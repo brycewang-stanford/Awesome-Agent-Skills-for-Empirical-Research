@@ -1,6 +1,11 @@
 # Awesome Agent Skills for Empirical Research
 
 <div align="center">
+
+**🌐 语言 / Language: 中文 | [English](README-en.md)**
+
+<br/>
+
   <a href="https://copaper.ai">
     <img src="images/copaper-logo.png" alt="CoPaper.AI" width="280" />
   </a>
