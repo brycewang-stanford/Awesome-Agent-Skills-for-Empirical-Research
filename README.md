@@ -324,11 +324,20 @@ Skill 就是解决这个问题的：它是给 AI 的**方法论操作手册**。
 
 <br/>
 
-<a href="https://copaper.ai">
-  <img src="images/copaper-qrcode.png" alt="扫码访问 copaper.ai" width="180" />
-</a>
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://copaper.ai"><img src="images/copaper-qrcode.png" alt="扫码访问 copaper.ai" width="180" /></a><br/>
+      <strong>扫码访问 <a href="https://copaper.ai">copaper.ai</a></strong>
+    </td>
+    <td align="center">
+      <img src="images/copaper-wechat.jpg" alt="CoPaper.AI 公众号" width="180" /><br/>
+      <strong>关注公众号「CoPaper.AI」</strong>
+    </td>
+  </tr>
+</table>
 
-**扫码访问 [copaper.ai](https://copaper.ai)** — 内置 20 个方法论 Skills，20 分钟完成实证论文
+内置 20 个方法论 Skills，20 分钟完成实证论文
 
 <br/>
 
