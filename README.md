@@ -1,5 +1,12 @@
 # Awesome Agent Skills for Empirical Research
 
+<div align="center">
+  <a href="https://copaper.ai">
+    <img src="images/copaper-logo.png" alt="CoPaper.AI" width="280" />
+  </a>
+  <br/><br/>
+</div>
+
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -308,6 +315,22 @@ Skill 就是解决这个问题的：它是给 AI 的**方法论操作手册**。
 <div align="center">
 
 **AI 是放大器，不是替代品。它替你做最耗时的"搬砖"，你保留最核心的"判断"。**
+
+<br/>
+
+<a href="https://copaper.ai">
+  <img src="images/copaper-logo.png" alt="CoPaper.AI" width="240" />
+</a>
+
+<br/>
+
+<a href="https://copaper.ai">
+  <img src="images/copaper-qrcode.png" alt="扫码访问 copaper.ai" width="180" />
+</a>
+
+**扫码访问 [copaper.ai](https://copaper.ai)** — 内置 20 个方法论 Skills，20 分钟完成实证论文
+
+<br/>
 
 由 [CoPaper.AI](https://copaper.ai) 团队维护 | 实证研究 AI 助手
 
