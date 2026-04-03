@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>journal-profiles.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="journal-profiles">Journal Profiles</h1>
+<!--
+These profiles calibrate the domain-referee and methods-referee when reviewing
+for a specific journal. Each profile describes the journal's review culture
+in plain language — the LLM adapts its priorities accordingly.
+
+Used by: domain-referee.md, methods-referee.md (via /review --peer [journal])
+-->
+<h2 id="how-this-works">How This Works</h2>
+<p>When <code>/review --peer [journal]</code> is invoked:</p>
+<ol>
+<li><strong>Editor reads the paper</strong> → desk review (reject or send to referees)</li>
+<li><strong>Editor selects referees</strong> → draws dispositions and pet peeves from the journal's <strong>Referee pool</strong></li>
+<li><strong>Profile found below</strong> → referees calibrate using the full profile</li>
+<li><strong>Profile NOT found</strong> → referees use the journal name + .claude/references/domain-profile.md to adapt (still better than generic)</li>
+<li><strong>No journal specified</strong> → generic top-field referee behavior</li>
+</ol>
+<h3 id="referee-pool-field">Referee Pool Field</h3>
+<p>Each journal profile includes a <strong>Referee pool</strong> that weights which dispositions the editor draws from. The two referees always get DIFFERENT dispositions. Dispositions: STRUCTURAL, CREDIBILITY, MEASUREMENT, POLICY, THEORY, SKEPTIC (see editor.md for definitions).</p>
+<hr>
+<h2 id="top-5-general-interest">Top-5 General Interest</h2>
+<h3 id="american-economic-review-aer">American Economic Review (AER)</h3>
+<p><strong>Focus:</strong> All fields of economics — the broadest audience
+<strong>Bar:</strong> Must interest economists outside your subfield. Big question, clean execution, clear contribution.
+<strong>Domain referee adjusts:</strong> &quot;Would a labor economist care about this health paper?&quot; Contribution must be broad. Literature positioning against the <em>general</em> frontier, not just subfield. Policy implications welcome but not required — insight is enough.
+<strong>Methods referee adjusts:</strong> Identification must be convincing to non-specialists. Clean, transparent design preferred over technically complex one. Standard errors and robustness should be thorough but not excessive.
+<strong>Typical concerns:</strong> &quot;Why should economists outside this field care?&quot; &quot;Is the contribution big enough for AER?&quot; &quot;Is this too narrow/specialized?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), POLICY (medium), STRUCTURAL (medium), MEASUREMENT (low), THEORY (low), SKEPTIC (low)</p>
+<h3 id="econometrica-ecma">Econometrica (ECMA)</h3>
+<p><strong>Focus:</strong> Theoretical and empirical economics with formal rigor
+<strong>Bar:</strong> Methodological innovation or empirical work with exceptional identification and formal results.
+<strong>Domain referee adjusts:</strong> Theoretical contribution valued highly. If empirical, the design must be near-airtight. Formal welfare analysis expected. Less emphasis on policy narrative, more on economic theory and mechanisms.
+<strong>Methods referee adjusts:</strong> Formal proofs or near-formal arguments expected for key results. Asymptotic properties discussed. Novel estimators should have theoretical justification. Simulation evidence for finite-sample properties.
+<strong>Typical concerns:</strong> &quot;Where's the formal result?&quot; &quot;What are the asymptotic properties?&quot; &quot;Is this a methods contribution or an applied contribution?&quot;
+<strong>Referee pool:</strong> THEORY (high), STRUCTURAL (high), SKEPTIC (medium), CREDIBILITY (low), MEASUREMENT (low), POLICY (low)</p>
+<h3 id="journal-of-political-economy-jpe">Journal of Political Economy (JPE)</h3>
+<p><strong>Focus:</strong> All fields — strong emphasis on economic mechanisms and structural thinking
+<strong>Bar:</strong> Deep economic insight. JPE values understanding <em>why</em> something happens, not just <em>that</em> it happens.
+<strong>Domain referee adjusts:</strong> Mechanism is king. Reduced-form results alone insufficient — need to explain the economics. Structural models or mechanism tests expected. Theoretical framework (even informal) valued.
+<strong>Methods referee adjusts:</strong> Identification strong, but mechanism evidence equally important. Heterogeneity that illuminates the mechanism. Willing to accept some identification imperfection if the economic insight is deep enough.
+<strong>Typical concerns:</strong> &quot;What's the mechanism?&quot; &quot;Can you decompose the effect?&quot; &quot;What does this tell us about economic behavior?&quot;
+<strong>Referee pool:</strong> STRUCTURAL (high), THEORY (high), CREDIBILITY (medium), SKEPTIC (medium), POLICY (low), MEASUREMENT (low)</p>
+<h3 id="quarterly-journal-of-economics-qje">Quarterly Journal of Economics (QJE)</h3>
+<p><strong>Focus:</strong> All fields — prizes compelling narrative and important questions
+<strong>Bar:</strong> The question must be important and the answer must surprise. QJE loves papers that change how you think about something.
+<strong>Domain referee adjusts:</strong> Narrative matters enormously. The paper should read like a story with a punchline. Broad implications. Creative use of data or setting. &quot;Clever&quot; identification valued.
+<strong>Methods referee adjusts:</strong> Identification must be clean and intuitive — not just technically correct, but easy to explain. Transparency and simplicity over complexity. Visual evidence (event studies, RD plots) highly valued.
+<strong>Typical concerns:</strong> &quot;Is this surprising?&quot; &quot;Does this change how we think about X?&quot; &quot;Can you explain the identification in one sentence?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), POLICY (high), SKEPTIC (medium), STRUCTURAL (low), THEORY (low), MEASUREMENT (low)</p>
+<h3 id="review-of-economic-studies-restud">Review of Economic Studies (REStud)</h3>
+<p><strong>Focus:</strong> All fields — technically excellent empirical and theoretical work
+<strong>Bar:</strong> Technical quality must be top-tier. Values precision and completeness over narrative.
+<strong>Domain referee adjusts:</strong> Thoroughness expected — address every possible objection. Complete set of robustness checks. Careful literature review. Less emphasis on storytelling than QJE, more on completeness.
+<strong>Methods referee adjusts:</strong> Every specification must be justified. Full battery of robustness checks expected. Sensitivity analysis (Oster bounds, etc.). Careful treatment of inference. Multiple testing corrections if applicable.
+<strong>Typical concerns:</strong> &quot;Have you checked robustness to X?&quot; &quot;What about specification Y?&quot; &quot;The inference needs more care.&quot;
+<strong>Referee pool:</strong> SKEPTIC (high), MEASUREMENT (high), CREDIBILITY (medium), THEORY (medium), STRUCTURAL (low), POLICY (low)</p>
+<hr>
+<h2 id="top-field-journals">Top Field Journals</h2>
+<h3 id="american-economic-journal-applied-economics-aejapplied">American Economic Journal: Applied Economics (AEJ:Applied)</h3>
+<p><strong>Focus:</strong> Empirical microeconomics — labor, health, education, development, public
+<strong>Bar:</strong> Clean applied micro paper with credible identification and clear results. Slightly below top-5 bar but same rigor expectations.
+<strong>Domain referee adjusts:</strong> Contribution should be meaningful to the subfield. Practical policy relevance appreciated. Literature positioning within the subfield, not the general field.
+<strong>Methods referee adjusts:</strong> Same identification standards as top-5. Modern estimators expected (no naive TWFE for staggered). Replication package expected.
+<strong>Typical concerns:</strong> &quot;Is this incremental relative to [closely related paper]?&quot; &quot;Would this be better in a field journal?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), POLICY (medium), MEASUREMENT (medium), SKEPTIC (low), STRUCTURAL (low), THEORY (low)</p>
+<h3 id="american-economic-journal-economic-policy-aejpolicy">American Economic Journal: Economic Policy (AEJ:Policy)</h3>
+<p><strong>Focus:</strong> Policy evaluation and design — how policies affect outcomes
+<strong>Bar:</strong> Must have direct policy relevance. Natural experiments from actual policy changes preferred.
+<strong>Domain referee adjusts:</strong> Policy implications front and center — not an afterthought. Cost-benefit or welfare discussion expected. Institutional details of the policy must be well-documented. Generalizability to other policy contexts.
+<strong>Methods referee adjusts:</strong> Identification from actual policy variation (not cross-sectional). Pre-trends must be clean. Heterogeneity by policy-relevant subgroups expected. Back-of-envelope welfare calculations.
+<strong>Typical concerns:</strong> &quot;What should policymakers do with this?&quot; &quot;Does this generalize to other states/countries?&quot; &quot;What's the cost-benefit?&quot;
+<strong>Referee pool:</strong> POLICY (high), CREDIBILITY (high), MEASUREMENT (medium), STRUCTURAL (low), THEORY (low), SKEPTIC (low)</p>
+<h3 id="journal-of-human-resources-jhr">Journal of Human Resources (JHR)</h3>
+<p><strong>Focus:</strong> Labor economics, education, health, demography
+<strong>Bar:</strong> Strong empirical contribution with clear policy relevance and careful identification.
+<strong>Domain referee adjusts:</strong> Policy relevance matters more than theoretical novelty. External validity — can results inform actual policy? Sample representativeness. Heterogeneity analysis by policy-relevant subgroups expected. Institutional knowledge of labor markets/education systems/health care valued.
+<strong>Methods referee adjusts:</strong> Clean identification is non-negotiable. Modern staggered DiD estimators required if applicable. Robustness to functional form. Pre-trends must be clean and shown. Replication package expected at acceptance.
+<strong>Typical concerns:</strong> &quot;What's the policy implication?&quot; &quot;Does this generalize beyond your sample?&quot; &quot;Have you considered heterogeneity by [race/gender/income]?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), POLICY (high), MEASUREMENT (medium), SKEPTIC (low), STRUCTURAL (low), THEORY (low)</p>
+<h3 id="journal-of-health-economics-jhe">Journal of Health Economics (JHE)</h3>
+<p><strong>Focus:</strong> Health economics — insurance, utilization, provider behavior, public health
+<strong>Bar:</strong> Sound health economics with credible identification. Institutional knowledge of health care systems expected.
+<strong>Domain referee adjusts:</strong> Must demonstrate deep understanding of health care institutions. Moral hazard vs. adverse selection distinction matters. Welfare implications expected. Connection to health policy debates. Knowledge of CMS data, insurance markets, provider incentives.
+<strong>Methods referee adjusts:</strong> Health-specific threats: selection into insurance, Ashenfelter dip in health utilization, moral hazard confounding. IV exclusion restrictions scrutinized heavily in health contexts. GLM for cost outcomes expected alongside OLS.
+<strong>Typical concerns:</strong> &quot;Is this moral hazard or adverse selection?&quot; &quot;Have you addressed selection into treatment?&quot; &quot;What about the Medicaid population specifically?&quot;
+<strong>Referee pool:</strong> STRUCTURAL (high), MEASUREMENT (high), POLICY (medium), CREDIBILITY (medium), THEORY (low), SKEPTIC (low)</p>
+<h3 id="rand-journal-of-economics-rand">RAND Journal of Economics (RAND)</h3>
+<p><strong>Focus:</strong> Industrial organization, regulation, antitrust, health care markets
+<strong>Bar:</strong> IO-flavored analysis with market structure or firm behavior component. Structural or quasi-experimental.
+<strong>Domain referee adjusts:</strong> Market structure and competition implications. Firm behavior and strategic incentives. Regulatory implications. Welfare analysis (consumer surplus, total surplus) expected.
+<strong>Methods referee adjusts:</strong> Structural models valued alongside reduced-form. Demand estimation methods (BLP, discrete choice). Entry/exit models. Merger simulation if relevant. Reduced-form papers need very clean identification.
+<strong>Typical concerns:</strong> &quot;What does this imply for market structure?&quot; &quot;Consumer welfare impact?&quot; &quot;Can you do a structural analysis?&quot;
+<strong>Referee pool:</strong> STRUCTURAL (high), THEORY (high), SKEPTIC (medium), POLICY (medium), CREDIBILITY (low), MEASUREMENT (low)</p>
+<h3 id="journal-of-public-economics-jpube">Journal of Public Economics (JPubE)</h3>
+<p><strong>Focus:</strong> Tax policy, public goods, redistribution, government programs
+<strong>Bar:</strong> Public finance question with clean identification. Understanding of tax/transfer system mechanics.
+<strong>Domain referee adjusts:</strong> Tax incidence, deadweight loss, behavioral responses to taxation. Program evaluation of government interventions. Fiscal federalism. Redistribution and inequality. Knowledge of tax code and transfer programs.
+<strong>Methods referee adjusts:</strong> Bunching estimators for tax kinks/notches. RDD at eligibility thresholds. DiD around policy changes. Structural models of labor supply response. Extensive vs. intensive margin effects.
+<strong>Typical concerns:</strong> &quot;What's the elasticity?&quot; &quot;Extensive or intensive margin?&quot; &quot;Welfare implications of the tax/transfer change?&quot;
+<strong>Referee pool:</strong> STRUCTURAL (high), POLICY (high), CREDIBILITY (medium), THEORY (medium), MEASUREMENT (low), SKEPTIC (low)</p>
+<h3 id="journal-of-labor-economics-jle">Journal of Labor Economics (JLE)</h3>
+<p><strong>Focus:</strong> Labor markets — wages, employment, human capital, discrimination, immigration
+<strong>Bar:</strong> Clean labor economics with careful identification. Understanding of labor market institutions.
+<strong>Domain referee adjusts:</strong> Wage determination, employment effects, human capital returns, discrimination, unions, immigration. Mincer equations and labor supply models. Firm-worker matched data valued. Monopsony and market power in labor markets.
+<strong>Methods referee adjusts:</strong> Selection correction (Heckman, Lee bounds) when relevant. Decomposition methods for wage gaps. Clean identification of causal effects on wages/employment. Event study designs around job transitions or policy changes.
+<strong>Typical concerns:</strong> &quot;Is this a supply or demand effect?&quot; &quot;Selection into employment?&quot; &quot;What about general equilibrium effects?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), STRUCTURAL (medium), MEASUREMENT (medium), THEORY (medium), POLICY (low), SKEPTIC (low)</p>
+<h3 id="journal-of-development-economics-jde">Journal of Development Economics (JDE)</h3>
+<p><strong>Focus:</strong> Development economics — poverty, institutions, agriculture, trade in developing countries
+<strong>Bar:</strong> Credible empirical evidence on development questions. RCTs or strong quasi-experimental designs. Field knowledge.
+<strong>Domain referee adjusts:</strong> Context matters enormously — deep knowledge of the country/region expected. External validity to other developing country settings. Implementation details for interventions. Cost-effectiveness. Sustainability of effects. Gender and equity dimensions.
+<strong>Methods referee adjusts:</strong> RCTs: randomization checks, attrition, compliance, spillovers, pre-analysis plan. Quasi-experimental: strong first stage for IV, clean RD, credible parallel trends. Power calculations. Clustered standard errors at appropriate level.
+<strong>Typical concerns:</strong> &quot;Does this generalize beyond this specific context?&quot; &quot;What about attrition?&quot; &quot;Cost-effectiveness?&quot; &quot;Long-run effects?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), POLICY (high), MEASUREMENT (high), SKEPTIC (medium), STRUCTURAL (low), THEORY (low)</p>
+<hr>
+<h2 id="strong-field-journals">Strong Field Journals</h2>
+<h3 id="review-of-economics-and-statistics-restat">Review of Economics and Statistics (RESTAT)</h3>
+<p><strong>Focus:</strong> Empirical economics — all fields, emphasis on careful measurement and methods
+<strong>Bar:</strong> Technically excellent empirical work. Values careful econometrics and measurement.
+<strong>Domain referee adjusts:</strong> Measurement quality is paramount. Novel data or measurement approaches valued. Less emphasis on big-picture narrative than QJE, more on getting the econometrics exactly right. Replication studies welcome.
+<strong>Methods referee adjusts:</strong> Highest econometric standards short of Econometrica. Every assumption must be tested or bounded. Sensitivity analysis expected. Careful treatment of standard errors. Pre-registration or pre-analysis plans viewed favorably.
+<strong>Typical concerns:</strong> &quot;Is the measurement precise enough?&quot; &quot;Have you tested every assumption?&quot; &quot;What about measurement error in [variable]?&quot;
+<strong>Referee pool:</strong> MEASUREMENT (high), SKEPTIC (high), CREDIBILITY (high), THEORY (medium), STRUCTURAL (low), POLICY (low)</p>
+<h3 id="aer-insights">AER: Insights</h3>
+<p><strong>Focus:</strong> Same breadth as AER but shorter format — important results that can be communicated concisely
+<strong>Bar:</strong> AER-quality insight in a shorter paper. Must be self-contained and punchy.
+<strong>Domain referee adjusts:</strong> Brevity is a feature, not a limitation. One clean result is enough. No need for 15 robustness checks — the core result must be compelling on its own. Well-suited for striking findings or clever identification.
+<strong>Methods referee adjusts:</strong> Core identification must be clean. Fewer robustness checks acceptable given format, but the main result must be robust. Transparency and visual evidence valued.
+<strong>Typical concerns:</strong> &quot;Can this be communicated in 10 pages?&quot; &quot;Is the single result compelling enough?&quot; &quot;Does this need a longer format to be convincing?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), POLICY (medium), SKEPTIC (medium), STRUCTURAL (low), THEORY (low), MEASUREMENT (low)</p>
+<h3 id="journal-of-urban-economics-jue">Journal of Urban Economics (JUE)</h3>
+<p><strong>Focus:</strong> Urban and regional economics — housing, transportation, local public goods, agglomeration, spatial equilibrium, neighborhood effects
+<strong>Bar:</strong> Clean empirical work on urban questions with credible identification. Understanding of spatial economics and local policy variation.
+<strong>Domain referee adjusts:</strong> Spatial equilibrium thinking expected — people and firms move, so partial equilibrium results need justification. Housing markets, land use regulation, sorting, commuting. Knowledge of Census/ACS geography, LODES, HMDA. Hedonic models and spatial instruments common. General equilibrium concerns about migration and capitalization.
+<strong>Methods referee adjusts:</strong> Spatial identification challenges: selection into neighborhoods, Tiebout sorting, MAUP. Boundary discontinuity designs valued. DiD around local policy changes. IV with Bartik-style shift-share instruments scrutinized. Spatial autocorrelation in standard errors. Conley standard errors when appropriate.
+<strong>Typical concerns:</strong> &quot;What about sorting?&quot; &quot;Is this capitalized into housing prices?&quot; &quot;General equilibrium effects?&quot; &quot;Have you addressed spatial autocorrelation?&quot;
+<strong>Referee pool:</strong> STRUCTURAL (high), CREDIBILITY (high), MEASUREMENT (medium), POLICY (medium), THEORY (medium), SKEPTIC (low)</p>
+<h3 id="economics-letters">Economics Letters</h3>
+<p><strong>Focus:</strong> Short papers across all fields of economics — theoretical and empirical
+<strong>Bar:</strong> One clear result that can be communicated in 5-8 pages. Speed of publication valued. No room for extensive robustness or literature review — the result must stand on its own.
+<strong>Domain referee adjusts:</strong> Contribution must be stated in the first paragraph. No space for extensive institutional background. One key finding, cleanly presented. Incremental extensions of existing work acceptable if the result is sharp.
+<strong>Methods referee adjusts:</strong> Identification must be clean but extensive robustness not expected given format. One well-executed specification is enough. Standard errors must be correct. No space for 10-table robustness sections.
+<strong>Typical concerns:</strong> &quot;Can this be said in 5 pages?&quot; &quot;Is the single result robust?&quot; &quot;Is this novel enough for a standalone paper?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), SKEPTIC (medium), THEORY (medium), MEASUREMENT (low), STRUCTURAL (low), POLICY (low)</p>
+<h3 id="health-economics">Health Economics</h3>
+<p><strong>Focus:</strong> Health economics with emphasis on empirical applications — health care demand, insurance, provider behavior, public health interventions, pharmaceutical markets
+<strong>Bar:</strong> Sound empirical health economics. Slightly below JHE bar but same methodological expectations. Good outlet for well-executed applied work in health.
+<strong>Domain referee adjusts:</strong> Same institutional knowledge as JHE expected — insurance markets, provider incentives, moral hazard, adverse selection. Health policy relevance valued. Understanding of health care data (claims, EHR, surveys). Behavioral health economics increasingly accepted.
+<strong>Methods referee adjusts:</strong> Clean identification expected. Health-specific threats addressed (selection into insurance, Ashenfelter dip, moral hazard confounding). Both OLS and GLM for cost outcomes. Subgroup analysis by insurance type, age, income expected.
+<strong>Typical concerns:</strong> &quot;Have you addressed selection?&quot; &quot;What about moral hazard?&quot; &quot;Does this replicate across payer types?&quot; &quot;Policy implications?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), MEASUREMENT (high), POLICY (medium), STRUCTURAL (medium), THEORY (low), SKEPTIC (low)</p>
+<h3 id="journal-of-economic-geography">Journal of Economic Geography</h3>
+<p><strong>Focus:</strong> Economic geography — agglomeration, trade costs, spatial inequality, regional development, clusters, migration, urban systems
+<strong>Bar:</strong> Contribution to understanding the spatial dimension of economic activity. Both theoretical and empirical work accepted. Interdisciplinary with geography and regional science.
+<strong>Domain referee adjusts:</strong> Spatial thinking required — distance, borders, market access, gravity models. New Economic Geography tradition (Krugman, Fujita, Venables). Understanding of agglomeration economies, congestion costs, and spatial sorting. European and international evidence valued alongside US.
+<strong>Methods referee adjusts:</strong> Spatial econometrics expected when appropriate (spatial lag, spatial error models). Gravity equation estimation (PPML, multilateral resistance). Handling of spatial autocorrelation. Market access instruments. Shift-share designs for local labor market shocks.
+<strong>Typical concerns:</strong> &quot;What about spatial sorting?&quot; &quot;Have you accounted for market access?&quot; &quot;Is this agglomeration or selection?&quot; &quot;Spatial autocorrelation in errors?&quot;
+<strong>Referee pool:</strong> STRUCTURAL (high), MEASUREMENT (high), THEORY (medium), CREDIBILITY (medium), POLICY (medium), SKEPTIC (low)</p>
+<h3 id="journal-of-econometrics">Journal of Econometrics</h3>
+<p><strong>Focus:</strong> Econometric theory and methods — estimation, inference, testing, computational methods, machine learning for causal inference
+<strong>Bar:</strong> Methodological contribution with formal results. Empirical applications welcome but the method must be the contribution, not the application.
+<strong>Domain referee adjusts:</strong> Theoretical novelty is paramount. Must clearly state what existing methods cannot do that yours can. Monte Carlo simulations expected to demonstrate finite-sample properties. Empirical illustration should showcase the method, not the substantive finding.
+<strong>Methods referee adjusts:</strong> Formal proofs required for key results (consistency, asymptotic normality, convergence rates). Regularity conditions must be stated and discussed. Comparison with existing estimators — analytically and via simulation. Power analysis. Computational feasibility discussed. Code availability expected.
+<strong>Typical concerns:</strong> &quot;What are the asymptotic properties?&quot; &quot;How does this compare to [existing method]?&quot; &quot;What happens in finite samples?&quot; &quot;Are the regularity conditions plausible in practice?&quot;
+<strong>Referee pool:</strong> THEORY (high), SKEPTIC (high), MEASUREMENT (high), STRUCTURAL (medium), CREDIBILITY (low), POLICY (low)</p>
+<hr>
+<h2 id="finance">Finance</h2>
+<h3 id="the-journal-of-finance-jf">The Journal of Finance (JF)</h3>
+<p><strong>Focus:</strong> All areas of finance — asset pricing, corporate finance, market microstructure, behavioral finance, household finance
+<strong>Bar:</strong> Must advance our understanding of financial markets or financial decision-making. Big question, clean execution. The finance equivalent of AER in breadth and ambition.
+<strong>Domain referee adjusts:</strong> Contribution must matter to finance broadly, not just one niche. Theoretical motivation expected — even empirical papers need a clear economic framework. Equilibrium implications considered. Risk adjustment must be thorough for asset pricing papers.
+<strong>Methods referee adjusts:</strong> For corporate/household finance: clean causal identification expected (DiD, IV, RDD). For asset pricing: factor model tests, Fama-MacBeth, portfolio sorts with proper standard errors. Endogeneity concerns taken very seriously. Instrument validity scrutinized.
+<strong>Typical concerns:</strong> &quot;What's the economic mechanism?&quot; &quot;Is this priced risk or mispricing?&quot; &quot;Have you addressed endogeneity?&quot; &quot;Does this survive controlling for known factors?&quot;
+<strong>Referee pool:</strong> THEORY (high), STRUCTURAL (high), CREDIBILITY (medium), SKEPTIC (medium), MEASUREMENT (low), POLICY (low)</p>
+<h3 id="journal-of-financial-economics-jfe">Journal of Financial Economics (JFE)</h3>
+<p><strong>Focus:</strong> Corporate finance, asset pricing, banking, governance, financial intermediation
+<strong>Bar:</strong> Rigorous empirical or theoretical work. Strong emphasis on economic significance, not just statistical significance. Slightly more empirical focus than JF.
+<strong>Domain referee adjusts:</strong> Corporate finance and governance papers especially valued. Institutional knowledge of financial markets expected. Firm-level analysis with careful treatment of endogeneity. Understanding of agency problems, contracting, and incentive alignment.
+<strong>Methods referee adjusts:</strong> Natural experiments and quasi-experimental designs valued in corporate finance. Event studies must follow modern best practices (short window, proper benchmarking). Diff-in-diff around regulatory changes common. IV exclusion restrictions scrutinized heavily.
+<strong>Typical concerns:</strong> &quot;Is this economically significant or just statistically significant?&quot; &quot;What about reverse causality?&quot; &quot;Have you controlled for firm fixed effects?&quot; &quot;Is your instrument truly exogenous?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), STRUCTURAL (high), THEORY (medium), SKEPTIC (medium), MEASUREMENT (low), POLICY (low)</p>
+<h3 id="the-review-of-financial-studies-rfs">The Review of Financial Studies (RFS)</h3>
+<p><strong>Focus:</strong> Theoretical and empirical finance — broad coverage, values technical sophistication
+<strong>Bar:</strong> Technically excellent finance research. Tolerates longer papers with thorough analysis. Values completeness and rigor over narrative.
+<strong>Domain referee adjusts:</strong> Thoroughness valued — complete robustness section expected. Both theoretical and empirical contributions accepted. International finance and emerging markets welcome. Novel datasets or measurement approaches valued.
+<strong>Methods referee adjusts:</strong> Full battery of robustness checks expected. Multiple identification strategies appreciated. Structural estimation alongside reduced-form welcome. Careful inference — clustered standard errors, bootstrap, wild cluster bootstrap when appropriate.
+<strong>Typical concerns:</strong> &quot;Have you checked robustness to alternative specifications?&quot; &quot;What about clustering at the firm vs. industry level?&quot; &quot;Can you provide a structural interpretation?&quot;
+<strong>Referee pool:</strong> SKEPTIC (high), MEASUREMENT (high), STRUCTURAL (medium), THEORY (medium), CREDIBILITY (low), POLICY (low)</p>
+<h3 id="journal-of-financial-and-quantitative-analysis-jfqa">Journal of Financial and Quantitative Analysis (JFQA)</h3>
+<p><strong>Focus:</strong> Empirical and theoretical finance with quantitative rigor — corporate finance, investments, banking, capital markets
+<strong>Bar:</strong> Sound empirical finance with clear contribution. Below top-3 finance bar but same rigor expectations. Good outlet for careful empirical work.
+<strong>Domain referee adjusts:</strong> Solid contribution to the subfield sufficient — doesn't need to reshape the whole field. International and comparative studies welcome. Clear economic intuition expected.
+<strong>Methods referee adjusts:</strong> Standard modern finance econometrics expected. Fixed effects, clustering, instrumental variables. Event study methodology must be current. Robustness to alternative specifications.
+<strong>Typical concerns:</strong> &quot;Is this incremental relative to existing work?&quot; &quot;Have you considered international evidence?&quot; &quot;Is the sample period long enough?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), MEASUREMENT (medium), SKEPTIC (medium), THEORY (medium), STRUCTURAL (low), POLICY (low)</p>
+<hr>
+<h2 id="accounting">Accounting</h2>
+<h3 id="journal-of-accounting-research-jar">Journal of Accounting Research (JAR)</h3>
+<p><strong>Focus:</strong> Financial reporting, auditing, disclosure, capital markets — the most empirically rigorous accounting journal
+<strong>Bar:</strong> Archival empirical work with strong identification, or analytical models with clear predictions. JAR is the most &quot;economics-adjacent&quot; accounting journal.
+<strong>Domain referee adjusts:</strong> Must understand GAAP/IFRS reporting incentives. Earnings management, accruals quality, and disclosure theory. Capital markets consequences of accounting choices. Audit quality and auditor incentives.
+<strong>Methods referee adjusts:</strong> Identification strategy must be clean — JAR holds to economics standards. DiD around accounting standard changes common. Selection models for auditor choice. Heckman corrections when appropriate. Pre-trends and parallel trends for policy changes.
+<strong>Typical concerns:</strong> &quot;Is this an accounting paper or a finance paper?&quot; &quot;Have you controlled for accruals quality?&quot; &quot;What about the selection into treatment?&quot; &quot;Does this survive the Hribar-Collins adjustment?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), MEASUREMENT (high), STRUCTURAL (medium), THEORY (medium), SKEPTIC (low), POLICY (low)</p>
+<h3 id="journal-of-accounting-and-economics-jae">Journal of Accounting and Economics (JAE)</h3>
+<p><strong>Focus:</strong> Economic analysis of accounting — contracting, regulation, capital markets, disclosure
+<strong>Bar:</strong> Must have a clear economic framework. JAE values theory-motivated empirical work. The most economics-flavored accounting journal.
+<strong>Domain referee adjusts:</strong> Agency theory and contracting framework expected. Understanding of SEC regulation, SOX, Dodd-Frank implications. CEO compensation and governance. Tax avoidance and tax planning. Positive accounting theory tradition.
+<strong>Methods referee adjusts:</strong> Theory-driven hypotheses expected — not data-mining. Structural approaches valued alongside reduced-form. Large-sample archival methods with careful endogeneity treatment. Instrument validity in governance studies especially scrutinized.
+<strong>Typical concerns:</strong> &quot;What's the economic theory behind this prediction?&quot; &quot;Is this a contracting or valuation story?&quot; &quot;Have you addressed the Leamer critique?&quot; &quot;What about omitted variable bias?&quot;
+<strong>Referee pool:</strong> THEORY (high), STRUCTURAL (high), CREDIBILITY (medium), MEASUREMENT (medium), SKEPTIC (low), POLICY (low)</p>
+<h3 id="the-accounting-review-tar">The Accounting Review (TAR)</h3>
+<p><strong>Focus:</strong> Broadest accounting journal — financial, managerial, auditing, tax, systems
+<strong>Bar:</strong> Significant contribution to accounting knowledge. More methodologically diverse than JAR/JAE — accepts experiments, surveys, and analytical work alongside archival.
+<strong>Domain referee adjusts:</strong> Broader scope than JAR/JAE — managerial accounting, cost accounting, and accounting education also considered. Practical implications for accounting profession valued. Standard-setting relevance appreciated.
+<strong>Methods referee adjusts:</strong> Archival papers: similar identification standards to JAR. Experiments: proper randomization, demand effects, external validity. Surveys: response rates, non-response bias. Tax papers: knowledge of IRC provisions expected.
+<strong>Typical concerns:</strong> &quot;What are the implications for standard-setters?&quot; &quot;Does this generalize beyond your sample?&quot; &quot;Have you addressed self-selection?&quot; &quot;What about the tax implications?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (medium), MEASUREMENT (high), POLICY (medium), STRUCTURAL (medium), THEORY (medium), SKEPTIC (low)</p>
+<h3 id="contemporary-accounting-research-car">Contemporary Accounting Research (CAR)</h3>
+<p><strong>Focus:</strong> All areas of accounting — international perspective, methodological innovation
+<strong>Bar:</strong> Solid accounting research with clear contribution. More international scope than US-centric TAR/JAR. Good outlet for methodological contributions to accounting.
+<strong>Domain referee adjusts:</strong> International accounting standards (IFRS adoption, cross-country comparisons) valued. Canadian and international evidence welcome alongside US. Innovative measurement approaches.
+<strong>Methods referee adjusts:</strong> Same rigor as TAR for archival work. Novel econometric approaches to accounting problems valued. Textual analysis and machine learning applications increasingly accepted. Careful treatment of measurement error in accounting variables.
+<strong>Typical concerns:</strong> &quot;Does this apply outside the US?&quot; &quot;How sensitive are results to the accrual measure used?&quot; &quot;Have you considered IFRS vs. GAAP differences?&quot;
+<strong>Referee pool:</strong> MEASUREMENT (high), CREDIBILITY (high), SKEPTIC (medium), POLICY (low), STRUCTURAL (low), THEORY (low)</p>
+<hr>
+<h2 id="marketing">Marketing</h2>
+<h3 id="journal-of-marketing-research-jmr">Journal of Marketing Research (JMR)</h3>
+<p><strong>Focus:</strong> Marketing research methods and substantive findings — consumer behavior, pricing, advertising, digital marketing
+<strong>Bar:</strong> Methodological rigor with marketing substance. Values causal identification and experimental design. The most empirically rigorous marketing journal.
+<strong>Domain referee adjusts:</strong> Must speak to marketing managers and academics. Consumer welfare and firm implications. Understanding of marketing mix (price, promotion, distribution, product). Digital marketing and platform economics increasingly important.
+<strong>Methods referee adjusts:</strong> Experiments (lab and field) held to high standards — randomization checks, demand effects, external validity. Structural demand models (BLP-style) valued. Causal inference from observational data must be convincing. Machine learning for prediction vs. causal inference distinction expected.
+<strong>Typical concerns:</strong> &quot;What's the managerial implication?&quot; &quot;Can you run a field experiment to validate?&quot; &quot;Have you addressed endogeneity of price/advertising?&quot; &quot;What about demand-side vs. supply-side effects?&quot;
+<strong>Referee pool:</strong> CREDIBILITY (high), STRUCTURAL (high), MEASUREMENT (medium), POLICY (medium), THEORY (low), SKEPTIC (low)</p>
+<h3 id="marketing-science">Marketing Science</h3>
+<p><strong>Focus:</strong> Quantitative marketing — structural models, field experiments, econometric analysis of marketing phenomena
+<strong>Bar:</strong> Technical sophistication expected. The most methods-intensive marketing journal. Structural estimation and formal models highly valued.
+<strong>Domain referee adjusts:</strong> Quantitative marketing models — demand estimation, pricing optimization, advertising response, customer lifetime value. Platform economics and two-sided markets. Competitive strategy implications. Welfare analysis of marketing practices.
+<strong>Methods referee adjusts:</strong> Structural models expected for many topics (demand estimation, dynamic pricing, entry/exit). BLP, nested logit, mixed logit standard vocabulary. Field experiments and A/B testing with proper inference. Bayesian methods accepted. Counterfactual simulations expected alongside reduced-form.
+<strong>Typical concerns:</strong> &quot;Can you estimate a structural model?&quot; &quot;What's the counterfactual policy simulation?&quot; &quot;Have you estimated price elasticities?&quot; &quot;What about consumer heterogeneity?&quot;
+<strong>Referee pool:</strong> STRUCTURAL (high), THEORY (high), MEASUREMENT (medium), CREDIBILITY (medium), SKEPTIC (low), POLICY (low)</p>
+<h3 id="journal-of-consumer-research-jcr">Journal of Consumer Research (JCR)</h3>
+<p><strong>Focus:</strong> Consumer behavior — psychology of consumption, decision-making, identity, culture
+<strong>Bar:</strong> Theoretical contribution to understanding consumer behavior. Values conceptual novelty and experimental rigor. More behavioral/psychological than JMR or Marketing Science.
+<strong>Domain referee adjusts:</strong> Psychological theory of consumer behavior expected. Process evidence (mediation, moderation) valued. Identity, motivation, judgment and decision-making frameworks. Cultural and sociological perspectives also accepted. Less emphasis on managerial implications than JMR.
+<strong>Methods referee adjusts:</strong> Experimental designs dominant — proper controls, manipulation checks, attention checks. Multiple studies showing robustness and boundary conditions expected. Effect sizes and confidence intervals. Replication of core finding across studies. Pre-registration viewed favorably.
+<strong>Typical concerns:</strong> &quot;What's the underlying psychological process?&quot; &quot;Can you show mediation?&quot; &quot;What are the boundary conditions?&quot; &quot;Have you replicated across different contexts?&quot;
+<strong>Referee pool:</strong> THEORY (high), MEASUREMENT (high), SKEPTIC (medium), CREDIBILITY (medium), STRUCTURAL (low), POLICY (low)</p>
+<hr>
+<h2 id="management-and-strategy">Management and Strategy</h2>
+<h3 id="management-science">Management Science</h3>
+<p><strong>Focus:</strong> Interdisciplinary — operations, finance, marketing, strategy, economics, behavioral science, organizations, information systems
+<strong>Bar:</strong> Technically rigorous work that spans business disciplines. Values formal models AND clean empirical work. Extremely broad scope — the most interdisciplinary top business journal.
+<strong>Domain referee adjusts:</strong> Paper must fit one of the departments (operations, finance, marketing, etc.) but speak to a broader audience. Practical implications valued. Model-driven empirical work appreciated. Accepts papers that wouldn't fit neatly into a single field journal.
+<strong>Methods referee adjusts:</strong> Standards match the relevant field (finance papers judged by finance methods standards, etc.). Structural estimation, causal inference, and field experiments all welcome. Simulation and computational methods accepted. Optimization and analytical models alongside empirical work.
+<strong>Typical concerns:</strong> &quot;Which department does this fit?&quot; &quot;Is this a Management Science paper or a field journal paper?&quot; &quot;What's the practical implication?&quot; &quot;Does the model match the empirics?&quot;
+<strong>Referee pool:</strong> STRUCTURAL (high), CREDIBILITY (high), THEORY (medium), MEASUREMENT (medium), POLICY (low), SKEPTIC (low)</p>
+<h3 id="strategic-management-journal-smj">Strategic Management Journal (SMJ)</h3>
+<p><strong>Focus:</strong> Strategy — competitive advantage, diversification, alliances, innovation, governance, entrepreneurship
+<strong>Bar:</strong> Significant contribution to strategic management theory and practice. Empirical papers need strong identification. Theory papers need testable implications.
+<strong>Domain referee adjusts:</strong> Resource-based view, dynamic capabilities, competitive dynamics, industry analysis. Understanding of firm heterogeneity and sustained competitive advantage. Alliance formation, M&amp;A, and diversification. Innovation strategy and technology competition.
+<strong>Methods referee adjusts:</strong> Endogeneity is the central concern — firm strategy is endogenous by nature. Instrumental variables, DiD around exogenous shocks, matching methods. Panel data with firm fixed effects expected. Selection models for entry/exit decisions. Heckman corrections common.
+<strong>Typical concerns:</strong> &quot;Is strategy endogenous here?&quot; &quot;What about unobserved firm heterogeneity?&quot; &quot;Can you identify the causal effect of this strategic choice?&quot; &quot;What's the theory of competitive advantage?&quot;
+<strong>Referee pool:</strong> THEORY (high), CREDIBILITY (high), STRUCTURAL (medium), SKEPTIC (medium), MEASUREMENT (low), POLICY (low)</p>
+<h3 id="administrative-science-quarterly-asq">Administrative Science Quarterly (ASQ)</h3>
+<p><strong>Focus:</strong> Organization theory and behavior — institutions, networks, culture, power, status, organizational design
+<strong>Bar:</strong> Deep theoretical contribution with rigorous evidence. ASQ values papers that change how you think about organizations. Accepts qualitative, quantitative, and mixed methods.
+<strong>Domain referee adjusts:</strong> Institutional theory, organizational ecology, network theory, social categorization. Status and legitimacy in markets. Organizational identity and culture. Power and politics in organizations. Historical and comparative analysis valued.
+<strong>Methods referee adjusts:</strong> Quantitative papers: panel data, fixed effects, causal identification expected. Qualitative papers: systematic data collection, coding protocols, theoretical sampling. Mixed methods: integration of qualitative and quantitative evidence. Ethnographic work accepted if theoretically motivated.
+<strong>Typical concerns:</strong> &quot;What's the theoretical mechanism?&quot; &quot;How does this advance organization theory?&quot; &quot;Is this generalizable beyond your empirical context?&quot; &quot;Have you considered alternative theoretical explanations?&quot;
+<strong>Referee pool:</strong> THEORY (high), MEASUREMENT (high), STRUCTURAL (medium), CREDIBILITY (medium), POLICY (low), SKEPTIC (low)</p>
+<hr>
+<h2 id="add-your-own-journal">Add Your Own Journal</h2>
+<p>Copy this template and add it above this section:</p>
+<pre class="hljs"><code><div><span class="hljs-section">### [Journal Name] ([Abbreviation])</span>
+<span class="hljs-strong">**Focus:**</span> [fields and topics covered]
+<span class="hljs-strong">**Bar:**</span> [what it takes to publish here]
+<span class="hljs-strong">**Domain referee adjusts:**</span> [what matters most to domain reviewers at this journal]
+<span class="hljs-strong">**Methods referee adjusts:**</span> [rigor expectations, preferred methods, required checks]
+<span class="hljs-strong">**Typical concerns:**</span> [common referee questions at this journal]
+<span class="hljs-strong">**Referee pool:**</span> [disposition] (high/medium/low) for each: STRUCTURAL, CREDIBILITY, MEASUREMENT, POLICY, THEORY, SKEPTIC
+</div></code></pre>
+
+</body>
+</html>

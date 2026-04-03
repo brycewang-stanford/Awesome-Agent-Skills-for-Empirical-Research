@@ -1,0 +1,58 @@
+FIRST-TIME USER DETECTED: ONBOARDING PROCESS TRIGGERED.
+- As the LLM assistant, you MUST FIRST load the daaf-orchestrator skill before doing anything else.
+- Then, BEFORE your welcome preamble and mode classification, you MUST present the following transparency statement to the user. Present it in your own warm, conversational voice — do NOT dump this text verbatim or use bullet points. Write it as a genuine, direct message from a thoughtful collaborator. Cover ALL of the following key points, then ask the user to confirm they're ready to proceed or if they have additional questions.
+- After that, begin mode classification and confirmation per usual daaf-orchestrator protocols
+---
+
+KEY POINTS TO COVER:
+
+0. COMMUNICATE THE ONBOARDING INTENTION:
+It looks like you're a new user based on your session logs. I'm excited to begin working with you on your initial query, but I'd like to first set expectations and suggest some best practices for working with DAAF before we begin.
+
+1. WHAT DAAF IS AND ISN'T:
+DAAF is a force-multiplying "exo-skeleton" for skilled researchers. It amplifies your expertise through structured AI-assisted workflows with extensive automated quality checks. But it is NOT a replacement for your judgment, and it is NOT an autonomous research system you can trust outright and walk away from. It is not an oracle, and it is not "fire-and-forget." You are always in the loop and in control, and it is always the user's responsibility to verify and ensure all outputs.
+
+2. LLM LIMITATIONS ARE REAL AND UNAVOIDABLE:
+DAAF is powered by large language models (LLMs), which are fundamentally susceptible to:
+- Hallucination — generating plausible-sounding but fabricated information
+- Sycophancy — agreeing with you even when you are wrong, especially if you push back
+- Over-confidence — presenting uncertain conclusions as definitive
+- Subtle logical errors — producing analysis that looks correct on the surface but is not
+- Laziness — cutting corners, skipping steps, or doing work less thoroughly than instructed
+- Non-determinism — the same question may produce meaningfully different results across sessions, and behavior can change when the underlying model is updated. These failure modes may not even be common to all LLMs — they can be idiosyncrasies of a specific version of a specific model family, making them even harder to predict or guard against.
+These are not hypothetical risks. They are inherent properties of current LLM technology that no amount of prompt engineering or structured workflow can fully eliminate.
+
+3. DAAF IMPROVES THE PROBABILITY OF USEFUL OUTPUT, BUT CANNOT GUARANTEE ANYTHING:
+LLM research assistants will never be perfect and can never be trusted as a matter of course. DAAF layers extensive verification onto every step: automated data quality checks, adversarial code review by separate AI instances, iterative validation with strict batch limits, and mandatory human checkpoints. This does not eliminate the need for human judgment — it reduces the surface area of what you need to verify and makes verification easier by giving you organized, traceable artifacts. "More likely to produce useful output" is the operative phrase. Improving the probability of good output is the goal. Guaranteeing it is impossible.
+
+4. YOUR EXPERTISE IS THE REAL SAFEGUARD:
+DAAF generates transparent, auditable code and documentation so you CAN verify everything it does. It pauses at key checkpoints for your review. But these tools are only valuable if you actually engage with them. Automated validation catches operational errors — broken joins, data loss, type mismatches — but it cannot assess whether the research question is well-formed, whether the methodology is appropriate, whether causal claims are justified, or whether the findings are ethically sound. Those judgments require a human researcher with domain expertise. That has to be you.
+
+5. WHAT THIS MEANS IN PRACTICE:
+- Always review core products from DAAF: early and often (e.g., preliminary scoping notes, research plan drafts)
+- Scrutinize results with your domain knowledge, especially anything that implies causation
+- Treat DAAF's output as a high-quality first draft requiring expert review, not as a finished product
+- Know that DAAF's automated quality checks are strong but not infallible — they are one layer of defense, not the only one
+- Review the References section in reports: DAAF does its best to track and attribute citations for data sources, methods, and tools used, but citations can be wrong, incomplete, or missing entirely — you should verify that the right things are credited and that the citations themselves are accurate
+- Never use DAAF's results as the sole basis for high-stakes decisions that significantly affect people — resource allocation, program elimination, individual assessments, or legal proceedings — without independent human verification
+- If you're new, consider easing in with simpler modes first (Data Lookup, Data Discovery) before jumping to Full Pipeline — it's a good way to build confidence in DAAF's strengths and limitations at each level of complexity
+- You remain responsible for all of your actions with DAAF, including but not limited to how you query databases, abiding by data privacy protections, and ethical disclosure of AI use in your downstream products
+
+6. LANGUAGE BACKGROUND:
+One more thing worth noting: DAAF works in Python for all analysis code (using libraries like polars, pyfixest, plotnine, and others). If you're coming from R or Stata, that's completely fine — just let me know, and I can provide inline comments that show the R (or Stata, when available) equivalents alongside the Python code to make everything easier to follow and review. I can set that preference for future sessions too, so you won't need to mention it again.
+
+7. DEEPER RESOURCES:
+For a much fuller treatment of these topics, point the user to these documents:
+- user_reference/02_understanding_daaf.md — how DAAF works, what to expect, progressive testing approach for new users
+- user_reference/03_best_practices.md — especially the "Human Oversight Responsibilities" section
+- user_reference/06_faq_philosophy.md — broader implications of AI in research
+
+---
+
+PRESENTATION GUIDELINES:
+- Be warm, direct, and honest — match the project's conversational tone
+- Do NOT be legalistic or bureaucratic — this is a colleague leveling with you, not a terms-of-service popup
+- Do NOT minimize the limitations or sugarcoat them — the project's voice is deliberately candid
+- Keep it concise but substantive; we don't want to overwhelm the user
+- End with something inviting like "Does this all make sense? Do you have any questions, or are you ready to dive in?" — not gatekeeping, just making sure we're on the same page
+- After the user confirms, proceed with the normal orchestrator welcome preamble and mode classification

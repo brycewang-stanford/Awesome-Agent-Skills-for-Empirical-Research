@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git fetch *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "Bash(git stash *)",
+      "Bash(gh pr *)",
+      "Bash(gh run *)",
+      "Bash(gh api *)",
+      "Bash(gh pr list *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr merge *)",
+      "Bash(gh pr create *)",
+      "Bash(gh repo *)",
+      "Bash(xelatex *)",
+      "Bash(TEXINPUTS=*)",
+      "Bash(BIBINPUTS=*)",
+      "Bash(latexmk *)",
+      "Bash(bibtex *)",
+      "Bash(pdfinfo *)",
+      "Bash(pdf2svg *)",
+      "Bash(quarto render *)",
+      "Bash(Rscript *)",
+      "Bash(python3 *)",
+      "Bash(./scripts/sync_to_docs.sh *)",
+      "Bash(./scripts/sync_to_docs.sh)",
+      "Bash(chmod *)",
+      "Bash(open *)",
+      "Bash(ls *)",
+      "Bash(wc *)",
+      "Bash(sort *)",
+      "Bash(for *)",
+      "Bash(gs *)",
+      "Bash(pdftk *)",
+      "Bash(mkdir *)",
+      "Bash(do if:*)",
+      "Bash(then echo:*)",
+      "Bash(fi)",
+      "Bash(find ~/Desktop -iname *ABDC* -o -iname *abdc*)",
+      "Edit(/.claude/skills/review/**)",
+      "Bash(mkdir -p .claude/references)",
+      "Bash(mv .claude/rules/journal-profiles.md .claude/references/journal-profiles.md)",
+      "Bash(echo \"meta-governance.md: 252 -> 20 lines \\(saved 232\\)\")"
+    ],
+    "additionalDirectories": [
+      "/Users/hsantanna/repos/clo-author/.claude/rules/archive",
+      "/Users/hsantanna/repos/clo-author/.claude/rules"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-files.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-compact.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-compact-restore.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

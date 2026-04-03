@@ -1,0 +1,17 @@
+[
+  {
+    "title": "short issue title",
+    "quote": "exact quote from the paper",
+    "explanation": "why this matters and what remains problematic",
+    "comment_type": "methodology",
+    "severity": "major",
+    "confidence": "high",
+    "source_kind": "llm",
+    "source_section": "methods",
+    "related_sections": ["results"],
+    "root_cause_key": "shared-root-cause",
+    "review_lane": "evaluation_fairness_and_reproducibility",
+    "gate_blocker": false,
+    "quote_verified": true
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "name": "stata-skill-contributor",
+  "description": "Development and testing tools for contributing to the stata-skill project. Run evals, analyze results, improve docs.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Dylan Moore"
+  }
+}

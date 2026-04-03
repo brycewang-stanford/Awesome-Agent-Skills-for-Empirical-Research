@@ -1,0 +1,168 @@
+{
+  "skill_name": "paper-audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run a quick audit on paper.tex for a NeurIPS submission and tell me what blocks submission versus what is only a quality improvement.",
+      "expected_output": "Route to quick-audit, keep blockers first, and produce a compact readiness report rather than a full reviewer-style issue bundle.",
+      "files": ["evals/fixtures/quick_audit_fixture.tex"],
+      "assertions": [
+        {"type": "contains", "text": "quick-audit", "description": "canonical quick-audit mode selected"},
+        {"type": "regex", "pattern": "(block|Block|blocking)", "description": "blocking issues discussed"},
+        {"type": "regex", "pattern": "\\[(Script|LLM)\\]", "description": "script/llm provenance visible"},
+        {"type": "not_contains", "text": "Deep Review Report", "description": "quick audit does not drift into deep-review report format"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Review this manuscript like a real conference reviewer. I care more about the biggest validity threats than about grammar. Give me a structured revision roadmap and point me to the generated artifact files.",
+      "expected_output": "Route to deep-review, produce a deep-review report, surface artifact paths, and emphasize major/moderate/minor findings plus a revision roadmap.",
+      "files": ["evals/fixtures/deep_review_fixture.tex"],
+      "assertions": [
+        {"type": "contains", "text": "Deep Review Report", "description": "deep-review report rendered"},
+        {"type": "contains", "text": "deep-review", "description": "canonical deep-review mode surfaced"},
+        {"type": "regex", "pattern": "(Major Issues|Moderate Issues|Minor Issues)", "description": "severity-grouped issue sections present"},
+        {"type": "regex", "pattern": "(Artifacts|artifact_dir|final_issues\\.json|review_report\\.md)", "description": "artifact references surfaced"},
+        {"type": "regex", "pattern": "(Revision Roadmap|Priority 1)", "description": "roadmap present"},
+        {"type": "regex", "pattern": "(final_issues\\.json|review_report\\.md)", "description": "required deep-review artifacts named explicitly"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Deep-review this paper and tell me whether the abstract and conclusion claims actually match the evidence in the experiments. I want quote-backed findings with lane/source metadata.",
+      "expected_output": "Use a claims-vs-evidence framing, highlight quote-backed findings, and surface structured reviewer metadata rather than a simple checklist dump.",
+      "files": ["evals/fixtures/deep_review_fixture.tex"],
+      "assertions": [
+        {"type": "contains", "text": "deep-review", "description": "canonical deep-review mode surfaced"},
+        {"type": "regex", "pattern": "(claims|evidence|overclaim|unsupported)", "description": "claims-vs-evidence reasoning present"},
+        {"type": "regex", "pattern": "(Quote|quote)", "description": "quote-backed issue output present"},
+        {"type": "regex", "pattern": "(review_lane|claims_vs_evidence|source_kind|Quote Verified)", "description": "structured metadata visible"},
+        {"type": "regex", "pattern": "(source_section|Related Sections)", "description": "section anchoring metadata visible"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Review this methods-heavy paper and check for notation drift, equation-to-text mismatch, and numbers that do not reconcile between the table and appendix. Show section anchors.",
+      "expected_output": "Emphasize notation and numeric consistency, not just generic methodology commentary, and include section anchoring.",
+      "files": ["evals/fixtures/deep_review_fixture.tex"],
+      "assertions": [
+        {"type": "contains", "text": "deep-review", "description": "canonical deep-review mode surfaced"},
+        {"type": "regex", "pattern": "(notation|equation|numeric|appendix|reconcile)", "description": "cross-section consistency focus present"},
+        {"type": "regex", "pattern": "(source_section|Section|Related Sections)", "description": "section anchoring present"},
+        {"type": "regex", "pattern": "(review_lane|notation_and_numeric_consistency)", "description": "lane metadata surfaced"}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Gate this IEEE paper and separate true submission blockers from advisory pseudocode recommendations like line numbers or shorter comments.",
+      "expected_output": "Return PASS or FAIL and clearly distinguish blockers from recommendations.",
+      "files": ["evals/fixtures/gate_ieee_fixture.tex"],
+      "assertions": [
+        {"type": "contains", "text": "Verdict", "description": "verdict shown"},
+        {"type": "regex", "pattern": "(PASS|FAIL)", "description": "pass/fail value present"},
+        {"type": "regex", "pattern": "(Block|Blocking|must fix)", "description": "blocking section present"},
+        {"type": "regex", "pattern": "(advisory|recommendation|recommended)", "description": "advisory distinction present"},
+        {"type": "not_contains", "text": "Deep Review Report", "description": "gate output stays in gate format"}
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Re-audit this revision against my previous report and tell me which root-cause issues are fully fixed, partially fixed, still open, or newly introduced.",
+      "expected_output": "Use re-audit language with issue-level status classification, not a fresh audit only.",
+      "files": [
+        "evals/fixtures/deep_review_fixture.tex",
+        "evals/fixtures/previous_final_issues.json",
+        "evals/fixtures/previous_review_report.md"
+      ],
+      "assertions": [
+        {"type": "contains", "text": "Re-Audit Report", "description": "re-audit report rendered"},
+        {"type": "regex", "pattern": "(FULLY_ADDRESSED|PARTIALLY_ADDRESSED|NOT_ADDRESSED|NEW)", "description": "status categories present"},
+        {"type": "regex", "pattern": "(root_cause_key|root cause)", "description": "root-cause comparison language present"}
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Run a deep review with literature grounding and tell me if the novelty claim is actually defended against the closest prior work.",
+      "expected_output": "Use prior-art and novelty grounding logic, not just missing-reference detection.",
+      "files": ["evals/fixtures/deep_review_fixture.tex"],
+      "assertions": [
+        {"type": "contains", "text": "deep-review", "description": "canonical deep-review mode surfaced"},
+        {"type": "regex", "pattern": "(prior.art|prior-art|novelty|closest prior work|grounding)", "description": "prior-art reasoning present"},
+        {"type": "regex", "pattern": "\\[(Script|LLM)\\]", "description": "provenance present"},
+        {"type": "regex", "pattern": "(review_lane|prior-art|novelty)", "description": "review-lane level framing preserved"}
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Polish this paper only if the precheck says there are no blockers that would make polishing premature.",
+      "expected_output": "Route to polish mode, evaluate safety first, and stop when blockers exist.",
+      "files": ["evals/fixtures/polish_fixture.tex"],
+      "assertions": [
+        {"type": "contains", "text": "polish", "description": "polish mode acknowledged"},
+        {"type": "regex", "pattern": "(precheck|blocker|safe)", "description": "precheck safety logic present"},
+        {"type": "not_contains", "text": "Deep Review Report", "description": "polish flow does not drift into deep-review report output"}
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Gate this submission with an editor-in-chief screening first. Tell me if a busy top-venue EIC would desk-reject this paper based on the title, abstract, and introduction pitch quality alone.",
+      "expected_output": "Run gate mode with EIC screening pass. Evaluate pitch quality, venue fit, fatal flaws, and presentation baseline before the detailed checklist.",
+      "files": ["evals/fixtures/gate_ieee_fixture.tex"],
+      "assertions": [
+        {"type": "regex", "pattern": "(EIC|editor.in.chief|desk.reject|screening)", "description": "EIC screening language present"},
+        {"type": "regex", "pattern": "(pitch|Pitch)", "description": "pitch quality assessment present"},
+        {"type": "regex", "pattern": "(PASS|FAIL|Pass to Review|Desk Reject|Conditional Pass)", "description": "EIC verdict present"},
+        {"type": "regex", "pattern": "(Verdict|verdict|score)", "description": "gate verdict or score shown"}
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Deep-review this qualitative research paper. Pay special attention to whether the coding process is transparent, whether data saturation is discussed, and whether there is adequate researcher reflexivity. Also check the theoretical contribution depth.",
+      "expected_output": "Route to deep-review and apply qualitative methodology checks (B6-B10) plus theory contribution assessment (A5-A7). Flag missing SRQR elements.",
+      "files": ["evals/fixtures/deep_review_fixture.tex"],
+      "assertions": [
+        {"type": "contains", "text": "deep-review", "description": "canonical deep-review mode surfaced"},
+        {"type": "regex", "pattern": "(coding|saturation|reflexivity|triangulation|sampling)", "description": "qualitative methodology checks present"},
+        {"type": "regex", "pattern": "(theor|contribution|concept|framework)", "description": "theory contribution assessment present"},
+        {"type": "regex", "pattern": "(Major Issues|Moderate Issues|Minor Issues)", "description": "severity-grouped findings present"}
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Deep-review this paper using the Academic Pre-Review Committee (Editor -> Theory -> Literature -> Methodology -> Logic). Be harsh, quote-backed, and point me to the committee artifacts in the deep-review workspace.",
+      "expected_output": "Run deep-review with committee routing, produce committee artifacts, and embed a committee section in the deep-review report when available.",
+      "files": ["evals/fixtures/deep_review_fixture.tex"],
+      "assertions": [
+        {"type": "regex", "pattern": "(Academic Pre-Review Committee|Committee)", "description": "committee section present"},
+        {"type": "regex", "pattern": "(Editor|Theory|Literature|Methodology|Logic)", "description": "committee roles present"}
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "Deep-review this paper but focus ONLY on methodology transparency (SRQR). I want MUST-FIX vs SHOULD-FIX items and quote-backed findings. Use --focus methodology if needed.",
+      "expected_output": "Route to deep-review and produce a methodology-focused committee output with MUST-FIX vs SHOULD-FIX separation and SRQR deltas.",
+      "files": ["evals/fixtures/deep_review_fixture.tex"],
+      "assertions": [
+        {"type": "regex", "pattern": "(MUST-FIX|SHOULD-FIX|SRQR)", "description": "methodology transparency structure present"}
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Deep-review this paper but focus ONLY on theory contribution. Give me exactly 3 fatal theory holes with quote+location, plus 2-4 concrete moves to fix. Use --focus theory if needed.",
+      "expected_output": "Route to deep-review and produce a theory-focused committee output with 3 fatal theory holes and concrete fixes.",
+      "files": ["evals/fixtures/deep_review_fixture.tex"],
+      "assertions": [
+        {"type": "regex", "pattern": "(3 Fatal Theory Holes|Fatal Theory Holes|Theory Contribution)", "description": "theory review structure present"}
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Deep-review this paper but focus ONLY on the logic chain. I want a logic chain diagnostic diagram (Mermaid flowchart is fine) and quote-backed breakpoints. Use --focus logic if needed.",
+      "expected_output": "Route to deep-review and produce a logic-chain-focused committee output including a diagnostic diagram and quoted breakpoints.",
+      "files": ["evals/fixtures/deep_review_fixture.tex"],
+      "assertions": [
+        {"type": "regex", "pattern": "(mermaid|flowchart|Logic Chain)", "description": "logic chain diagnostic present"}
+      ]
+    }
+  ]
+}

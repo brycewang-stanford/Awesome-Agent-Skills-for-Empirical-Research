@@ -1,0 +1,4 @@
+interface:
+  display_name: "Industrial AI Research"
+  short_description: "Research recent Industrial AI literature with mandatory language selection, venue-aware source prioritization, and survey draft generation"
+  default_prompt: "Research recent Industrial AI literature, ask for report language first, and prioritize arXiv plus top IEEE and automation venues. Supports survey-draft mode with outline-first writing."

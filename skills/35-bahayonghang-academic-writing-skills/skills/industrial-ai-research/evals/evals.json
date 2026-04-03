@@ -1,0 +1,98 @@
+{
+  "skill_name": "industrial-ai-research",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Research recent predictive maintenance work in the last 3 years and return a research-brief that separates peer-reviewed papers from preprints.",
+      "expected_output": "Ask the mandatory intake questions if they are not already resolved, then produce a research-brief with scope, source buckets, shortlisted papers, evidence-backed synthesis, and explicit preprint labeling.",
+      "files": [],
+      "assertions": [
+        {"type": "regex", "pattern": "(intake|language|deliverable|time window|emphasis)", "description": "intake questions asked"},
+        {"type": "regex", "pattern": "(preprint|[Pp]reprint|arXiv)", "description": "preprints labeled"},
+        {"type": "regex", "pattern": "(source bucket|venue|arXiv|IEEE)", "description": "source buckets present"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need the latest Industrial AI papers on intelligent scheduling for job shops. Prioritize the newest work and tell me where the evidence is thin.",
+      "expected_output": "Prefer recent arXiv plus top automation venues, explain the recency policy, surface thin-evidence areas, and avoid venue-blind mixing in the final report.",
+      "files": [],
+      "assertions": [
+        {"type": "regex", "pattern": "(intake|language|deliverable|time window)", "description": "intake questions asked"},
+        {"type": "regex", "pattern": "(thin|sparse|limited|gap)", "description": "thin evidence areas surfaced"},
+        {"type": "regex", "pattern": "(arXiv|IEEE|T-ASE|CASE)", "description": "venue-aware sourcing"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Use survey-draft mode for industrial anomaly detection and stop after the YAML outline so I can approve the structure first.",
+      "expected_output": "Route into the survey-draft workflow, ask the survey-specific follow-up questions if missing, build only the S1 YAML outline, and stop before evidence packs or prose.",
+      "files": [],
+      "assertions": [
+        {"type": "regex", "pattern": "(survey.draft|S1|outline)", "description": "survey-draft mode selected"},
+        {"type": "regex", "pattern": "(YAML|yaml|taxonomy)", "description": "YAML outline format used"},
+        {"type": "regex", "pattern": "(approv|checkpoint|stop)", "description": "checkpoint before S2"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "My topic is hospital triage optimization with clinical ethics constraints. If that is outside Industrial AI scope, redirect me to the closest supported framing instead of pretending it fits.",
+      "expected_output": "Identify the topic as off-scope, state the boundary clearly, suggest the closest supported Industrial AI framing, and avoid starting a normal synthesis until scope is resolved.",
+      "files": [],
+      "assertions": [
+        {"type": "regex", "pattern": "(out.?of.?scope|outside|boundary|not.*supported)", "description": "off-scope identified"},
+        {"type": "regex", "pattern": "(closest|suggest|alternative|redirect)", "description": "alternative suggested"},
+        {"type": "not_contains", "text": "source buckets", "description": "no premature synthesis"}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Create a literature map comparing deep reinforcement learning methods for robotic manipulation across top robotics venues (ICRA, IROS, RSS, CoRL) from 2022-2025. Show method evolution and benchmark convergence.",
+      "mode": "literature-map",
+      "expected_output": "Ask intake questions, produce a literature map with venue-grouped papers, method evolution timeline, and benchmark convergence analysis across ICRA, IROS, RSS, CoRL.",
+      "files": [],
+      "assertions": [
+        {"type": "contains", "text": "ICRA", "description": "venue coverage"},
+        {"type": "contains", "text": "reinforcement learning", "description": "topic match"},
+        {"type": "regex", "pattern": "(comparison|evolution|convergence)", "description": "comparative analysis present"}
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Write a venue-ranked survey on federated learning for industrial IoT with explicit contradiction analysis between results from different research groups.",
+      "mode": "venue-ranked survey",
+      "expected_output": "Ask intake questions, produce a venue-ranked survey with papers grouped by tier, contradiction analysis between conflicting results, and explicit discussion of methodological disagreements.",
+      "files": [],
+      "assertions": [
+        {"type": "contains", "text": "federated learning", "description": "topic present"},
+        {"type": "regex", "pattern": "(contradict|conflict|disagree|inconsisten)", "description": "contradiction analysis present"},
+        {"type": "regex", "pattern": "(Tier[- ]?[1-3]|A\\*|venue)", "description": "venue ranking present"}
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Identify research gaps at the intersection of cyber-physical systems (CPS) and edge AI for smart manufacturing. Focus on real-time safety guarantees and latency-bounded inference.",
+      "mode": "research-gap memo",
+      "expected_output": "Ask intake questions, produce a research-gap memo identifying open problems at the CPS-edge AI intersection, focusing on real-time safety and latency constraints.",
+      "files": [],
+      "assertions": [
+        {"type": "contains", "text": "CPS", "description": "CPS topic covered"},
+        {"type": "regex", "pattern": "(edge|Edge)", "description": "edge AI covered"},
+        {"type": "regex", "pattern": "(gap|underexplored|open problem|future)", "description": "gap identification present"}
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Summarize the latest advances in Transformer-based defect detection for industrial visual inspection in both Chinese and English, including data augmentation strategies and few-shot solutions.",
+      "mode": "any",
+      "expected_output": "Ask intake questions (including confirming bilingual output), produce a bilingual summary covering Transformer-based defect detection, data augmentation, and few-shot approaches.",
+      "files": [],
+      "assertions": [
+        {"type": "contains", "text": "Transformer", "description": "topic match"},
+        {"type": "regex", "pattern": "(bilingual|Chinese.*English|English.*Chinese)", "description": "bilingual output confirmed"},
+        {"type": "regex", "pattern": "(few[- ]?shot|data augment)", "description": "key technique covered"},
+        {"type": "regex", "pattern": "(intake|language|deliverable)", "description": "intake questions asked"}
+      ]
+    }
+  ]
+}

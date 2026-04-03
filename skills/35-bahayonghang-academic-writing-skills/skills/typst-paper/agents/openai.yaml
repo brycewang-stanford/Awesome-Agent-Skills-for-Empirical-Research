@@ -1,0 +1,4 @@
+interface:
+  display_name: "Typst Paper"
+  short_description: "Compile and audit existing Typst papers with modules for bibliography, formatting, prose quality, and title refinement"
+  default_prompt: "Review my Typst paper project, choose the right module, run the relevant uv-backed script, and return Typst-friendly findings."

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Research Companion"
+  short_description: "Brainstorm, stress-test, and triage research directions"
+  icon_small: "./assets/research-companion-small.svg"
+  icon_large: "./assets/research-companion.svg"
+  default_prompt: "Use $research-companion to brainstorm a research direction, critique an idea, or decide whether a project should continue, pivot, or stop."

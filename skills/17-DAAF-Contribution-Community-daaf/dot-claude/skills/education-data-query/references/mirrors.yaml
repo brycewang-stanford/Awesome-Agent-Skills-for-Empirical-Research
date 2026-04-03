@@ -1,0 +1,102 @@
+# Mirror Configuration for Education Data Portal
+#
+# This file is the SINGLE SOURCE OF TRUTH for mirror configuration.
+# All other documentation references mirrors generically via this file.
+#
+# ============================================================================
+# UNIFIED PATH MODEL
+# ============================================================================
+# All mirrors use the same canonical path from datasets-reference.md.
+# Each mirror's url_template resolves {path} to a full URL:
+#
+#   url = mirror["url_template"].format(root_url=mirror["root_url"],
+#                                       path=canonical_path,
+#                                       format=mirror["format"])
+#
+# The canonical path is mirror-agnostic: "{source}/{filename}"
+# Example: "ccd/schools_ccd_directory" → each mirror appends its own extension.
+#
+# Mirrors are tried in priority order (first entry = highest priority).
+# The first mirror that successfully serves the requested file is used.
+# If a mirror returns 404 or times out, the next mirror is tried.
+#
+# ============================================================================
+# HOW TO ADD A NEW MIRROR
+# ============================================================================
+# 1. Add a new entry to the `mirrors` list below (position = priority)
+# 2. Define url_template using {root_url}, {path}, and {format} placeholders
+#    - {path} comes from the single `path` column in datasets-reference.md
+#    - {format} comes from the mirror's `format` field
+# 3. Set read_strategy to match your file format (see options below)
+# 4. Define a discovery section so agents can check file availability
+# 5. No other documentation files need to change — paths are in datasets-reference.md
+# 6. (Optional) Add a metadata section if the mirror serves metadata files
+#    (e.g., codebook .xls files). See existing mirrors for the format.
+#    Metadata files are for human reference — not parsed programmatically.
+#
+# read_strategy options:
+#   eager_parquet  - pl.read_parquet(url) — for columnar formats with embedded schema
+#   lazy_csv       - pl.scan_csv(url, infer_schema_length=10000) — for large text files
+#
+# discovery.method options:
+#   http_json      - GET a URL that returns JSON listing available files
+#   known_complete - Mirror has complete coverage; no discovery query needed
+# ============================================================================
+
+mirrors:
+  - name: huggingface
+    root_url: "https://huggingface.co/datasets/brhkim/education_data_portal_mirror/resolve/main"
+    format: parquet
+    timeout: 300
+    url_template: "{root_url}/{path}.parquet"
+    read_strategy: eager_parquet
+    discovery:
+      method: http_json
+      url: "https://huggingface.co/api/datasets/brhkim/education_data_portal_mirror/tree/main?recursive=true"
+      file_path_key: "path"
+      file_filter: "*.parquet"
+    coverage_notes: >
+      Complete coverage of all data sources in flat {source}/{filename}.parquet structure.
+      Parquet format: columnar, compressed (3-10x smaller than CSV), schema embedded.
+    metadata:
+      url_template: "{root_url}/{path}.{format}"
+      formats: [xls]
+      filename_pattern: "codebook_{entity}_{source}_{topic}"
+      notes: >
+        Codebook .xls files are co-located with data files in the same directory structure.
+        Path matches the codebook column in datasets-reference.md with .xls extension.
+
+  - name: urban_csv
+    root_url: "https://educationdata.urban.org/csv"
+    format: csv
+    timeout: 300
+    url_template: "{root_url}/{path}.{format}"
+    read_strategy: lazy_csv
+    discovery:
+      method: http_json
+      url: "https://educationdata.urban.org/api/v1/api-downloads"
+      # Response is a JSON array of objects with fields:
+      #   id, endpoint_id, sort_order, file_dir, file_name, file_label, file_size, hide
+      # file_name includes the .csv/.xls extension already.
+      # Filter: hide == 0 for active files; file_name ends with .csv for data.
+      #
+      # NOTE: The discovery API returns separate file_dir + file_name fields,
+      # but the canonical path is "{file_dir}/{file_name}" (matching datasets-reference.md).
+      # The discover_mirror_files() function constructs paths as:
+      #   path = f"{entry['file_dir']}/{entry['file_name']}"
+      file_dir_key: "file_dir"
+      file_name_key: "file_name"
+      file_filter: "*.csv"
+    coverage_notes: >
+      Complete coverage of all data sources in flat {source}/{filename}.csv structure.
+      Large files (500MB+); always use lazy loading with filters.
+      Some datasets are split into yearly files (e.g., ccd/schools_ccd_enrollment_{year}.csv)
+      while others contain all years in a single file (e.g., fsa/colleges_fsa_grants.csv).
+      Check the api-downloads manifest to determine which pattern applies.
+    metadata:
+      url_template: "{root_url}/{path}.{format}"
+      formats: [xls]
+      filename_pattern: "codebook_{entity}_{source}_{topic}"
+      notes: >
+        Codebook .xls files use the same {source}/{filename} path structure as data files.
+        Path from datasets-reference.md codebook column resolves directly.

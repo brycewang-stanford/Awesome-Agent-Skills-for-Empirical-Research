@@ -1,0 +1,9 @@
+Upstream repository: https://github.com/kepano/obsidian-skills
+Vendored from commit: bb9ec95e1b59c3471bd6fd77a78a4042430bfac3
+License: MIT
+Included skills:
+- obsidian-markdown
+- obsidian-cli
+- obsidian-bases
+- json-canvas
+- defuddle

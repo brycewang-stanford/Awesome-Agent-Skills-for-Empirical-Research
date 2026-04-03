@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Claim outruns evidence",
+    "quote": "We achieve state-of-the-art efficiency across all tasks.",
+    "explanation": "The claim was too broad relative to the reported scope.",
+    "comment_type": "claim_accuracy",
+    "severity": "major",
+    "confidence": "high",
+    "source_kind": "llm",
+    "source_section": "abstract",
+    "related_sections": ["results", "conclusion"],
+    "root_cause_key": "claim-scope-mismatch",
+    "review_lane": "claims_vs_evidence",
+    "gate_blocker": false,
+    "quote_verified": true
+  },
+  {
+    "title": "Comparison protocol is asymmetric",
+    "quote": "We tune our method over three retry runs while reporting each baseline once.",
+    "explanation": "The proposed method receives extra opportunities relative to baselines.",
+    "comment_type": "methodology",
+    "severity": "moderate",
+    "confidence": "high",
+    "source_kind": "llm",
+    "source_section": "results",
+    "related_sections": ["methods", "appendix"],
+    "root_cause_key": "comparison-asymmetry",
+    "review_lane": "evaluation_fairness_and_reproducibility",
+    "gate_blocker": false,
+    "quote_verified": true
+  }
+]

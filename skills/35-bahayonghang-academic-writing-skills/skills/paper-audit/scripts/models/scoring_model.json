@@ -1,0 +1,26 @@
+{
+  "coefficients": {
+    "soundness": 0.18,
+    "clarity": 0.13,
+    "presentation": 0.08,
+    "novelty": 0.13,
+    "significance": 0.13,
+    "reproducibility": 0.08,
+    "ethics": 0.05,
+    "literature_grounding": 0.12,
+    "overall_base": 0.0,
+    "soundness_x_novelty": 0.02,
+    "clarity_x_significance": 0.02,
+    "literature_grounding_x_novelty": 0.01,
+    "critical_count": -0.5,
+    "dims_below_5": -0.3
+  },
+  "intercept": 0.5,
+  "feature_names": [
+    "soundness", "clarity", "presentation", "novelty", "significance",
+    "reproducibility", "ethics", "literature_grounding", "overall_base",
+    "soundness_x_novelty", "clarity_x_significance",
+    "literature_grounding_x_novelty",
+    "critical_count", "dims_below_5"
+  ]
+}

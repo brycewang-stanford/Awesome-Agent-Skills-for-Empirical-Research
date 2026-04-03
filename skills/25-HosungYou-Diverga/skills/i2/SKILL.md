@@ -1,0 +1,247 @@
+---
+name: i2
+description: |
+  Screening Assistant - AI-PRISMA 6-dimension screening with Groq LLM (100x cheaper)
+  Supports two project types with different confidence thresholds
+  Use when: screening papers, PRISMA screening, inclusion/exclusion criteria
+  Triggers: screen papers, PRISMA screening, inclusion criteria, exclusion criteria, AI screening
+version: "12.0.1"
+---
+
+## ⛔ Prerequisites (v8.2 — MCP Enforcement)
+
+`diverga_check_prerequisites("i2")` → must return `approved: true`
+If not approved → AskUserQuestion for each missing checkpoint (see `.claude/references/checkpoint-templates.md`)
+
+### Checkpoints During Execution
+- 🔴 SCH_SCREENING_CRITERIA → `diverga_mark_checkpoint("SCH_SCREENING_CRITERIA", decision, rationale)`
+
+### Fallback (MCP unavailable)
+Read `.research/decision-log.yaml` directly to verify prerequisites. Conversation history is last resort.
+
+---
+
+# I2-ScreeningAssistant
+
+**Agent ID**: I2
+**Category**: I - Systematic Review Automation
+**Tier**: MEDIUM (Sonnet)
+**Icon**: 📋✅
+
+## Overview
+
+Executes AI-assisted PRISMA 2020 screening using a 6-dimension rubric. Leverages Groq LLM for 100x cost reduction compared to Claude, while maintaining screening quality. Supports two project types with different confidence thresholds.
+
+## Cost Comparison
+
+| Provider | Model | Cost per 100 papers | Quality |
+|----------|-------|---------------------|---------|
+| **Groq** (Default) | llama-3.3-70b | **$0.01** | Excellent |
+| Groq | qwen-qwq-32b | $0.008 | Good |
+| Claude | claude-haiku-4-5 | $0.15 | Excellent |
+| Claude | claude-sonnet-3-5 | $0.45 | Best |
+| Ollama | llama3.2:70b | $0 | Good (local) |
+
+**Recommendation**: Use Groq for screening. Switch to Claude only for complex edge cases.
+
+## Input Schema
+
+```yaml
+Required:
+  - project_path: "string"
+  - research_question: "string"
+  - project_type: "enum[knowledge_repository, systematic_review]"
+
+Optional:
+  - llm_provider: "enum[groq, claude, ollama]"
+  - custom_criteria: "object"
+  - max_workers: "int"
+  - batch_size: "int"
+```
+
+## Output Schema
+
+```yaml
+main_output:
+  stage: "prisma_screening"
+  project_type: "string"
+  threshold: "int"
+  llm_provider: "string"
+  model: "string"
+  results:
+    total_screened: "int"
+    auto_included: "int"
+    auto_excluded: "int"
+    human_review: "int"
+  cost:
+    input_tokens: "int"
+    output_tokens: "int"
+    total_cost: "string"
+  output_files:
+    relevant_papers: "string"
+    excluded_papers: "string"
+    human_review: "string"
+```
+
+## Project Types
+
+### knowledge_repository
+- **Threshold**: 50% confidence (score ≥ 25)
+- **Expected output**: 5,000-15,000 papers
+- **Use case**: Teaching materials, AI research assistant, domain exploration
+- **Screening behavior**: Lenient, removes only spam/off-topic
+
+### systematic_review
+- **Threshold**: 90% confidence (score ≥ 40)
+- **Expected output**: 50-300 papers
+- **Use case**: Meta-analysis, journal publication, clinical guidelines
+- **Screening behavior**: Strict PRISMA 2020 criteria
+
+## Human Checkpoint Protocol
+
+### 🔴 SCH_SCREENING_CRITERIA (REQUIRED)
+
+Before executing screening, I2 MUST:
+
+1. **PRESENT** screening criteria:
+   ```
+   AI-PRISMA 6-Dimension Screening Criteria
+
+   Project Type: {knowledge_repository | systematic_review}
+   Threshold: {50% | 90%} confidence
+
+   Scoring Rubric:
+   1. DOMAIN (0-10): Target population/context relevance
+   2. INTERVENTION (0-10): Technology/tool focus
+   3. METHOD (0-5): Study design rigor
+   4. OUTCOMES (0-10): Measured results clarity
+   5. EXCLUSION (-20 to 0): Penalties for wrong domain/review
+   6. TITLE BONUS (0 or 10): Keywords in title
+
+   Total Score Range: -20 to 50 points
+
+   Decision Rules:
+   - score ≥ {threshold} → auto-include
+   - score < 0 → auto-exclude
+   - otherwise → human-review
+
+   Do you approve these criteria?
+   ```
+
+2. **WAIT** for explicit approval
+3. **CONFIRM** before executing screening
+
+## Execution Commands
+
+```bash
+# Project path (set to your working directory)
+cd "$(pwd)"
+
+# Set LLM provider (v1.2.6: Groq default)
+export LLM_PROVIDER=groq
+export GROQ_API_KEY={api_key}
+
+# Execute screening
+python scripts/03_screen_papers.py \
+  --project {project_path} \
+  --question "{research_question}" \
+  --max-workers 8 \
+  --batch-size 50
+```
+
+## AI-PRISMA Scoring System
+
+### Domain Score (0-10)
+- 10 = Direct match to research question
+- 7-9 = Strong overlap
+- 4-6 = Partial relevance
+- 1-3 = Tangential
+- 0 = Unrelated
+
+### Intervention Score (0-10)
+- 10 = Primary focus of study
+- 7-9 = Major component
+- 4-6 = Mentioned
+- 1-3 = Vague reference
+- 0 = Absent
+
+### Method Score (0-5)
+- 5 = RCT/experimental
+- 4 = Quasi-experimental
+- 3 = Mixed methods/survey
+- 2 = Qualitative
+- 1 = Descriptive
+- 0 = Theory/opinion
+
+### Outcomes Score (0-10)
+- 10 = Explicit + rigorous measurement
+- 7-9 = Clear outcomes
+- 4-6 = Mentioned
+- 1-3 = Implied
+- 0 = None
+
+### Exclusion Penalties (-20 to 0)
+- -20 = Wrong domain
+- -15 = Wrong population
+- -10 = Review/editorial
+- -5 = Abstract only
+- 0 = No penalties
+
+### Title Bonus (0 or 10)
+- 10 = Both domain AND intervention in title
+- 0 = Missing keywords
+
+## Hallucination Detection
+
+I2 validates AI evidence quotes against abstracts:
+
+```python
+def validate_evidence_grounding(quotes, abstract):
+    """Flag potential hallucinations"""
+    for quote in quotes:
+        if quote.lower() not in abstract.lower():
+            return False, "FLAGGED: Potential hallucination"
+    return True, None
+```
+
+Papers with hallucinated evidence are routed to human review.
+
+## Auto-Trigger Keywords
+
+| Keywords (EN) | Keywords (KR) | Action |
+|---------------|---------------|--------|
+| screen papers, PRISMA screening | 논문 스크리닝, 선별 | Activate I2 |
+| inclusion criteria, exclusion | 포함 기준, 제외 기준 | Activate I2 |
+| AI screening, automated screening | AI 스크리닝 | Activate I2 |
+
+## Integration with B2
+
+I2 can call B2-evidence-quality-appraiser for deeper quality assessment:
+
+```python
+Task(
+    subagent_type="diverga:b2",
+    model="sonnet",
+    prompt="""
+    Assess quality of included papers using:
+    - Risk of Bias (RoB) for RCTs
+    - Newcastle-Ottawa for observational
+    - GRADE for overall evidence quality
+    """
+)
+```
+
+## Dependencies
+
+```yaml
+requires: ["I1-paper-retrieval-agent"]
+sequential_next: ["I3-rag-builder"]
+parallel_compatible: ["B2-evidence-quality-appraiser"]
+```
+
+## Related Agents
+
+- **I0-review-pipeline-orchestrator**: Pipeline coordination
+- **I1-paper-retrieval-agent**: Paper fetching
+- **I3-rag-builder**: RAG system building
+- **B2-evidence-quality-appraiser**: Quality assessment

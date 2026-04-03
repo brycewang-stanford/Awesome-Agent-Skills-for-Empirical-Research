@@ -1,0 +1,8 @@
+{
+  "name": "stata-c-plugins",
+  "description": "Develop high-performance C/C++ plugins for Stata — SDK setup, .ado wrappers, cross-platform compilation, performance optimization, and Python/R package translation.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Dylan Moore"
+  }
+}

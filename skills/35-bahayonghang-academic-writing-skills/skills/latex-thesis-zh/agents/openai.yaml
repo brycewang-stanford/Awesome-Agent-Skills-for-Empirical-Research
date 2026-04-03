@@ -1,0 +1,4 @@
+interface:
+  display_name: "LaTeX Thesis ZH"
+  short_description: "Compile and inspect Chinese LaTeX theses with modules for structure, templates, consistency, bibliography, and de-AI review"
+  default_prompt: "Review my Chinese LaTeX thesis project, choose the right module, run the relevant uv-backed script, and return thesis-focused findings."
