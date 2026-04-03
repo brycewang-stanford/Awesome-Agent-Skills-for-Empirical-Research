@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 900">
+  <rect width="1080" height="900" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="540" y="60" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="36" font-weight="700" fill="#1E293B" text-anchor="middle">因果推断方法的逻辑层次</text>
+  <text x="540" y="100" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#6B7280" text-anchor="middle">内部效度从上到下递减，方法复杂度从左到右递增</text>
+
+  <!-- Level 1: RCT -->
+  <rect x="60" y="140" width="960" height="100" rx="12" fill="#2563EB"/>
+  <text x="540" y="180" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="700" fill="#FFFFFF" text-anchor="middle">第一层：随机对照试验（RCT）</text>
+  <text x="540" y="218" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#FFFFFF" text-anchor="middle">随机分组 → 因果识别最可信 | 但成本高、外部效度受限</text>
+
+  <!-- Arrow -->
+  <polygon points="540,250 520,250 540,275 560,250" fill="#3B82F6"/>
+
+  <!-- Level 2: Quasi-experiments -->
+  <rect x="60" y="285" width="960" height="180" rx="12" fill="#3B82F6"/>
+  <text x="540" y="325" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="700" fill="#FFFFFF" text-anchor="middle">第二层：准自然实验</text>
+
+  <!-- Sub items -->
+  <rect x="90" y="345" width="200" height="50" rx="8" fill="#FFFFFF"/>
+  <text x="190" y="377" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#3B82F6" text-anchor="middle">IV 工具变量</text>
+
+  <rect x="310" y="345" width="200" height="50" rx="8" fill="#FFFFFF"/>
+  <text x="410" y="377" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#3B82F6" text-anchor="middle">RDD 断点回归</text>
+
+  <rect x="530" y="345" width="200" height="50" rx="8" fill="#FFFFFF"/>
+  <text x="630" y="377" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#3B82F6" text-anchor="middle">DID 双重差分</text>
+
+  <rect x="750" y="345" width="240" height="50" rx="8" fill="#FFFFFF"/>
+  <text x="870" y="377" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#3B82F6" text-anchor="middle">SCM 合成控制</text>
+
+  <text x="540" y="430" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle">利用政策变化、制度断点等"自然随机性"构造对照组</text>
+
+  <!-- Arrow -->
+  <polygon points="540,475 520,475 540,500 560,475" fill="#60A5FA"/>
+
+  <!-- Level 3: Observational -->
+  <rect x="60" y="510" width="960" height="150" rx="12" fill="#60A5FA"/>
+  <text x="540" y="550" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="700" fill="#FFFFFF" text-anchor="middle">第三层：观察性研究方法</text>
+
+  <rect x="90" y="570" width="200" height="50" rx="8" fill="#FFFFFF"/>
+  <text x="190" y="602" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#60A5FA" text-anchor="middle">PSM 倾向匹配</text>
+
+  <rect x="310" y="570" width="220" height="50" rx="8" fill="#FFFFFF"/>
+  <text x="420" y="602" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#60A5FA" text-anchor="middle">Heckman 两阶段</text>
+
+  <rect x="550" y="570" width="220" height="50" rx="8" fill="#FFFFFF"/>
+  <text x="660" y="602" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#60A5FA" text-anchor="middle">面板固定效应</text>
+
+  <rect x="790" y="570" width="200" height="50" rx="8" fill="#FFFFFF"/>
+  <text x="890" y="602" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#60A5FA" text-anchor="middle">OLS + 控制</text>
+
+  <!-- Arrow -->
+  <polygon points="540,670 520,670 540,695 560,670" fill="#93C5FD"/>
+
+  <!-- Level 4: ML + Causal -->
+  <rect x="60" y="705" width="960" height="120" rx="12" fill="#93C5FD"/>
+  <text x="540" y="745" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="700" fill="#1E293B" text-anchor="middle">第四层：ML + 因果推断（2020s 前沿）</text>
+
+  <rect x="90" y="765" width="200" height="40" rx="8" fill="#FFFFFF"/>
+  <text x="190" y="792" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#1E293B" text-anchor="middle">DML 双重机器学习</text>
+
+  <rect x="310" y="765" width="200" height="40" rx="8" fill="#FFFFFF"/>
+  <text x="410" y="792" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#1E293B" text-anchor="middle">因果森林</text>
+
+  <rect x="530" y="765" width="200" height="40" rx="8" fill="#FFFFFF"/>
+  <text x="630" y="792" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#1E293B" text-anchor="middle">Meta Learners</text>
+
+  <rect x="750" y="765" width="240" height="40" rx="8" fill="#FFFFFF"/>
+  <text x="870" y="792" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#1E293B" text-anchor="middle">交错DID新方法</text>
+
+  <!-- Footer -->
+  <text x="540" y="870" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#9CA3AF" text-anchor="middle">数据来源：Rubin因果模型框架、IZA World of Labor、CausalML Book</text>
+</svg>

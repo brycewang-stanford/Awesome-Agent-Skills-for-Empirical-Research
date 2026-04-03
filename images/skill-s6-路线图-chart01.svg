@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 750">
+  <rect width="1080" height="750" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="540" y="60" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="36" font-weight="700" fill="#1E293B" text-anchor="middle">2026 实证研究者技能升级路线图</text>
+
+  <!-- Timeline line -->
+  <line x1="160" y1="130" x2="160" y2="650" stroke="#3B82F6" stroke-width="4"/>
+
+  <!-- Stage 1: Entry -->
+  <circle cx="160" cy="170" r="20" fill="#2563EB"/>
+  <text x="160" y="178" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" font-weight="700" fill="#FFFFFF" text-anchor="middle">1</text>
+
+  <rect x="210" y="120" width="810" height="170" rx="12" fill="#F3F4F6"/>
+  <text x="240" y="160" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="30" font-weight="700" fill="#2563EB">入门阶段</text>
+  <text x="500" y="160" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280">硕士一年级 / 初学者</text>
+
+  <text x="240" y="200" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">Stata 基础操作 + OLS/固定效应/DID</text>
+  <text x="240" y="236" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">数据获取：国家统计局、世界银行、FRED</text>
+  <text x="240" y="272" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">AI 辅助：ChatGPT/Claude 理解概念 + 调试代码</text>
+
+  <!-- Stage 2: Intermediate -->
+  <circle cx="160" cy="370" r="20" fill="#3B82F6"/>
+  <text x="160" y="378" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" font-weight="700" fill="#FFFFFF" text-anchor="middle">2</text>
+
+  <rect x="210" y="320" width="810" height="170" rx="12" fill="#F3F4F6"/>
+  <text x="240" y="360" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="30" font-weight="700" fill="#3B82F6">进阶阶段</text>
+  <text x="500" y="360" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280">硕士二年级 / 博士早期</text>
+
+  <text x="240" y="400" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">深入 IV/RDD/PSM/SCM 识别策略</text>
+  <text x="240" y="436" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">学习 R 或 Python 作为第二语言</text>
+  <text x="240" y="472" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">交错 DID 新方法 + Perplexity/Elicit 文献综述</text>
+
+  <!-- Stage 3: Advanced -->
+  <circle cx="160" cy="570" r="20" fill="#60A5FA"/>
+  <text x="160" y="578" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" font-weight="700" fill="#FFFFFF" text-anchor="middle">3</text>
+
+  <rect x="210" y="520" width="810" height="170" rx="12" fill="#F3F4F6"/>
+  <text x="240" y="560" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="30" font-weight="700" fill="#60A5FA">前沿阶段</text>
+  <text x="500" y="560" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280">博士中后期 / 青年学者</text>
+
+  <text x="240" y="600" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">DML/因果森林/Meta Learners (DoWhy+EconML/grf)</text>
+  <text x="240" y="636" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">Stata 19 CATE + 弱 IV 检验</text>
+  <text x="240" y="672" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">Claude Code Skills 全流程自动化（Claude Scholar）</text>
+
+  <!-- Footer -->
+  <text x="540" y="730" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#9CA3AF" text-anchor="middle">数据来源：Econ-Jobs 2026就业数据、连享会课程体系、Claude Code Skills生态</text>
+</svg>

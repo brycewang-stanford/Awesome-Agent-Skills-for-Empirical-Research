@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 800">
+  <rect width="1080" height="800" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="540" y="60" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="36" font-weight="700" fill="#1E293B" text-anchor="middle">Python 因果推断工具生态全景</text>
+
+  <!-- Center circle -->
+  <circle cx="540" cy="400" r="80" fill="#2563EB"/>
+  <text x="540" y="390" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#FFFFFF" text-anchor="middle">PyWhy</text>
+  <text x="540" y="420" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle">因果推断</text>
+
+  <!-- DoWhy - Top -->
+  <line x1="540" y1="320" x2="540" y2="190" stroke="#3B82F6" stroke-width="3"/>
+  <rect x="400" y="110" width="280" height="80" rx="12" fill="#3B82F6"/>
+  <text x="540" y="148" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#FFFFFF" text-anchor="middle">DoWhy</text>
+  <text x="540" y="178" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle">端到端因果推断框架</text>
+
+  <!-- EconML - Right -->
+  <line x1="620" y1="380" x2="730" y2="320" stroke="#3B82F6" stroke-width="3"/>
+  <rect x="730" y="270" width="280" height="100" rx="12" fill="#60A5FA"/>
+  <text x="870" y="308" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#FFFFFF" text-anchor="middle">EconML</text>
+  <text x="870" y="338" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle">DML / 因果森林</text>
+  <text x="870" y="358" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle">Meta Learners</text>
+
+  <!-- CausalML - Bottom Right -->
+  <line x1="600" y1="460" x2="730" y2="520" stroke="#3B82F6" stroke-width="3"/>
+  <rect x="730" y="480" width="280" height="80" rx="12" fill="#93C5FD"/>
+  <text x="870" y="518" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#1E293B" text-anchor="middle">CausalML</text>
+  <text x="870" y="548" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#1E293B" text-anchor="middle">Uber开源 / 提升建模</text>
+
+  <!-- causal-learn - Bottom Left -->
+  <line x1="480" y1="460" x2="350" y2="520" stroke="#3B82F6" stroke-width="3"/>
+  <rect x="70" y="480" width="280" height="80" rx="12" fill="#93C5FD"/>
+  <text x="210" y="518" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#1E293B" text-anchor="middle">causal-learn</text>
+  <text x="210" y="548" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#1E293B" text-anchor="middle">因果发现算法</text>
+
+  <!-- statsmodels - Left -->
+  <line x1="460" y1="380" x2="350" y2="320" stroke="#3B82F6" stroke-width="3"/>
+  <rect x="70" y="270" width="280" height="100" rx="12" fill="#60A5FA"/>
+  <text x="210" y="308" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#FFFFFF" text-anchor="middle">statsmodels</text>
+  <text x="210" y="338" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle">OLS / IV / 时间序列</text>
+  <text x="210" y="358" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle">经典统计推断</text>
+
+  <!-- Bottom tools row -->
+  <text x="540" y="640" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#6B7280" text-anchor="middle">配套工具</text>
+
+  <rect x="80" y="670" width="180" height="50" rx="12" fill="#F3F4F6"/>
+  <text x="170" y="702" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#374151" text-anchor="middle">pandas</text>
+
+  <rect x="290" y="670" width="180" height="50" rx="12" fill="#F3F4F6"/>
+  <text x="380" y="702" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#374151" text-anchor="middle">scikit-learn</text>
+
+  <rect x="500" y="670" width="180" height="50" rx="12" fill="#F3F4F6"/>
+  <text x="590" y="702" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#374151" text-anchor="middle">linearmodels</text>
+
+  <rect x="710" y="670" width="180" height="50" rx="12" fill="#F3F4F6"/>
+  <text x="800" y="702" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#374151" text-anchor="middle">matplotlib</text>
+
+  <!-- Footer -->
+  <text x="540" y="770" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#9CA3AF" text-anchor="middle">数据来源：PyWhy 官方文档、EconML/DoWhy/CausalML GitHub 仓库</text>
+</svg>

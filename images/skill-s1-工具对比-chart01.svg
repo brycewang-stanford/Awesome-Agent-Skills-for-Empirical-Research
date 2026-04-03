@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 750">
+  <rect width="1080" height="750" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="540" y="60" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="36" font-weight="700" fill="#1E293B" text-anchor="middle">Stata vs R vs Python：核心优势对比</text>
+
+  <!-- Stata Column -->
+  <rect x="60" y="110" width="300" height="540" rx="12" fill="#F3F4F6"/>
+  <rect x="60" y="110" width="300" height="60" rx="12" fill="#2563EB"/>
+  <text x="210" y="148" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="700" fill="#FFFFFF" text-anchor="middle">Stata</text>
+
+  <text x="210" y="210" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#2563EB" text-anchor="middle">学术计量黄金标准</text>
+
+  <text x="90" y="260" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- 面板数据分析</text>
+  <text x="90" y="300" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- 期刊复现标准</text>
+  <text x="90" y="340" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- IV/DID/PSM 一站式</text>
+  <text x="90" y="380" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- 语法简洁直观</text>
+  <text x="90" y="420" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- Stata 19: CATE</text>
+
+  <rect x="80" y="460" width="260" height="44" rx="8" fill="#2563EB"/>
+  <text x="210" y="490" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle">适合：学术研究、政策分析</text>
+
+  <rect x="80" y="520" width="260" height="44" rx="8" fill="#F3F4F6" stroke="#6B7280" stroke-width="1"/>
+  <text x="210" y="550" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">短板：可视化、扩展性</text>
+
+  <!-- R Column -->
+  <rect x="390" y="110" width="300" height="540" rx="12" fill="#F3F4F6"/>
+  <rect x="390" y="110" width="300" height="60" rx="12" fill="#3B82F6"/>
+  <text x="540" y="148" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="700" fill="#FFFFFF" text-anchor="middle">R</text>
+
+  <text x="540" y="210" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#3B82F6" text-anchor="middle">因果推断包最丰富</text>
+
+  <text x="420" y="260" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- fixest/did/fect</text>
+  <text x="420" y="300" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- rdrobust/grf</text>
+  <text x="420" y="340" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- tidyverse 数据处理</text>
+  <text x="420" y="380" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- 免费开源</text>
+  <text x="420" y="420" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- ggplot2 可视化</text>
+
+  <rect x="410" y="460" width="260" height="44" rx="8" fill="#3B82F6"/>
+  <text x="540" y="490" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle">适合：因果推断、统计建模</text>
+
+  <rect x="410" y="520" width="260" height="44" rx="8" fill="#F3F4F6" stroke="#6B7280" stroke-width="1"/>
+  <text x="540" y="550" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">短板：学习曲线陡峭</text>
+
+  <!-- Python Column -->
+  <rect x="720" y="110" width="300" height="540" rx="12" fill="#F3F4F6"/>
+  <rect x="720" y="110" width="300" height="60" rx="12" fill="#60A5FA"/>
+  <text x="870" y="148" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="700" fill="#FFFFFF" text-anchor="middle">Python</text>
+
+  <text x="870" y="210" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#60A5FA" text-anchor="middle">全栈生态最强大</text>
+
+  <text x="750" y="260" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- DoWhy + EconML</text>
+  <text x="750" y="300" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- pandas 数据清洗</text>
+  <text x="750" y="340" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- scikit-learn ML</text>
+  <text x="750" y="380" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- AI/LLM 集成</text>
+  <text x="750" y="420" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">- 企业部署能力</text>
+
+  <rect x="740" y="460" width="260" height="44" rx="8" fill="#60A5FA"/>
+  <text x="870" y="490" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#FFFFFF" text-anchor="middle">适合：数据科学、ML+因果</text>
+
+  <rect x="740" y="520" width="260" height="44" rx="8" fill="#F3F4F6" stroke="#6B7280" stroke-width="1"/>
+  <text x="870" y="550" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">短板：统计语法不够直观</text>
+
+  <!-- Footer -->
+  <text x="540" y="700" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#9CA3AF" text-anchor="middle">数据来源：Econ-Jobs 2026 就业市场分析、Stata/R/Python 官方文档</text>
+  <text x="540" y="730" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#9CA3AF" text-anchor="middle">2026 年建议：至少掌握两种工具的组合使用</text>
+</svg>

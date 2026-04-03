@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 850">
+  <rect width="1080" height="850" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="540" y="60" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="36" font-weight="700" fill="#1E293B" text-anchor="middle">实证研究各阶段的 AI 工具选择</text>
+
+  <!-- Stage headers -->
+  <rect x="60" y="100" width="220" height="50" rx="12" fill="#2563EB"/>
+  <text x="170" y="132" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#FFFFFF" text-anchor="middle">选题阶段</text>
+
+  <rect x="300" y="100" width="220" height="50" rx="12" fill="#3B82F6"/>
+  <text x="410" y="132" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#FFFFFF" text-anchor="middle">数据分析</text>
+
+  <rect x="540" y="100" width="220" height="50" rx="12" fill="#60A5FA"/>
+  <text x="650" y="132" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#FFFFFF" text-anchor="middle">写作阶段</text>
+
+  <rect x="780" y="100" width="240" height="50" rx="12" fill="#93C5FD"/>
+  <text x="900" y="132" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#1E293B" text-anchor="middle">审稿回复</text>
+
+  <!-- Arrows -->
+  <polygon points="285,125 290,115 290,135" fill="#6B7280"/>
+  <polygon points="525,125 530,115 530,135" fill="#6B7280"/>
+  <polygon points="765,125 770,115 770,135" fill="#6B7280"/>
+
+  <!-- Row 1: Perplexity -->
+  <rect x="60" y="180" width="220" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="170" y="215" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#2563EB" text-anchor="middle">Perplexity</text>
+  <text x="170" y="250" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">实时带源搜索引擎</text>
+
+  <!-- Row 1: Julius AI -->
+  <rect x="300" y="180" width="220" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="410" y="215" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#3B82F6" text-anchor="middle">Julius AI</text>
+  <text x="410" y="250" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">上传数据即出结果</text>
+
+  <!-- Row 1: Claude -->
+  <rect x="540" y="180" width="220" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="650" y="215" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#60A5FA" text-anchor="middle">Claude</text>
+  <text x="650" y="250" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">100万token长文分析</text>
+
+  <!-- Row 1: Claude Code -->
+  <rect x="780" y="180" width="240" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="900" y="215" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#2563EB" text-anchor="middle">Claude Code</text>
+  <text x="900" y="250" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">Skills自动化审稿回复</text>
+
+  <!-- Row 2 -->
+  <rect x="60" y="290" width="220" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="170" y="325" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#2563EB" text-anchor="middle">NotebookLM</text>
+  <text x="170" y="360" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">基于文档零幻觉</text>
+
+  <rect x="300" y="290" width="220" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="410" y="325" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#3B82F6" text-anchor="middle">ChatGPT</text>
+  <text x="410" y="360" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">Stata语法+代码调试</text>
+
+  <rect x="540" y="290" width="220" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="650" y="325" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#60A5FA" text-anchor="middle">Jenni AI</text>
+  <text x="650" y="360" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">大纲+内文引用</text>
+
+  <rect x="780" y="290" width="240" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="900" y="325" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#2563EB" text-anchor="middle">Wolfram Alpha</text>
+  <text x="900" y="360" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">数学公式精确验证</text>
+
+  <!-- Row 3 -->
+  <rect x="60" y="400" width="220" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="170" y="435" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#2563EB" text-anchor="middle">Elicit</text>
+  <text x="170" y="470" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">1.25亿篇论文</text>
+
+  <rect x="300" y="400" width="220" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="410" y="435" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#3B82F6" text-anchor="middle">Stata/Python</text>
+  <text x="410" y="470" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">正式计量回归</text>
+
+  <rect x="540" y="400" width="220" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="650" y="435" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#60A5FA" text-anchor="middle">Scite AI</text>
+  <text x="650" y="470" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">智能引用分析</text>
+
+  <rect x="780" y="400" width="240" height="90" rx="12" fill="#F3F4F6"/>
+  <text x="900" y="435" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#2563EB" text-anchor="middle">Grammarly</text>
+  <text x="900" y="470" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" fill="#6B7280" text-anchor="middle">语法检查润色</text>
+
+  <!-- Key insight box -->
+  <rect x="60" y="530" width="960" height="100" rx="12" fill="#F3F4F6" stroke="#2563EB" stroke-width="2"/>
+  <text x="540" y="570" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" font-weight="700" fill="#2563EB" text-anchor="middle">核心原则：AI 是"放大器"而非"替代品"</text>
+  <text x="540" y="610" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#6B7280" text-anchor="middle">ChatGPT/Claude 会产生幻觉 → 用 Perplexity 验证数据 → 核心论证自己写</text>
+
+  <!-- Claude Code Skills section -->
+  <text x="540" y="680" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="30" font-weight="700" fill="#1E293B" text-anchor="middle">Claude Code Skills 学术研究全覆盖</text>
+
+  <rect x="60" y="700" width="180" height="50" rx="8" fill="#2563EB"/>
+  <text x="150" y="732" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#FFFFFF" text-anchor="middle">research-ideation</text>
+
+  <rect x="260" y="700" width="180" height="50" rx="8" fill="#3B82F6"/>
+  <text x="350" y="732" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#FFFFFF" text-anchor="middle">results-analysis</text>
+
+  <rect x="460" y="700" width="180" height="50" rx="8" fill="#60A5FA"/>
+  <text x="550" y="732" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#FFFFFF" text-anchor="middle">paper-writing</text>
+
+  <rect x="660" y="700" width="180" height="50" rx="8" fill="#93C5FD"/>
+  <text x="750" y="732" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#1E293B" text-anchor="middle">review-response</text>
+
+  <rect x="860" y="700" width="160" height="50" rx="8" fill="#F3F4F6" stroke="#2563EB" stroke-width="1"/>
+  <text x="940" y="732" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#2563EB" text-anchor="middle">+87 more</text>
+
+  <!-- Footer -->
+  <text x="540" y="810" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#9CA3AF" text-anchor="middle">数据来源：Dupple 2026评测、Claude Scholar GitHub、AI-Research-SKILLs</text>
+</svg>
