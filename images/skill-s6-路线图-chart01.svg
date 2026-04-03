@@ -44,5 +44,5 @@
   <text x="240" y="672" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="26" fill="#374151">Claude Code Skills 全流程自动化（Claude Scholar）</text>
 
   <!-- Footer -->
-  <text x="540" y="730" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#9CA3AF" text-anchor="middle">数据来源：Econ-Jobs 2026就业数据、连享会课程体系、Claude Code Skills生态</text>
+  <text x="540" y="730" font-family="'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#9CA3AF" text-anchor="middle">数据来源：Econ-Jobs 2026就业数据、CEPR/VoxDev讲座、Claude Code Skills生态</text>
 </svg>
