@@ -6,12 +6,18 @@
 
 <br/>
 
-  <a href="https://copaper.ai">
-    <img src="images/copaper-logo.png" alt="CoPaper.AI" width="280" />
-  </a>
-  <br/><br/>
-  <img src="images/stanford-reap-logo.png" alt="Stanford REAP - Center on China's Economy & Institutions" width="480" />
-  <br/><br/>
+  <table>
+    <tr>
+      <td align="center">
+        <a href="https://copaper.ai"><img src="images/copaper-logo.png" alt="CoPaper.AI" width="260" /></a>
+      </td>
+      <td width="60"></td>
+      <td align="center">
+        <img src="images/stanford-reap-logo.png" alt="Stanford REAP - Center on China's Economy & Institutions" width="380" />
+      </td>
+    </tr>
+  </table>
+  <br/>
 </div>
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
