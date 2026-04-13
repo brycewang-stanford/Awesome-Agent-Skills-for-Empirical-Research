@@ -37,8 +37,36 @@
 
 ---
 
+## 🆕 更新日志
+
+<details open>
+<summary><b>2026-04-12：新增 StatsPAI Agent-Native 计量包 + 降 AIGC 检测率 Skills</b></summary>
+
+- **🔥 [StatsPAI](https://github.com/brycewang-stanford/StatsPAI)**：我们自研的 **Agent-Native 因果推断 & 计量经济学 Python 包**。390+ 函数，一个 `import`，自描述 API（`list_functions()` / `describe_function()` / `function_schema()`）。覆盖 OLS、IV、DID（Callaway-Sant'Anna / Sun-Abraham / Bacon / HonestDID / 连续 DID）、RDD、PSM、SCM、DML、因果森林、Meta-Learners、TMLE、神经因果模型（TARNet/CFRNet/DragonNet）等。JOSS 发表，MIT 开源。[→ PyPI](https://pypi.org/project/StatsPAI/) | [→ GitHub](https://github.com/brycewang-stanford/StatsPAI)
+- **📝 降 AIGC 检测率 Skills**（新增 3 个，详见 [07-论文修改与润色](docs/07-论文修改与润色.md)）：
+  - [humanizer_academic](https://github.com/matsuikentaro1/humanizer_academic) — 学术论文专用，23 种 AI 写作模式检测，适配医学/自然科学论文
+  - [skill-deslop](https://github.com/stephenturner/skill-deslop) — 科学写作去 AI 化，尊重方法论部分被动语态等学科惯例
+  - [stop-slop](https://github.com/hardikpandya/stop-slop) — 三层检测 + 五维评分（直接性/节奏/信任/真实性/密度），低于 35/50 建议重写
+- **🛡️ [revision-guard](https://github.com/ShiyanW/ai-revision-guard)**：防止 AI 越改越差，限制修改轮次 + 7 项同质化检测（社区 PR 贡献）
+
+</details>
+
+<details>
+<summary><b>2026-04-11：从 43 个集合扩展至 119 个仓库，覆盖 23,000+ Skills</b></summary>
+
+- 新增 76 个 GitHub 仓库，覆盖 8 大社科学科（经济学、政治学、社会学、心理学、教育学、公共健康、管理学、金融学）
+- 新增金融、法律、营销、产品管理、教育、公共健康等领域 Skill 套件
+- 新增 13 个学术数据 MCP 服务器（OpenAlex、Semantic Scholar、FRED、World Bank 等）
+- 新增 11 个多代理协作系统（Agent Laboratory、AI-Scientist-v2 等）
+- 新增中英双语 README
+
+</details>
+
+---
+
 ## 目录
 
+- [🆕 更新日志](#-更新日志)
 - [这份列表能帮你什么？](#这份列表能帮你什么)
 - [按研究流程速查](#按研究流程速查)
 - **Skills 分类详解**

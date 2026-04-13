@@ -37,8 +37,36 @@ This repository is the **Agent Skills landscape** we compiled while building CoP
 
 ---
 
+## 🆕 Changelog
+
+<details open>
+<summary><b>2026-04-12: Added StatsPAI Agent-Native Econometrics Package + Anti-AIGC Detection Skills</b></summary>
+
+- **🔥 [StatsPAI](https://github.com/brycewang-stanford/StatsPAI)**: Our own **agent-native causal inference & econometrics Python package**. 390+ functions, one `import`, self-describing API (`list_functions()` / `describe_function()` / `function_schema()`). Covers OLS, IV, DID (Callaway-Sant'Anna / Sun-Abraham / Bacon / HonestDID / continuous DID), RDD, PSM, SCM, DML, Causal Forest, Meta-Learners, TMLE, neural causal models (TARNet/CFRNet/DragonNet), and more. Published in JOSS, MIT license. [→ PyPI](https://pypi.org/project/StatsPAI/) | [→ GitHub](https://github.com/brycewang-stanford/StatsPAI)
+- **📝 Anti-AIGC Detection Skills** (3 new, see [07-Paper Revision & Polishing](docs/07-论文修改与润色.md)):
+  - [humanizer_academic](https://github.com/matsuikentaro1/humanizer_academic) — Academic paper specialist, 23 AI writing pattern detectors, adapted for medical/scientific papers
+  - [skill-deslop](https://github.com/stephenturner/skill-deslop) — Scientific writing de-AI, respects discipline conventions (e.g., passive voice in methods sections)
+  - [stop-slop](https://github.com/hardikpandya/stop-slop) — 3-layer detection + 5-dimension scoring (directness/rhythm/trust/authenticity/density), rewrite if below 35/50
+- **🛡️ [revision-guard](https://github.com/ShiyanW/ai-revision-guard)**: Prevents AI over-refinement, limits revision rounds + 7-point homogenization checklist (community PR contribution)
+
+</details>
+
+<details>
+<summary><b>2026-04-11: Expanded from 43 collections to 119 repos, covering 23,000+ Skills</b></summary>
+
+- Added 76 GitHub repositories across 8 social science disciplines (economics, political science, sociology, psychology, education, public health, management, finance)
+- Added skill suites for finance, law, marketing, product management, education, public health
+- Added 13 academic data MCP servers (OpenAlex, Semantic Scholar, FRED, World Bank, etc.)
+- Added 11 multi-agent collaboration systems (Agent Laboratory, AI-Scientist-v2, etc.)
+- Added bilingual Chinese/English README
+
+</details>
+
+---
+
 ## Table of Contents
 
+- [🆕 Changelog](#-changelog)
 - [What Can This List Do for You?](#what-can-this-list-do-for-you)
 - [Quick Lookup by Research Stage](#quick-lookup-by-research-stage)
 - **Skills by Category**
