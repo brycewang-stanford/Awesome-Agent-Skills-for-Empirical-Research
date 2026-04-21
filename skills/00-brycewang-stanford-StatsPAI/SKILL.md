@@ -1,6 +1,6 @@
 ---
 name: statspai
-description: Agent-native causal inference & econometrics toolkit for Python. 390+ functions, one import, unified API. Covers OLS, IV, DID, staggered DID, RDD, PSM, SCM, DML, Causal Forest, Meta-Learners, TMLE, neural causal models, and more. Every function returns structured result objects with self-describing schemas for LLM-driven workflows.
+description: "Agent-native causal inference and econometrics toolkit for Python. 390+ functions, one import, unified API. Covers OLS, IV, DID, staggered DID, RDD, PSM, SCM, DML, Causal Forest, Meta-Learners, TMLE, neural causal models, and more. Use when the user asks about treatment effect estimation, causal analysis, regression analysis, policy evaluation, observational study methods, or any of the listed econometric methods in Python. Every function returns structured result objects with self-describing schemas for LLM-driven workflows."
 triggers:
   - implement causal inference
   - run a DID analysis
@@ -12,6 +12,10 @@ triggers:
   - causal forest
   - panel data regression
   - econometric analysis
+  - treatment effect estimation
+  - causal analysis
+  - policy evaluation
+  - observational study
   - StatsPAI
   - statspai
 ---
@@ -24,13 +28,13 @@ StatsPAI is the agent-native Python package for causal inference and applied eco
 **PyPI**: `pip install statspai`
 **Paper**: Published in Journal of Open Source Software (JOSS)
 
-## Why StatsPAI for Agents?
+## Agent API
 
-StatsPAI is the **first econometrics toolkit purpose-built for LLM-driven research workflows**:
+StatsPAI provides a self-describing API for agent-driven workflows:
 
-1. **Self-describing API**: `sp.list_functions()`, `sp.describe_function("did")`, `sp.function_schema("rdrobust")` — agents can discover and understand functions without documentation lookup
-2. **Unified result objects**: Every function returns a `CausalResult` with `.summary()`, `.plot()`, `.to_latex()`, `.to_word()`, `.to_excel()`, `.cite()`
-3. **One import**: No need to juggle 20+ packages — `import statspai as sp` covers everything
+1. **Discovery**: `sp.list_functions()`, `sp.describe_function("did")`, `sp.function_schema("rdrobust")` — discover and understand functions without external documentation
+2. **Unified results**: Every function returns a `CausalResult` with `.summary()`, `.plot()`, `.to_latex()`, `.to_word()`, `.to_excel()`, `.cite()`
+3. **One import**: `import statspai as sp` covers all 390+ functions
 4. **Publication-ready output**: Word, Excel, LaTeX, HTML export in every function
 
 ## Core Methods
@@ -128,13 +132,24 @@ print(result.summary())
 result.to_latex("tables/did_results.tex")
 ```
 
-## When to Use StatsPAI vs Other Packages
+## Validation and Error Handling
 
-| Scenario | Use StatsPAI | Alternative |
-|----------|-------------|-------------|
-| Agent-driven analysis pipeline | ✅ Best choice — self-describing API | pyfixest (no agent API) |
-| Full causal inference workflow | ✅ 390+ functions, one import | Assemble 10+ R/Python packages |
-| Publication-ready output needed | ✅ Word/Excel/LaTeX/HTML built-in | statsmodels (no export) |
-| Staggered DID with diagnostics | ✅ CS + SA + Bacon + HonestDID | differences (partial) |
-| Neural causal models | ✅ TARNet/CFRNet/DragonNet | econml (partial) |
-| Stata users migrating to Python | ✅ Stata-equivalent function names | linearmodels (limited) |
+After running any estimation, check the result before proceeding:
+
+```python
+result = sp.did(df, "y", "treated", "post")
+
+# Check convergence and diagnostics
+print(result.summary())
+
+# Verify key assumptions
+if hasattr(result, 'diagnostics'):
+    print(result.diagnostics)
+```
+
+Common issues to check:
+- **Convergence warnings** in `.summary()` output
+- **Weak instruments** for IV: check first-stage F-statistic > 10
+- **Parallel trends** for DID: run event study and inspect pre-treatment coefficients
+- **Bandwidth sensitivity** for RDD: compare results at half and double the optimal bandwidth
+- **Missing data**: StatsPAI drops missing values by default — verify sample sizes match expectations

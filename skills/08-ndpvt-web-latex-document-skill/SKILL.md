@@ -1,3 +1,8 @@
+---
+name: latex-document
+description: "Universal LaTeX document skill for creating, compiling, and converting documents to professional PDF with PNG previews. Use when the user asks to write a LaTeX document, create a resume/CV, compile a .tex file, make a report/presentation/thesis, create charts/diagrams, convert between document formats (Markdown/DOCX/HTML to/from LaTeX), convert/OCR a PDF to LaTeX, create fillable PDF forms, or perform any PDF operation (merge, encrypt, extract, watermark). Supports pdflatex, xelatex, and lualatex with auto-detection, bibliography management, multi-language/CJK, and batch processing pipelines."
+---
+
 <!--
   ╔══════════════════════════════════════════════════════════════╗
   ║  本文件为开源 Skill 原始文档，收录仅供学习与研究参考        ║
@@ -12,68 +17,6 @@
   声明: 本文件版权归原作者所有。此处收录旨在为社会科学实证研究者
   提供 AI Agent Skills 的集中参考。如有侵权，请联系删除。
 -->
-
----
-name: latex-document
-description: >
-  Universal LaTeX document skill: create, compile, and convert any document to
-  professional PDF with PNG previews. Supports resumes, reports, cover letters,
-  invoices, academic papers, theses/dissertations, academic CVs, presentations
-  (Beamer), scientific posters, formal letters, exams/quizzes, books,
-  cheat sheets, reference cards, exam formula sheets,
-  fillable PDF forms (hyperref form fields), conditional content (etoolbox toggles),
-  mail merge from CSV/JSON (Jinja2 templates), version diffing (latexdiff),
-  charts (pgfplots + matplotlib), tables (booktabs + CSV import), images (TikZ),
-  Mermaid diagrams, AI-generated images, watermarks, landscape pages,
-  bibliography/citations (BibTeX/biblatex), multi-language/CJK (auto XeLaTeX),
-  algorithms/pseudocode, colored boxes (tcolorbox), SI units (siunitx),
-  Pandoc format conversion (Markdown/DOCX/HTML ↔ LaTeX),
-  and PDF-to-LaTeX conversion of handwritten or printed documents (math, business,
-  legal, general). Compile script supports pdflatex, xelatex, lualatex with
-  auto-detection, latexmk backend, texfot log filtering, PDF/A output, and
-  verbosity control (--verbose/--quiet). Empirically optimized scaling: single agent 1-10 pages, split
-  11-20, batch-7 pipeline 21+. Use when user asks to: (1) create a resume/CV/cover
-  letter, (2) write a LaTeX document, (3) create PDF with tables/charts/images,
-  (4) compile a .tex file, (5) make a report/invoice/presentation, (6) anything
-  involving LaTeX or pdflatex, (7) convert/OCR a PDF to LaTeX, (8) convert
-  handwritten notes, (9) create charts/graphs/diagrams, (10) create slides,
-  (11) write a thesis or dissertation, (12) create an academic CV, (13) create
-  a poster, (14) create an exam/quiz, (15) create a book, (16) convert between
-  document formats (Markdown, DOCX, HTML to/from LaTeX), (17) generate Mermaid
-  diagrams for LaTeX, (18) create a formal business letter, (19) create a cheat
-  sheet or reference card, (20) create an exam formula sheet or crib sheet,
-  (21) condense lecture notes/PDFs into a cheat sheet,
-  (22) create a fillable PDF form with text fields/checkboxes/dropdowns,
-  (23) create a document with conditional content/toggles (show/hide sections),
-  (24) generate batch/mail-merge documents from CSV/JSON data,
-  (25) create a version diff PDF (latexdiff) highlighting changes between documents,
-  (26) create a homework or assignment submission with problems and solutions,
-  (27) create a lab report with data tables, graphs, and error analysis,
-  (28) encrypt or password-protect a PDF,
-  (29) merge multiple PDFs into one,
-  (30) optimize/compress a PDF for web or email,
-  (31) lint or check a LaTeX document for common issues,
-  (32) count words in a LaTeX document,
-  (33) analyze document statistics (figures, tables, citations),
-  (34) fetch BibTeX from a DOI,
-  (35) convert a Graphviz .dot file to PDF/PNG,
-  (36) convert a PlantUML .puml file to PDF/PNG,
-  (37) create a one-pager/fact sheet/executive summary,
-  (38) create a datasheet or product specification sheet,
-  (39) extract pages from a PDF (page ranges, odd/even),
-  (40) check LaTeX package availability before compiling,
-  (41) analyze citations and cross-reference with .bib files,
-  (42) debug LaTeX compilation errors,
-  (43) make a document accessible (PDF/A, tagged PDF),
-  (44) create lecture notes or course handouts,
-  (45) fill an existing PDF form (fillable fields or non-fillable with annotations),
-  (46) extract text or tables from a PDF (pdfplumber, pypdf),
-  (47) OCR a scanned PDF to text (pytesseract),
-  (48) create a PDF programmatically with reportlab (Canvas, Platypus),
-  (49) rotate or crop PDF pages (pypdf),
-  (50) add a watermark to an existing PDF,
-  (51) extract metadata from a PDF (title, author, subject).
----
 
 # LaTeX Document Skill
 
