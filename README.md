@@ -40,6 +40,19 @@
 ## 🆕 更新日志
 
 <details open>
+<summary><b>2026-04-13：🇨🇳 原创中文降 AIGC Skill 上线（skills/48）</b></summary>
+
+- **🇨🇳🔥 [chinese-de-aigc](skills/48-copaper-ai-chinese-de-aigc/)**：**CoPaper.AI 团队原创的中文学术降 AIGC Skill**。目前 GitHub 上唯一面向中文学术实证论文、针对知网 AMLC / 万方 / 维普 / Turnitin 中文版的 humanizer。
+  - **17 类中文 AI 痕迹模式库**（四字套话 / 虚词堆叠 / 显性连接词 / 绝对化断言 / 总分总对称 / 句长方差等）
+  - **五步闭环工作流**：定位 → 诊断 → 差异化改写 → 五维自评 → 二次复查
+  - **分章节差异化策略**：摘要/引言/文献综述/方法/结果/讨论/结论的改写力度各不相同
+  - **五维评分量表**：具体性 / 节奏性 / 谨慎性 / 隐衔接 / 研究者语气（加权满分 50）
+  - **12 组改写前后对照**覆盖实证论文七大章节
+  - 设计思想吸收了英文 humanizer 的顶层架构（humanizer_academic / skill-deslop / stop-slop / avoid-ai-writing），但**针对中文语境完全重新设计**
+
+</details>
+
+<details>
 <summary><b>2026-04-12：新增 StatsPAI Agent-Native 计量包 + 降 AIGC 检测率 Skills</b></summary>
 
 - **🔥 [StatsPAI](https://github.com/brycewang-stanford/StatsPAI)**：我们自研的 **Agent-Native 因果推断 & 计量经济学 Python 包**。390+ 函数，一个 `import`，自描述 API（`list_functions()` / `describe_function()` / `function_schema()`）。覆盖 OLS、IV、DID（Callaway-Sant'Anna / Sun-Abraham / Bacon / HonestDID / 连续 DID）、RDD、PSM、SCM、DML、因果森林、Meta-Learners、TMLE、神经因果模型（TARNet/CFRNet/DragonNet）等。JOSS 发表，MIT 开源。[→ PyPI](https://pypi.org/project/StatsPAI/) | [→ GitHub](https://github.com/brycewang-stanford/StatsPAI)
@@ -176,6 +189,7 @@ Skill 就是解决这个问题的：它是给 AI 的**方法论操作手册**。
 
 | 套件 | 核心特色 | 适用场景 | 本地位置 |
 |------|---------|---------|---------|
+| **CoPaper.AI / chinese-de-aigc** 🇨🇳🔥 | **中文学术专用原创 Skill**。针对知网 AMLC / 万方 / 维普 / Turnitin 中文版检测机制设计，17 类中文 AI 痕迹模式库（四字套话 / 虚词堆叠 / 显性连接词 / 绝对化断言 / 句长方差等），五步闭环工作流（定位→诊断→改写→自评→复查），分章节差异化策略，五维评分量表。**这是目前 GitHub 上唯一面向中文学术的降 AIGC Skill** | 中文期刊投稿、学位论文、基金申请书 | [`skills/48`](skills/48-copaper-ai-chinese-de-aigc/) |
 | **[matsuikentaro1/humanizer_academic](https://github.com/matsuikentaro1/humanizer_academic)** 🔥 | **学术论文专用**。23 种 AI 写作模式检测（内容 6 + 语言 6 + 风格 3 + 填充 3 + 用词 5），示例来自 EMPA-REG OUTCOME 心血管试验，保留合法学术过渡词，基于 Wikipedia "Signs of AI writing" | 医学、生命科学、自然科学论文 | [`skills/44`](skills/44-matsuikentaro1-humanizer_academic/) |
 | **[stephenturner/skill-deslop](https://github.com/stephenturner/skill-deslop)** | **科学写作去 AI 化**。智能区分合法学科惯例（方法论章节的被动语态）vs AI 痕迹，5 维评分量表（直接性/节奏/信任/真实性/密度），附 4 个参考文件（examples/phrases/structures/tropes） | 科学论文、技术博客 | [`skills/45`](skills/45-stephenturner-skill-deslop/) |
 | **[hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop)** | **通用三层检测 + 五维评分**。禁用短语（清喉开场、强调拐杖、商业行话）、结构套路（二元对比、戏剧性碎片化、虚假能动性）、句级规则（禁止 em dash、Wh- 开头）。低于 35/50 分建议重写 | 通用散文、博客、报告 | [`skills/46`](skills/46-hardikpandya-stop-slop/) |
@@ -183,9 +197,11 @@ Skill 就是解决这个问题的：它是给 AI 的**方法论操作手册**。
 | [ShiyanW/ai-revision-guard](https://github.com/ShiyanW/ai-revision-guard) | **防过度修改**（另一角度）。限制修改轮次（每节 ≤2 轮）、7 项同质化检测清单、跨模型交叉验证。防止 AI 越改越差，保护作者 voice | 多轮润色场景 | （社区 PR 贡献） |
 
 > **使用建议**：
-> - 学术论文首选 **humanizer_academic**（学术语境适配）+ **revision-guard**（防越改越差）组合
-> - 需要可审计流程用 **avoid-ai-writing**（产出结构化报告）
-> - 通用写作用 **stop-slop**（5 维评分量化改进空间）
+> - 🇨🇳 **中文学术论文**（知网/万方/维普）→ **chinese-de-aigc**（本仓库原创）+ **revision-guard**
+> - 🇬🇧 英文学术论文 → **humanizer_academic**（学术语境适配）+ **revision-guard**（防越改越差）
+> - 中英双语论文 → **chinese-de-aigc** + **humanizer_academic** 组合
+> - 需要可审计流程 → **avoid-ai-writing**（产出结构化报告）
+> - 通用写作 → **stop-slop**（5 维评分量化改进空间）
 
 ### 金融与投资研究
 

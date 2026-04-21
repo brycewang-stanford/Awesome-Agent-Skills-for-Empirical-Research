@@ -40,6 +40,19 @@ This repository is the **Agent Skills landscape** we compiled while building CoP
 ## 🆕 Changelog
 
 <details open>
+<summary><b>2026-04-13: 🇨🇳 Original Chinese De-AIGC Skill Launched (skills/48)</b></summary>
+
+- **🇨🇳🔥 [chinese-de-aigc](skills/48-copaper-ai-chinese-de-aigc/)**: **CoPaper.AI team's original Chinese academic de-AIGC skill**. Currently the only humanizer on GitHub dedicated to Chinese academic empirical papers and targeting China's CNKI AMLC / Wanfang / VIP / Turnitin Chinese detectors.
+  - **17-pattern library of Chinese AI tells** (4-character clichés / hollow connectives / explicit transitions / absolutist claims / total-part-total symmetry / sentence-length uniformity)
+  - **5-step closed-loop workflow**: Locate → Diagnose → Differential Rewrite → 5-Dim Self-Score → Second-Pass Review
+  - **Per-section strategy**: Abstract / Introduction / Literature Review / Methods / Results / Discussion / Conclusion each has different rewrite intensity
+  - **5-dimension scoring rubric**: Concreteness / Rhythm / Caution / Implicit Cohesion / Researcher Voice (weighted max 50)
+  - **12 before/after case comparisons** covering 7 main chapters of empirical papers
+  - Architecture inspired by English humanizers (humanizer_academic / skill-deslop / stop-slop / avoid-ai-writing), **but fully re-designed for Chinese language context**
+
+</details>
+
+<details>
 <summary><b>2026-04-12: Added StatsPAI Agent-Native Econometrics Package + Anti-AIGC Detection Skills</b></summary>
 
 - **🔥 [StatsPAI](https://github.com/brycewang-stanford/StatsPAI)**: Our own **agent-native causal inference & econometrics Python package**. 390+ functions, one `import`, self-describing API (`list_functions()` / `describe_function()` / `function_schema()`). Covers OLS, IV, DID (Callaway-Sant'Anna / Sun-Abraham / Bacon / HonestDID / continuous DID), RDD, PSM, SCM, DML, Causal Forest, Meta-Learners, TMLE, neural causal models (TARNet/CFRNet/DragonNet), and more. Published in JOSS, MIT license. [→ PyPI](https://pypi.org/project/StatsPAI/) | [→ GitHub](https://github.com/brycewang-stanford/StatsPAI)
@@ -176,6 +189,7 @@ These repositories contain multiple Skills and typically cover several research 
 
 | Suite | Key Features | Use Case | Local Path |
 |-------|-------------|----------|-----------|
+| **CoPaper.AI / chinese-de-aigc** 🇨🇳🔥 | **Original Chinese academic de-AIGC skill** by CoPaper.AI team. Targets China's CNKI AMLC / Wanfang / VIP / Turnitin Chinese detectors. 17-pattern library of Chinese-specific AI tells (4-char clichés, hollow connectives, explicit transitions, absolutist claims, sentence-length uniformity), 5-step closed loop workflow (locate→diagnose→rewrite→self-score→review), per-section strategy, 5-dim scoring rubric. **Currently the only GitHub skill dedicated to Chinese academic de-AIGC** | Chinese journal submissions, theses, grant proposals | [`skills/48`](skills/48-copaper-ai-chinese-de-aigc/) |
 | **[matsuikentaro1/humanizer_academic](https://github.com/matsuikentaro1/humanizer_academic)** 🔥 | **Academic-specific**. 23 AI writing patterns (6 content + 6 language + 3 style + 3 filler + 5 word choice), examples from EMPA-REG OUTCOME cardiovascular trials, preserves legitimate academic transitions, based on Wikipedia "Signs of AI writing" | Medical, life sciences, natural science papers | [`skills/44`](skills/44-matsuikentaro1-humanizer_academic/) |
 | **[stephenturner/skill-deslop](https://github.com/stephenturner/skill-deslop)** | **Scientific writing de-AI**. Smartly distinguishes legitimate discipline conventions (passive voice in methods) from AI tells; 5-dimension scoring (directness/rhythm/trust/authenticity/density); 4 reference files (examples/phrases/structures/tropes) | Scientific papers, technical blogs | [`skills/45`](skills/45-stephenturner-skill-deslop/) |
 | **[hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop)** | **3-layer detection + 5-dim scoring**. Banned phrases (throat-clearing openers, emphasis crutches, corporate jargon), structural clichés (binary contrasts, dramatic fragmentation, false agency), sentence-level rules (no em dash, no Wh- starters). Below 35/50 → revise | General prose, blogs, reports | [`skills/46`](skills/46-hardikpandya-stop-slop/) |
@@ -183,9 +197,11 @@ These repositories contain multiple Skills and typically cover several research 
 | [ShiyanW/ai-revision-guard](https://github.com/ShiyanW/ai-revision-guard) | **Prevents over-refinement** (different angle). Limits revision rounds (≤2 per section), 7-point homogenization checklist, cross-model verification. Protects author's voice from AI erosion | Multi-round polishing scenarios | (community PR) |
 
 > **Recommended combos**:
-> - Academic papers: **humanizer_academic** (academic context) + **revision-guard** (prevent over-refinement)
-> - Need auditable workflow: **avoid-ai-writing** (structured reports)
-> - General writing: **stop-slop** (5-dim scoring for quantified improvement)
+> - 🇨🇳 **Chinese academic papers** (CNKI/Wanfang/VIP) → **chinese-de-aigc** (original) + **revision-guard**
+> - 🇬🇧 English academic papers → **humanizer_academic** + **revision-guard** (prevent over-refinement)
+> - Bilingual papers → **chinese-de-aigc** + **humanizer_academic** combined
+> - Need auditable workflow → **avoid-ai-writing** (structured reports)
+> - General writing → **stop-slop** (5-dim scoring for quantified improvement)
 
 ### Finance & Investment Research
 
