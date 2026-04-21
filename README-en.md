@@ -43,10 +43,11 @@ This repository is the **Agent Skills landscape** we compiled while building CoP
 <summary><b>2026-04-12: Added StatsPAI Agent-Native Econometrics Package + Anti-AIGC Detection Skills</b></summary>
 
 - **🔥 [StatsPAI](https://github.com/brycewang-stanford/StatsPAI)**: Our own **agent-native causal inference & econometrics Python package**. 390+ functions, one `import`, self-describing API (`list_functions()` / `describe_function()` / `function_schema()`). Covers OLS, IV, DID (Callaway-Sant'Anna / Sun-Abraham / Bacon / HonestDID / continuous DID), RDD, PSM, SCM, DML, Causal Forest, Meta-Learners, TMLE, neural causal models (TARNet/CFRNet/DragonNet), and more. Published in JOSS, MIT license. [→ PyPI](https://pypi.org/project/StatsPAI/) | [→ GitHub](https://github.com/brycewang-stanford/StatsPAI)
-- **📝 Anti-AIGC Detection Skills** (3 new, see [07-Paper Revision & Polishing](docs/07-论文修改与润色.md)):
-  - [humanizer_academic](https://github.com/matsuikentaro1/humanizer_academic) — Academic paper specialist, 23 AI writing pattern detectors, adapted for medical/scientific papers
-  - [skill-deslop](https://github.com/stephenturner/skill-deslop) — Scientific writing de-AI, respects discipline conventions (e.g., passive voice in methods sections)
-  - [stop-slop](https://github.com/hardikpandya/stop-slop) — 3-layer detection + 5-dimension scoring (directness/rhythm/trust/authenticity/density), rewrite if below 35/50
+- **📝 Anti-AIGC Detection Skills** (4 new, [→ dedicated section](#-anti-aigc-detection--de-ai-academic-writing-highlighted)):
+  - [humanizer_academic](https://github.com/matsuikentaro1/humanizer_academic) — Academic paper specialist, 23 AI writing pattern detectors (`skills/44`)
+  - [skill-deslop](https://github.com/stephenturner/skill-deslop) — Scientific writing de-AI, respects discipline conventions (`skills/45`)
+  - [stop-slop](https://github.com/hardikpandya/stop-slop) — 3-layer detection + 5-dimension scoring (`skills/46`)
+  - [avoid-ai-writing](https://github.com/conorbronsdon/avoid-ai-writing) — Structured audit + rewrite + second-pass audit (`skills/47`)
 - **🛡️ [revision-guard](https://github.com/ShiyanW/ai-revision-guard)**: Prevents AI over-refinement, limits revision rounds + 7-point homogenization checklist (community PR contribution)
 
 </details>
@@ -81,6 +82,7 @@ This repository is the **Agent Skills landscape** we compiled while building CoP
   - [09 - Replication & Reproducible Research](docs/09-论文复现与可复现研究.md)
   - [10 - Peer Review Response & Defense](docs/10-审稿回复与学术答辩.md)
 - [Comprehensive Skill Suites](#comprehensive-skill-suites)
+  - 🚨 [Anti-AIGC Detection & De-AI Academic Writing (Highlighted)](#-anti-aigc-detection--de-ai-academic-writing-highlighted)
 - [Multi-Agent Collaboration Systems](#multi-agent-collaboration-systems)
 - [Skill Aggregation Platforms & Discovery Tools](#skill-aggregation-platforms--discovery-tools)
 - [Learning Resources](#learning-resources)
@@ -167,6 +169,23 @@ These repositories contain multiple Skills and typically cover several research 
 | [fuhaoda/stats-paper-writing-agent-skills](https://github.com/fuhaoda/stats-paper-writing-agent-skills) | LaTeX statistical paper writing, front-end draft generation | Statistics & econometrics papers |
 | [dylantmoore/stata-skill](https://github.com/dylantmoore/stata-skill) | Full Stata coverage: syntax, data management, econometrics, causal inference, graphics, Mata, 20+ community packages | Stata users |
 | [SepineTam/stata-mcp](https://github.com/SepineTam/stata-mcp) | LLM operates Stata regression directly via MCP, "evolve from regression monkey to causal thinker" | Stata econometrics |
+
+### 🚨 Anti-AIGC Detection & De-AI Academic Writing (Highlighted)
+
+> **This is one of the most critical pain points in academic writing in 2026**. Papers failing AIGC detection can be rejected outright, and detectors like Turnitin, GPTZero, and China's CNKI are getting stricter. The 4 skills below are the **most authoritative and complete** solutions on GitHub — all MIT open-source, and all locally archived in this repo (`skills/44-47`).
+
+| Suite | Key Features | Use Case | Local Path |
+|-------|-------------|----------|-----------|
+| **[matsuikentaro1/humanizer_academic](https://github.com/matsuikentaro1/humanizer_academic)** 🔥 | **Academic-specific**. 23 AI writing patterns (6 content + 6 language + 3 style + 3 filler + 5 word choice), examples from EMPA-REG OUTCOME cardiovascular trials, preserves legitimate academic transitions, based on Wikipedia "Signs of AI writing" | Medical, life sciences, natural science papers | [`skills/44`](skills/44-matsuikentaro1-humanizer_academic/) |
+| **[stephenturner/skill-deslop](https://github.com/stephenturner/skill-deslop)** | **Scientific writing de-AI**. Smartly distinguishes legitimate discipline conventions (passive voice in methods) from AI tells; 5-dimension scoring (directness/rhythm/trust/authenticity/density); 4 reference files (examples/phrases/structures/tropes) | Scientific papers, technical blogs | [`skills/45`](skills/45-stephenturner-skill-deslop/) |
+| **[hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop)** | **3-layer detection + 5-dim scoring**. Banned phrases (throat-clearing openers, emphasis crutches, corporate jargon), structural clichés (binary contrasts, dramatic fragmentation, false agency), sentence-level rules (no em dash, no Wh- starters). Below 35/50 → revise | General prose, blogs, reports | [`skills/46`](skills/46-hardikpandya-stop-slop/) |
+| **[conorbronsdon/avoid-ai-writing](https://github.com/conorbronsdon/avoid-ai-writing)** | **Structured audit + rewrite + second-pass audit**. Four-section output: identified issues (with quotes) → rewrite → change summary → second audit. Compatible with Claude Code, OpenClaw, Hermes, and other agents | Workflows needing auditable, traceable revision | [`skills/47`](skills/47-conorbronsdon-avoid-ai-writing/) |
+| [ShiyanW/ai-revision-guard](https://github.com/ShiyanW/ai-revision-guard) | **Prevents over-refinement** (different angle). Limits revision rounds (≤2 per section), 7-point homogenization checklist, cross-model verification. Protects author's voice from AI erosion | Multi-round polishing scenarios | (community PR) |
+
+> **Recommended combos**:
+> - Academic papers: **humanizer_academic** (academic context) + **revision-guard** (prevent over-refinement)
+> - Need auditable workflow: **avoid-ai-writing** (structured reports)
+> - General writing: **stop-slop** (5-dim scoring for quantified improvement)
 
 ### Finance & Investment Research
 

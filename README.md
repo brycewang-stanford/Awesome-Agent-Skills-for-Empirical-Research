@@ -43,10 +43,11 @@
 <summary><b>2026-04-12：新增 StatsPAI Agent-Native 计量包 + 降 AIGC 检测率 Skills</b></summary>
 
 - **🔥 [StatsPAI](https://github.com/brycewang-stanford/StatsPAI)**：我们自研的 **Agent-Native 因果推断 & 计量经济学 Python 包**。390+ 函数，一个 `import`，自描述 API（`list_functions()` / `describe_function()` / `function_schema()`）。覆盖 OLS、IV、DID（Callaway-Sant'Anna / Sun-Abraham / Bacon / HonestDID / 连续 DID）、RDD、PSM、SCM、DML、因果森林、Meta-Learners、TMLE、神经因果模型（TARNet/CFRNet/DragonNet）等。JOSS 发表，MIT 开源。[→ PyPI](https://pypi.org/project/StatsPAI/) | [→ GitHub](https://github.com/brycewang-stanford/StatsPAI)
-- **📝 降 AIGC 检测率 Skills**（新增 3 个，详见 [07-论文修改与润色](docs/07-论文修改与润色.md)）：
-  - [humanizer_academic](https://github.com/matsuikentaro1/humanizer_academic) — 学术论文专用，23 种 AI 写作模式检测，适配医学/自然科学论文
-  - [skill-deslop](https://github.com/stephenturner/skill-deslop) — 科学写作去 AI 化，尊重方法论部分被动语态等学科惯例
-  - [stop-slop](https://github.com/hardikpandya/stop-slop) — 三层检测 + 五维评分（直接性/节奏/信任/真实性/密度），低于 35/50 建议重写
+- **📝 降 AIGC 检测率 Skills**（新增 4 个，[→ 专项分类](#-降-aigc-检测率--学术去-ai-味重点推荐)）：
+  - [humanizer_academic](https://github.com/matsuikentaro1/humanizer_academic) — 学术论文专用，23 种 AI 写作模式检测（`skills/44`）
+  - [skill-deslop](https://github.com/stephenturner/skill-deslop) — 科学写作去 AI 化，尊重学科惯例（`skills/45`）
+  - [stop-slop](https://github.com/hardikpandya/stop-slop) — 三层检测 + 五维评分（`skills/46`）
+  - [avoid-ai-writing](https://github.com/conorbronsdon/avoid-ai-writing) — 结构化审计 + 重写 + 二次审计（`skills/47`）
 - **🛡️ [revision-guard](https://github.com/ShiyanW/ai-revision-guard)**：防止 AI 越改越差，限制修改轮次 + 7 项同质化检测（社区 PR 贡献）
 
 </details>
@@ -81,6 +82,7 @@
   - [09 - 论文复现与可复现研究](docs/09-论文复现与可复现研究.md)
   - [10 - 审稿回复与学术答辩](docs/10-审稿回复与学术答辩.md)
 - [综合型 Skill 套件](#综合型-skill-套件)
+  - 🚨 [降 AIGC 检测率 & 学术去 AI 味（重点推荐）](#-降-aigc-检测率--学术去-ai-味重点推荐)
 - [多代理协作系统](#多代理协作系统)
 - [Skill 聚合平台与发现工具](#skill-聚合平台与发现工具)
 - [学习资源](#学习资源)
@@ -167,6 +169,23 @@ Skill 就是解决这个问题的：它是给 AI 的**方法论操作手册**。
 | [fuhaoda/stats-paper-writing-agent-skills](https://github.com/fuhaoda/stats-paper-writing-agent-skills) | LaTeX 统计论文写作，前端草稿生成 | 统计学、计量经济学论文 |
 | [dylantmoore/stata-skill](https://github.com/dylantmoore/stata-skill) | Stata 全覆盖：语法、数据管理、计量经济学、因果推断、图形、Mata、20+ 社区包 | Stata 用户 |
 | [SepineTam/stata-mcp](https://github.com/SepineTam/stata-mcp) | LLM 通过 MCP 直接操作 Stata 回归，"从回归猴进化为因果思考者" | Stata 计量分析 |
+
+### 🚨 降 AIGC 检测率 & 学术去 AI 味（重点推荐）
+
+> **这是 2026 年学术写作最关键的痛点之一**。论文 AIGC 率超标一票否决，知网/Turnitin/GPTZero 检测日趋严格。下面这 4 个 Skill 是目前 GitHub 上**最权威、最完整**的解决方案，全部 MIT 开源，仓库已本地收录（`skills/44-47`）。
+
+| 套件 | 核心特色 | 适用场景 | 本地位置 |
+|------|---------|---------|---------|
+| **[matsuikentaro1/humanizer_academic](https://github.com/matsuikentaro1/humanizer_academic)** 🔥 | **学术论文专用**。23 种 AI 写作模式检测（内容 6 + 语言 6 + 风格 3 + 填充 3 + 用词 5），示例来自 EMPA-REG OUTCOME 心血管试验，保留合法学术过渡词，基于 Wikipedia "Signs of AI writing" | 医学、生命科学、自然科学论文 | [`skills/44`](skills/44-matsuikentaro1-humanizer_academic/) |
+| **[stephenturner/skill-deslop](https://github.com/stephenturner/skill-deslop)** | **科学写作去 AI 化**。智能区分合法学科惯例（方法论章节的被动语态）vs AI 痕迹，5 维评分量表（直接性/节奏/信任/真实性/密度），附 4 个参考文件（examples/phrases/structures/tropes） | 科学论文、技术博客 | [`skills/45`](skills/45-stephenturner-skill-deslop/) |
+| **[hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop)** | **通用三层检测 + 五维评分**。禁用短语（清喉开场、强调拐杖、商业行话）、结构套路（二元对比、戏剧性碎片化、虚假能动性）、句级规则（禁止 em dash、Wh- 开头）。低于 35/50 分建议重写 | 通用散文、博客、报告 | [`skills/46`](skills/46-hardikpandya-stop-slop/) |
+| **[conorbronsdon/avoid-ai-writing](https://github.com/conorbronsdon/avoid-ai-writing)** | **结构化审计 + 重写 + 二次审计**。四段式输出：识别问题（含引用原文）→ 重写文本 → 修改摘要 → 第二遍审计。兼容 Claude Code、OpenClaw、Hermes 等 Agent | 需要可审计、可追溯修改流程 | [`skills/47`](skills/47-conorbronsdon-avoid-ai-writing/) |
+| [ShiyanW/ai-revision-guard](https://github.com/ShiyanW/ai-revision-guard) | **防过度修改**（另一角度）。限制修改轮次（每节 ≤2 轮）、7 项同质化检测清单、跨模型交叉验证。防止 AI 越改越差，保护作者 voice | 多轮润色场景 | （社区 PR 贡献） |
+
+> **使用建议**：
+> - 学术论文首选 **humanizer_academic**（学术语境适配）+ **revision-guard**（防越改越差）组合
+> - 需要可审计流程用 **avoid-ai-writing**（产出结构化报告）
+> - 通用写作用 **stop-slop**（5 维评分量化改进空间）
 
 ### 金融与投资研究
 
