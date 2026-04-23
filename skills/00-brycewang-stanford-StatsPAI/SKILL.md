@@ -33,8 +33,8 @@ triggers:
 
 StatsPAI is the agent-native Python package for causal inference and applied econometrics. One `import statspai as sp`, 390+ functions, covering the complete empirical research workflow.
 
-**Source**: https://github.com/brycewang-stanford/StatsPAI
-**PyPI**: `pip install statspai`
+**Source**: https://github.com/brycewang-stanford/StatsPAI  
+**PyPI**: `pip install statspai`  
 **Paper**: Submitted to Journal of Open Source Software (JOSS) — under review
 
 ## Why StatsPAI for Agents?
