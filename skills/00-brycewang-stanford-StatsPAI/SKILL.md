@@ -62,6 +62,8 @@ Step 6  Diagnostics & robust    sp.diagnose / sp.spec_curve / sp.honest_did / sp
 
 `sp.paper()` exists for end-to-end draft generation but is **out of scope for this skill** — stop at Step 6 and hand the `CausalResult` back to the user.
 
+> **Note on code blocks below.** All Step 0–6 examples share one **labor-economics running narrative** (`training → wage`, with `worker_id` / `firm_id` / `year` / `age` / `edu` / `tenure`) purely for readability. Every column name, `population` string, `estimand`, and `design` value is **illustrative** — agents must substitute the actual columns and design from the user's DataFrame and research question. Only the `sp.*` function names and argument *shapes* are normative.
+
 ### Scope boundary — what StatsPAI does NOT do
 
 StatsPAI assumes you arrive with an **analysis-ready DataFrame**. Do these in pandas (or your preferred ETL) *before* calling any `sp.*` function:
