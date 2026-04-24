@@ -1,6 +1,6 @@
 ---
-name: statspai
-description: Agent-native one-stop toolkit for the full empirical data-analysis pipeline in Python (v1.6+). 390+ functions, one import (`import statspai as sp`), unified API. Covers the complete loop after data cleaning — descriptive stats & EDA (sp.sumstats, sp.balance_table, sp.balance_panel), estimand-first research-question DSL (sp.causal_question), LLM-assisted DAG discovery (sp.llm_dag_propose/validate/constrained), one-call orchestration (sp.causal), classical estimators (OLS, IV, DID, staggered DID, RDD, PSM, SCM), ML causal (DML, Causal Forest, Meta-Learners, TMLE), neural causal, text causal (sp.causal_text), and diagnostics + robustness (sp.diagnose, sp.spec_curve, sp.honest_did). Use when the user asks to run a full empirical analysis, decide which estimator to use ("DID vs RD vs IV?"), explore models via DAG, estimate treatment effects, evaluate policy, run observational studies, or apply any of the listed econometric methods in Python. Every function returns structured result objects with self-describing schemas for LLM-driven workflows. Data cleaning (missing values, type coercion, merges) is *not* covered — handle that with pandas first, then enter StatsPAI.
+name: StatsPAI_skill
+description: Agent-native one-stop toolkit for the full empirical data-analysis pipeline in Python (v1.6+). 900+ functions, one import (`import statspai as sp`), unified API. Covers the complete loop after data cleaning — descriptive stats & EDA (sp.sumstats, sp.balance_table, sp.balance_panel), estimand-first research-question DSL (sp.causal_question), LLM-assisted DAG discovery (sp.llm_dag_propose/validate/constrained), one-call orchestration (sp.causal), classical estimators (OLS, IV, DID, staggered DID, RDD, PSM, SCM), ML causal (DML, Causal Forest, Meta-Learners, TMLE), neural causal, text causal (sp.causal_text), and diagnostics + robustness (sp.diagnose, sp.spec_curve, sp.honest_did). Use when the user asks to run a full empirical analysis, decide which estimator to use ("DID vs RD vs IV?"), explore models via DAG, estimate treatment effects, evaluate policy, run observational studies, or apply any of the listed econometric methods in Python. Every function returns structured result objects with self-describing schemas for LLM-driven workflows. Data cleaning (missing values, type coercion, merges) is *not* covered — handle that with pandas first, then enter StatsPAI.
 triggers:
   - implement causal inference
   - run a DID analysis
@@ -25,13 +25,15 @@ triggers:
   - panel balance check
   - pre-flight diagnostics
   - text as treatment
+  - automate a complete empirical analysis
+  - end-to-end empirical workflow in Python
   - StatsPAI
   - statspai
 ---
 
 # StatsPAI: Agent-Native Causal Inference & Econometrics
 
-StatsPAI is the agent-native Python package for causal inference and applied econometrics. One `import statspai as sp`, 390+ functions, covering the complete empirical research workflow.
+StatsPAI is the agent-native Python package for causal inference and applied econometrics. One `import statspai as sp`, 900+ functions, covering the complete empirical research workflow.
 
 **Source**: https://github.com/brycewang-stanford/StatsPAI  
 **PyPI**: `pip install statspai`  
