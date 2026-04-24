@@ -1,0 +1,56 @@
+name: Sync StatsPAI skill from upstream
+
+# Weekly mirror of brycewang-stanford/StatsPAI:StatsPAI_skill/ into
+# skills/00-StatsPAI_skill/. Opens a PR on drift; does nothing on parity.
+# No untrusted user input (issue/PR/commit fields) is interpolated into
+# any run step, so command-injection attack surface is zero.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run sync script
+        id: sync
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          bash scripts/sync-statspai-skill.sh
+          rc=$?
+          set -e
+          if [ "$rc" -eq 0 ]; then
+            echo "drift=false" >> "$GITHUB_OUTPUT"
+          elif [ "$rc" -eq 1 ]; then
+            echo "drift=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Sync script failed with exit code $rc" >&2
+            exit "$rc"
+          fi
+
+      - name: Open PR on drift
+        if: steps.sync.outputs.drift == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/sync-statspai-skill
+          commit-message: "chore(skills/statspai): sync from upstream"
+          title: "chore(skills/statspai): sync from upstream StatsPAI_skill/"
+          body: |
+            Automated sync from
+            [`brycewang-stanford/StatsPAI:StatsPAI_skill/`](https://github.com/brycewang-stanford/StatsPAI/tree/main/StatsPAI_skill).
+
+            Triggered by `.github/workflows/sync-statspai-skill.yml`.
+            Review the diff and merge if upstream changes are intended.
+          labels: |
+            sync
+            skills
