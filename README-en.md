@@ -40,6 +40,20 @@ This repository is the **Agent Skills landscape** we compiled while building CoP
 ## 🆕 Changelog
 
 <details open>
+<summary><b>2026-04-24: 🔥 StatsPAI Skill officially shipped — end-to-end automated empirical analysis (skills/00)</b></summary>
+
+- **🔥🔥 [StatsPAI Skill](skills/00-StatsPAI_skill/)**: Our **agent-native, one-stop empirical-analysis Skill** is now officially vendored in this repo at [`skills/00-StatsPAI_skill/`](skills/00-StatsPAI_skill/) — **slot #0, the repository's flagship**.
+  - **🚀 End-to-end automation for the entire empirical pipeline**: data cleaning (pandas pre-step) → EDA & descriptives (`sp.sumstats` / `sp.balance_table`) → pre-flight diagnostics (`sp.diagnose` / `sp.balance_panel` / overlap / missingness) → research-question DSL (`sp.causal_question(...).identify()`) → LLM-assisted DAG discovery (`sp.llm_dag_propose` / `validate` / `constrained`) → one-call estimation (`sp.causal(...)`) → robustness (`sp.spec_curve` / `sp.honest_did` / `sp.evalue`). **6-step closed loop, no tool switching — the agent runs the whole thing from a single instruction.**
+  - **900+ functions, one `import statspai as sp`**: more than doubled from the 390+ version on 2026-04-12. Covers OLS, IV, panel, DID (Callaway-Sant'Anna / Sun-Abraham / Bacon / HonestDID / continuous DID), RDD (Sharp / Fuzzy / multi-cutoff / Kink), PSM, SCM, SDID, DML, Causal Forest, Meta-Learners, TMLE, AIPW, neural causal models (TARNet / CFRNet / DragonNet), **text causal (`sp.causal_text`)**, Heckman, structural estimation (BLP).
+  - **Agent-native self-describing API**: `sp.list_functions()` / `sp.describe_function()` / `sp.function_schema()` — agents discover and understand functions without doc lookup. Every estimator returns a unified `CausalResult` with `.summary()` / `.plot()` / `.to_latex()` / `.to_word()` / `.to_excel()` / `.cite()` and a structured `.diagnostics` dict — **purpose-built for LLM-driven workflows**.
+  - **Estimand-first decisions**: `sp.causal_question` makes the "DID vs RD vs IV?" choice **explicit and defensible** — no more guesswork.
+  - **Submitted to JOSS, MIT-licensed.** [→ PyPI](https://pypi.org/project/StatsPAI/) | [→ GitHub](https://github.com/brycewang-stanford/StatsPAI) | [→ Local Skill](skills/00-StatsPAI_skill/)
+- **🔁 Weekly upstream sync**: new GitHub Action auto-pulls the latest `SKILL.md` / `README.md` from the StatsPAI main repo into [`skills/00-StatsPAI_skill/`](skills/00-StatsPAI_skill/) every week — **users always get the latest version**.
+- Corrected several `sp.*` signatures in Skill code examples; Step 0–6 code blocks are now explicitly flagged as *illustrative* (so agents don't copy them verbatim).
+
+</details>
+
+<details>
 <summary><b>2026-04-13: 🇨🇳 Original Chinese De-AIGC Skill Launched (skills/48)</b></summary>
 
 - **🇨🇳🔥 [chinese-de-aigc](skills/48-copaper-ai-chinese-de-aigc/)**: **CoPaper.AI team's original Chinese academic de-AIGC skill**. Currently the only humanizer on GitHub dedicated to Chinese academic empirical papers and targeting China's CNKI AMLC / Wanfang / VIP / Turnitin Chinese detectors.
@@ -147,7 +161,7 @@ If you don't want to pick Skills one by one, these solutions cover the full work
 | Solution | Coverage | Highlights | Link |
 |----------|----------|------------|------|
 | **CoPaper.AI** | Data Analysis → Paper Writing | 20 built-in methodology Skills, multi-agent architecture, complete publication-quality empirical paper in 20 minutes | [copaper.ai](https://copaper.ai) |
-| **StatsPAI** | Causal Inference & Econometrics | **390+ functions, one import**, agent-native API (self-describing schemas), covers OLS/IV/DID/RDD/PSM/SCM/DML/Causal Forest/neural causal models, publication-ready output (Word/Excel/LaTeX) | [GitHub](https://github.com/brycewang-stanford/StatsPAI) |
+| **StatsPAI Skill** 🔥🔥 | **End-to-end automated empirical analysis** | **900+ functions, one `import statspai as sp`**. A single agent instruction runs the full 6-step loop: EDA → pre-flight → research-question DSL → DAG discovery → estimation → robustness. Agent-native self-describing API, covers OLS/IV/DID (incl. Callaway-Sant'Anna, Sun-Abraham, HonestDID, continuous DID)/RDD/PSM/SCM/DML/Causal Forest/neural causal/text causal, publication-ready output (Word/Excel/LaTeX) | [Local Skill](skills/00-StatsPAI_skill/) · [GitHub](https://github.com/brycewang-stanford/StatsPAI) |
 | **Claude Scholar** | Ideation → Submission | 25+ Skills covering the full research lifecycle, Zotero MCP integration | [GitHub](https://github.com/Galaxy-Dawn/claude-scholar) |
 | **K-Dense Scientific Skills** | Cross-disciplinary Science | 140+ Skills, 28+ scientific databases, 55+ Python packages | [GitHub](https://github.com/K-Dense-AI/claude-scientific-skills) |
 | **AI-Research-SKILLs** | AI/ML Research | 22 categories, 87 skills, full research cycle | [GitHub](https://github.com/Orchestra-Research/AI-Research-SKILLs) |
@@ -177,7 +191,7 @@ These repositories contain multiple Skills and typically cover several research 
 | Suite | Key Features | Use Case |
 |-------|-------------|----------|
 | **[CoPaper.AI](https://copaper.ai)** | **20 methodology Skills** (OLS, DID, staggered DID, IV, RDD, PSM, SCM, DML, causal forest, etc.), multi-agent architecture (Supervisor + 4 sub-agents), smart routing, automatic output | Full empirical economics workflow |
-| **[StatsPAI](https://github.com/brycewang-stanford/StatsPAI)** 🔥 | **Agent-native econometrics Python package**: 390+ functions, self-describing API (`list_functions()` / `describe_function()` / `function_schema()`), unified `CausalResult` objects. Covers OLS, IV, panel data, DID (Callaway-Sant'Anna / Sun-Abraham / Bacon / HonestDID / continuous DID), RDD (Sharp/Fuzzy/multi-cutoff/Kink), PSM, SCM, SDID, DML, Causal Forest, Meta-Learners, TMLE, AIPW, neural causal models (TARNet/CFRNet/DragonNet), Heckman, structural estimation (BLP). **Published in JOSS, MIT license** | Full causal inference coverage, agent-driven analysis pipelines |
+| **[StatsPAI Skill](skills/00-StatsPAI_skill/)** 🔥🔥 | **End-to-end automated empirical analysis.** Agent-native econometrics Python package: **900+ functions**, one `import statspai as sp` runs the full loop: EDA → research-question DSL → LLM-assisted DAG discovery → estimation → robustness. Self-describing API (`list_functions()` / `describe_function()` / `function_schema()`), unified `CausalResult` objects. Covers OLS, IV, panel data, DID (Callaway-Sant'Anna / Sun-Abraham / Bacon / HonestDID / continuous DID), RDD (Sharp/Fuzzy/multi-cutoff/Kink), PSM, SCM, SDID, DML, Causal Forest, Meta-Learners, TMLE, AIPW, neural causal models (TARNet/CFRNet/DragonNet), **text causal (`sp.causal_text`)**, Heckman, structural estimation (BLP). **Submitted to JOSS, MIT license** | Whole-pipeline automation: one agent call goes from cleaned data to robust estimates |
 | [claesbackman/AI-research-feedback](https://github.com/claesbackman/AI-research-feedback) | 2-agent economics paper pre-review: causal overclaiming detection, identification strategy assessment; supports AER/QJE/JPE/Econometrica/REStud; 6-agent grant review | Pre-submission self-review, grant applications |
 | [fuhaoda/stats-paper-writing-agent-skills](https://github.com/fuhaoda/stats-paper-writing-agent-skills) | LaTeX statistical paper writing, front-end draft generation | Statistics & econometrics papers |
 | [dylantmoore/stata-skill](https://github.com/dylantmoore/stata-skill) | Full Stata coverage: syntax, data management, econometrics, causal inference, graphics, Mata, 20+ community packages | Stata users |
