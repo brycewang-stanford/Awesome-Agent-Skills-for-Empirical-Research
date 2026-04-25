@@ -1,0 +1,22 @@
+\begin{table}
+\centering
+\begin{talltblr}[         %% tabularray outer open
+caption={NSW 培训对 log(1+1978 收入) 的处理效应 / Effect of NSW training on log(1+1978 earnings)},
+note{}={* p \num{< 0.1}, ** p \num{< 0.05}, *** p \num{< 0.01}},
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]Q[]Q[]},
+hline{2}={1-6}{solid, black, 0.05em},
+hline{4}={1-6}{solid, black, 0.05em},
+hline{1}={1-6}{solid, black, 0.08em},
+hline{6}={1-6}{solid, black, 0.08em},
+column{2-6}={}{halign=c},
+column{1}={}{halign=l},
+}                     %% tabularray inner close
+& (1) Naive OLS & (2) OLS + X (HC3) & (3) PSM-NN1 + reg & (4) IPW + reg & (5) DoubleML PLR \\
+Treated & \num{-0.141} & \num{0.894}** & \num{0.788}* & \num{0.550} & \num{0.737} \\
+& (\num{0.334}) & (\num{0.403}) & (\num{0.413}) & (\num{0.444}) & (\num{0.450}) \\
+Num.Obs. & \num{614} & \num{614} & \num{370} & \num{614} & \num{614} \\
+R2 & \num{0.000} & \num{0.082} & \num{0.053} & \num{0.070} &  \\
+\end{talltblr}
+\end{table}

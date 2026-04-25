@@ -1,9 +1,9 @@
 name: Sync StatsPAI skill from upstream
 
-# Weekly mirror of brycewang-stanford/StatsPAI:StatsPAI_skill/ into
-# skills/00-StatsPAI_skill/. Opens a PR on drift; does nothing on parity.
-# No untrusted user input (issue/PR/commit fields) is interpolated into
-# any run step, so command-injection attack surface is zero.
+# Weekly mirror of brycewang-stanford/StatsPAI:StatsPAI_full_data_analysis_skill/
+# into skills/00-Full-empirical-analysis-skill_StatsPAI/. Opens a PR on drift;
+# does nothing on parity. No untrusted user input (issue/PR/commit fields) is
+# interpolated into any run step, so command-injection attack surface is zero.
 
 on:
   schedule:

@@ -1,0 +1,19 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{渐进式控制集 (Progressive specifications) - Lalonde NSW}
+\begin{tabular}{l*{5}{c}}
+\toprule
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}\\
+                    &\multicolumn{1}{c}{M1: bivariate}&\multicolumn{1}{c}{M2: + age,educ}&\multicolumn{1}{c}{M3: + race}&\multicolumn{1}{c}{M4: + family}&\multicolumn{1}{c}{M5: full}\\
+\midrule
+NSW 职业培训 (0/1)  &      -635.0         &      -480.7         &       822.0         &      1163.9         &      1548.2\sym{**} \\
+                    &     (676.7)         &     (662.5)         &     (733.3)         &     (741.3)         &     (740.6)         \\
+\midrule
+N                   &         614         &         614         &         614         &         614         &         614         \\
+R\textsuperscript{2}&     0.00152         &      0.0432         &      0.0556         &      0.0708         &       0.148         \\
+Adj. R\textsuperscript{2}&   -0.000108         &      0.0385         &      0.0478         &      0.0600         &       0.135         \\
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{6}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

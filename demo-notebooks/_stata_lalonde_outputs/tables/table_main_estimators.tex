@@ -1,0 +1,17 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Lalonde NSW: 培训对 1978 年收入的 ATT (多估计器对照)}
+\begin{tabular}{l*{5}{c}}
+\toprule
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}\\
+                    &\multicolumn{1}{c}{OLS}&\multicolumn{1}{c}{RA}&\multicolumn{1}{c}{IPW}&\multicolumn{1}{c}{IPWRA}&\multicolumn{1}{c}{PSM}\\
+\midrule
+main                &                     &                     &                     &                     &                     \\
+NSW 职业培训 (0/1)  &      1548.2\sym{**} &      1647.6\sym{**} &      1214.1         &      1270.1         &      1273.9         \\
+                    &     (740.6)         &     (809.0)         &     (798.2)         &     (783.1)         &    (1017.0)         \\
+\midrule
+Observations        &         614         &         614         &         614         &         614         &         614         \\
+\bottomrule
+\multicolumn{6}{l}{\footnotesize HC1 稳健 SE。teffects 估计量给出 ATT (atet)，OLS 给出 ATE 系数。AIPW 因弱 overlap 在此数据上不收敛，详见 5e。}\\
+\end{tabular}
+\end{table}

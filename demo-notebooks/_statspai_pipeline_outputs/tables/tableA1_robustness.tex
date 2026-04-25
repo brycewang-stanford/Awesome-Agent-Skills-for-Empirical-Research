@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering
+\begin{tabular}{lccccccccc}
+\hline\hline
+ & (1) Baseline & (2) Drop top 1\% re78 & (3) re74 > 0 only & (4) Drop nodegree & (5) log(1+re78) & (6) PSM & (7) AIPW & (8) DML-PLR & (9) Ebalance \\
+\hline
+Training (β̂) & 1548.244** & 747.338 & -1293.622 & 1569.957** & 0.893** &  &  &  &  \\
+ & (740.576) & (647.554) & (1122.589) & (744.447) & (0.403) &  &  &  &  \\
+\hline
+Estimator &  &  &  &  &  &  &  &  &  \\
+N & 614 & 596 & 371 & 614 & 614 & 614 & 614 & 614 & 614 \\
+R$^2$ & 0.148 & 0.096 & 0.244 & 0.148 & 0.082 &  &  &  &  \\
+\hline\hline
+\multicolumn{10}{l}{\footnotesize Standard errors in parentheses} \\
+\multicolumn{10}{l}{\footnotesize * p<0.10, ** p<0.05, *** p<0.01} \\
+\end{tabular}
+\end{table}

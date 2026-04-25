@@ -1,0 +1,20 @@
+\begin{table}[!htbp] \centering
+  \caption{Robustness battery — effect of NSW training on re78}
+\begin{tabular}{@{\extracolsep{5pt}}lccccccccccc}
+\\[-1.8ex]\hline
+\hline \\[-1.8ex]
+\\[-1.8ex] & \multicolumn{1}{c}{HC0} & \multicolumn{1}{c}{HC1} & \multicolumn{1}{c}{HC3} & \multicolumn{1}{c}{Baseline (M5)} & \multicolumn{1}{c}{Winsor 1/99} & \multicolumn{1}{c}{Log outcome} & \multicolumn{1}{c}{Common support} & \multicolumn{1}{c}{Drop unemployed-74} & \multicolumn{1}{c}{Drop nodegree} & \multicolumn{1}{c}{Placebo (re75)} & \multicolumn{1}{c}{IPW}  \\
+\hline \\[-1.8ex]
+ treat & 0.866$^{}$ & 0.866$^{}$ & 0.866$^{}$ & 0.866$^{}$ & 642.085$^{}$ & 0.822$^{*}$ & 0.887$^{}$ & -1.119$^{}$ & 1.446$^{}$ & 0.209$^{}$ & 1.378$^{}$ \\
+& (0.731) & (0.739) & (0.749) & (0.749) & (713.366) & (0.431) & (0.756) & (1.177) & (1.453) & (0.287) & (1.120) \\
+\hline \\[-1.8ex]
+ Observations & 614 & 614 & 614 & 614 & 614 & 614 & 600 & 371 & 227 & 614 & 614 \\
+ $R^2$ & 0.164 & 0.164 & 0.164 & 0.164 & 0.176 & 0.082 & 0.162 & 0.247 & 0.285 & 0.338 & 0.010 \\
+ Adjusted $R^2$ & 0.149 & 0.149 & 0.149 & 0.149 & 0.161 & 0.066 & 0.146 & 0.226 & 0.252 & 0.329 & 0.009 \\
+ Residual Std. Error & 6.892 (df=602) & 6.892 (df=602) & 6.892 (df=602) & 6.892 (df=602) & 6482.298 (df=602) & 3.662 (df=602) & 6.907 (df=588) & 6.556 (df=360) & 7.041 (df=216) & 2.700 (df=605) & 7.659 (df=612) \\
+ F Statistic & 9.664$^{***}$ (df=11; 602) & 9.475$^{***}$ (df=11; 602) & 8.997$^{***}$ (df=11; 602) & 8.997$^{***}$ (df=11; 602) & 9.929$^{***}$ (df=11; 602) & 6.341$^{***}$ (df=11; 602) & 8.491$^{***}$ (df=11; 588) & 9.514$^{***}$ (df=10; 360) & 11.887$^{***}$ (df=10; 216) & 17.219$^{***}$ (df=8; 605) & 1.514$^{}$ (df=1; 612) \\
+\hline
+\hline \\[-1.8ex]
+\textit{Note:} & \multicolumn{11}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\
+\end{tabular}
+\end{table}

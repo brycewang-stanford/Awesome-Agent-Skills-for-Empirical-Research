@@ -2,15 +2,16 @@
 # sync-statspai-skill.sh
 #
 # Pull SKILL.md and README.md from the upstream StatsPAI repository
-# (brycewang-stanford/StatsPAI:StatsPAI_skill/) into the local mirror at
-# skills/00-StatsPAI_skill/, then report whether anything changed.
+# (brycewang-stanford/StatsPAI:StatsPAI_full_data_analysis_skill/) into the
+# local mirror at skills/00-Full-empirical-analysis-skill_StatsPAI/, then
+# report whether anything changed.
 #
 # Why a script instead of a git submodule:
 #   git submodule operates at whole-repo granularity and cannot mount a
-#   subdirectory. A sparse-checkout submodule would also place SKILL.md at
-#   skills/00-StatsPAI_skill/StatsPAI_skill/SKILL.md, breaking the skill
-#   auto-discovery path. This script mirrors the upstream subtree byte-for-byte
-#   and is invoked weekly by .github/workflows/sync-statspai-skill.yml.
+#   subdirectory. A sparse-checkout submodule would also nest SKILL.md one
+#   level deeper, breaking the skill auto-discovery path. This script mirrors
+#   the upstream subtree byte-for-byte and is invoked weekly by
+#   .github/workflows/sync-statspai-skill.yml.
 #
 # Exit codes:
 #   0 — no drift (local already matches upstream)
@@ -20,8 +21,8 @@
 set -euo pipefail
 
 UPSTREAM_REPO="brycewang-stanford/StatsPAI"
-UPSTREAM_PATH="StatsPAI_skill"
-LOCAL_DIR="skills/00-StatsPAI_skill"
+UPSTREAM_PATH="StatsPAI_full_data_analysis_skill"
+LOCAL_DIR="skills/00-Full-empirical-analysis-skill_StatsPAI"
 FILES=("SKILL.md" "README.md")
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"

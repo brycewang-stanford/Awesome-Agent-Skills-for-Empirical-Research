@@ -1,0 +1,2903 @@
+-------------------------------------------------------------------------------
+      name:  pipelog
+       log:  /Users/brycewang/Documents/GitHub/Awesome-Agent-Skills-for-Empiric
+> al-Research/demo-notebooks/_stata_lalonde_outputs/logs/lalonde_pipeline.log
+  log type:  text
+ opened on:  25 Apr 2026, 02:05:41
+
+. 
+. 
+. *============================================================================
+> =*
+. * 包依赖：自动按需安装（首次运行需要联网；已装的会跳过，不重复安装）         
+>  *
+. * 仅装本 do 文件真正用到的包。`mdesc` 已用 Stata 内置命令替代，无需安装。    
+>  *
+. *============================================================================
+> =*
+. * asdoc 已用 estpost+esttab 替换（零额外依赖），从清单剔除
+. local _cmds  esttab    coefplot  winsor2  balancetable  psmatch2  ebalance  p
+> sacalc
+
+. local _pkgs  estout    coefplot  winsor2  balancetable  psmatch2  ebalance  p
+> sacalc
+
+. local _N : word count `_cmds'
+
+. forvalues i = 1/`_N' {
+  2.     local _c : word `i' of `_cmds'
+  3.     local _p : word `i' of `_pkgs'
+  4.     capture which `_c'
+  5.     if _rc {
+  6.         di as text "[setup] installing `_p' from SSC ..."
+  7.         capture noisily ssc install `_p', replace
+  8.         if _rc {
+  9.             di as error "[setup] 安装 `_p' 失败：请检查网络或手动 ssc inst
+> all `_p'"
+ 10.             exit _rc
+ 11.         }
+ 12.     }
+ 13. }
+
+. 
+. * 全局画图主题
+. set scheme s2color
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 0 / Step 1 : 数据导入 & 清洗                                          
+>  *
+. *  - 直接从 Rdatasets 公网 CSV 读入（与 Python notebook 保持同源数据）       
+>   *
+. *  - 把字符型 race 拆成 black / hispan 两个 0/1 哑变量，对齐经典 Lalonde 设定
+>  *
+. *============================================================================
+> =*
+. 
+. di as text _n "==== Step 1: 数据导入与清洗 ===="
+
+==== Step 1: 数据导入与清洗 ====
+
+. 
+. * 1a. 从 URL 直接读 CSV（Stata 16+ 支持 https）
+. import delimited using     "https://vincentarelbundock.github.io/Rdatasets/cs
+> v/MatchIt/lalonde.csv",     clear varnames(1) encoding("utf-8")
+(10 vars, 614 obs)
+
+. 
+. * 1b. 第一眼看数据
+. describe, short
+
+Contains data
+ Observations:           614                  
+    Variables:            10                  
+Sorted by: 
+     Note: Dataset has changed since last saved.
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    rownames |          0
+       treat |        614    .3013029    .4591981          0          1
+         age |        614    27.36319    9.881187         16         55
+        educ |        614    10.26873    2.628325          0         18
+        race |          0
+-------------+---------------------------------------------------------
+     married |        614    .4153094    .4931771          0          1
+    nodegree |        614    .6302932    .4831189          0          1
+        re74 |        614    4557.547    6477.964          0   35040.07
+        re75 |        614    2184.938    3295.679          0   25142.24
+        re78 |        614    6792.834    7470.731          0   60307.93
+
+. 
+. * 1c. 缺失诊断（用 Stata 内置命令实现，避免依赖 SSC 外部包 mdesc）
+. qui count
+
+. local _Ntotal = r(N)
+
+. di as text _n "缺失诊断（每列缺失数 / 比例）："
+
+缺失诊断（每列缺失数 / 比例）：
+
+. foreach v of varlist * {
+  2.     qui count if missing(`v')
+  3.     local _miss = r(N)
+  4.     di as text "  " %-15s "`v'"         "  缺失=" %5.0f `_miss'         " 
+>  (" %5.2f 100*`_miss'/`_Ntotal' "%)"
+  5. }
+  rownames         缺失=    0  ( 0.00%)
+  treat            缺失=    0  ( 0.00%)
+  age              缺失=    0  ( 0.00%)
+  educ             缺失=    0  ( 0.00%)
+  race             缺失=    0  ( 0.00%)
+  married          缺失=    0  ( 0.00%)
+  nodegree         缺失=    0  ( 0.00%)
+  re74             缺失=    0  ( 0.00%)
+  re75             缺失=    0  ( 0.00%)
+  re78             缺失=    0  ( 0.00%)
+
+. misstable summarize                              // Stata 原生缺失模式
+(variables nonmissing or string)
+
+. 
+. * 1d. race 是字符型 → 拆成两个 0/1 哑变量
+. *     与 notebook 中 df["black"] = (df["race"] == "black").astype(int) 一致
+. gen byte black  = (race == "black")
+
+. gen byte hispan = (race == "hispan")
+
+. 
+. label variable black  "Race = Black"
+
+. label variable hispan "Race = Hispanic"
+
+. 
+. * 1e. 删除 R 导出的行号列、再做一次 listwise 删除（与 notebook 对齐）
+. capture drop v1
+
+. capture drop rownames
+
+. local analysis_vars "treat re78 age educ black hispan married nodegree re74 r
+> e75"
+
+. foreach v of local analysis_vars {
+  2.     drop if missing(`v')
+  3. }
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+
+. 
+. * 1f. 硬性断言：分析样本里 treat 必须是严格 0/1，否则后续全错
+. levelsof treat, local(_tlev)
+0 1
+
+. assert "`_tlev'" == "0 1"
+
+. 
+. * 1g. 给关键变量打中文/英文双语标签，esttab 表格里直接漂亮显示
+. label variable treat    "NSW 职业培训 (0/1)"
+
+. label variable re78     "1978 年收入 (美元)"
+
+. label variable age      "年龄 (岁)"
+
+. label variable educ     "受教育年限"
+
+. label variable married  "已婚"
+
+. label variable nodegree "未获得高中文凭"
+
+. label variable re74     "1974 年收入 (美元)"
+
+. label variable re75     "1975 年收入 (美元)"
+
+. 
+. * 1h. 处理组 / 对照组样本量
+. tab treat, missing
+
+        NSW |
+     职业培 |
+   训 (0/1) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        429       69.87       69.87
+          1 |        185       30.13      100.00
+------------+-----------------------------------
+      Total |        614      100.00
+
+. 
+. * 1i. 把清洗后的分析样本存盘，方便复跑
+. save "_stata_lalonde_outputs/data/lalonde_analysis.dta", replace
+file _stata_lalonde_outputs/data/lalonde_analysis.dta saved
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 2 : 变量构造与变换                                                    
+>  *
+. *  Lalonde 是横截面数据（无 panel/time），所以不做 L./F./D. 时序算子，       
+>   *
+. *  仅做 winsor2 缩尾、log 变换、收入是否>0 的指示变量。                      
+>  *
+. *============================================================================
+> =*
+. 
+. di as text _n "==== Step 2: 变量构造 ===="
+
+==== Step 2: 变量构造 ====
+
+. 
+. * 2a. 1% / 99% 缩尾，给后面稳健性扫描做准备
+. winsor2 re78 re74 re75, cuts(1 99) suffix(_w1)
+
+. 
+. * 2b. log(收入+1)，应对 0 收入。注意：不是首选目标变量，仅供稳健性
+. gen log_re78 = log(re78 + 1)
+
+. 
+. * 2c. 1975 年收入是否为正——后面做子样本（与 notebook 的 positive_earnings_75 
+> 一致）
+. gen byte pos_re75 = (re75 > 0)
+
+. label variable pos_re75 "1975 年收入>0"
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 3 : 描述统计 & 均衡表（Table 1）                                      
+>  *
+. *============================================================================
+> =*
+. 
+. di as text _n "==== Step 3: 描述统计 & 均衡表 ===="
+
+==== Step 3: 描述统计 & 均衡表 ====
+
+. 
+. * 3a. 全样本描述统计——只看连续变量，避免 0/1 哑变量刷屏
+. local sumvars "re78 re74 re75 age educ"
+
+. tabstat `sumvars',     statistics(n mean sd min p25 p50 p75 max)     columns(
+> statistics)
+
+    Variable |         N      Mean        SD       Min       p25       p50
+-------------+------------------------------------------------------------
+        re78 |       614  6792.834  7470.731         0   237.914  4759.019
+        re74 |       614  4557.547  6477.964         0         0   1042.33
+        re75 |       614  2184.938  3295.679         0         0  601.5484
+         age |       614  27.36319  9.881187        16        20        25
+        educ |       614  10.26873  2.628325         0         9        11
+--------------------------------------------------------------------------
+
+    Variable |       p75       Max
+-------------+--------------------
+        re78 |  10923.35  60307.93
+        re74 |  7891.927  35040.07
+        re75 |  3254.806  25142.24
+         age |        32        55
+        educ |        12        18
+----------------------------------
+
+. 
+. * 3b. 描述统计表落盘（用 estout = estpost + esttab 替代 asdoc，零额外依赖）
+. *     asdoc 在部分环境下 Mata 库 lasdoc.mlib 索引失败 → asdoctable() not foun
+> d；
+. *     estout 是本管线已有依赖，输出同等 RTF / LaTeX，更稳。
+. estpost summarize `sumvars', detail
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd) 
+-------------+-------------------------------------------------------
+        re78 |       614        614   6792.834   5.58e+07   7470.731 
+        re74 |       614        614   4557.547   4.20e+07   6477.964 
+        re75 |       614        614   2184.938   1.09e+07   3295.679 
+         age |       614        614   27.36319   97.63786   9.881187 
+        educ |       614        614   10.26873   6.908091   2.628325 
+
+             | e(skewn~)  e(kurto~)     e(sum)     e(min)     e(max) 
+-------------+-------------------------------------------------------
+        re78 |  1.555079   7.350233    4170800          0   60307.93 
+        re74 |  1.585787   4.962113    2798334          0   35040.07 
+        re75 |  2.297341   10.16726    1341552          0   25142.24 
+         age |  1.024577   3.147059      16801         16         55 
+        educ | -.7210553   4.634994       6305          0         18 
+
+             |     e(p1)      e(p5)     e(p10)     e(p25)     e(p50) 
+-------------+-------------------------------------------------------
+        re78 |         0          0          0    237.914   4759.019 
+        re74 |         0          0          0          0    1042.33 
+        re75 |         0          0          0          0   601.5484 
+         age |        16         17         17         20         25 
+        educ |         2          5          7          9         11 
+
+             |    e(p75)     e(p90)     e(p95)     e(p99) 
+-------------+--------------------------------------------
+        re78 |  10923.35   17814.98   21857.05   25564.67 
+        re74 |  7891.927   14426.79   18501.36   25862.32 
+        re75 |  3254.806   6701.177   8502.242   13830.64 
+         age |        32         43         48         54 
+        educ |        12         13         14         16 
+
+. esttab . using "_stata_lalonde_outputs/tables/table1_full.rtf",     replace  
+>    cells("count(fmt(0)) mean(fmt(2)) sd(fmt(2)) min(fmt(2)) p50(fmt(2)) max(f
+> mt(2))")     label nonumber nomtitle     title("Lalonde NSW: 全样本描述统计")
+(output written to _stata_lalonde_outputs/tables/table1_full.rtf)
+
+. esttab . using "_stata_lalonde_outputs/tables/table1_full.tex",     replace b
+> ooktabs     cells("count(fmt(0)) mean(fmt(2)) sd(fmt(2)) min(fmt(2)) p50(fmt(
+> 2)) max(fmt(2))")     label nonumber nomtitle     title("Lalonde NSW: 全样本
+> 描述统计")
+(output written to _stata_lalonde_outputs/tables/table1_full.tex)
+
+. 
+. * 3c. 处理 vs 对照的均衡表 + t 检验（核心选择性偏倚体检）
+. *     输出 LaTeX 表，可直接放到论文 appendix
+. balancetable treat age educ black hispan married nodegree re74 re75     using
+>  "_stata_lalonde_outputs/tables/table1_balance.tex",     replace varlabels pv
+> al
+
+. 
+. * 3d. 手动做一遍带 SMD（standardized mean difference）的均衡检查
+. *     SMD 是匹配文献的核心指标（|SMD|<0.1 一般认为均衡）
+. di as text _n "Standardized Mean Differences:"
+
+Standardized Mean Differences:
+
+. foreach v in age educ black hispan married nodegree re74 re75 {
+  2.     qui sum `v' if treat == 1
+  3.     local m1 = r(mean)
+  4.     local sd1 = r(sd)
+  5.     qui sum `v' if treat == 0
+  6.     local m0 = r(mean)
+  7.     local sd0 = r(sd)
+  8.     local smd = (`m1' - `m0') / sqrt((`sd1'^2 + `sd0'^2)/2)
+  9.     qui ttest `v', by(treat)
+ 10.     di as text "  `v': diff=" %9.3f (`m1'-`m0')         "  SMD=" %7.3f `sm
+> d' "  p=" %6.4f r(p)
+ 11. }
+  age: diff=   -2.214  SMD= -0.242  p=0.0107
+  educ: diff=    0.111  SMD=  0.045  p=0.6330
+  black: diff=    0.640  SMD=  1.668  p=0.0000
+  hispan: diff=   -0.083  SMD= -0.277  p=0.0034
+  married: diff=   -0.324  SMD= -0.719  p=0.0000
+  nodegree: diff=    0.111  SMD=  0.235  p=0.0087
+  re74: diff=-3523.663  SMD= -0.596  p=0.0000
+  re75: diff= -934.429  SMD= -0.287  p=0.0012
+
+. 
+. * 3e. 朴素效应（不调整任何混淆）—— 后面方法的对照锚点
+. qui sum re78 if treat == 1
+
+. local mean_t = r(mean)
+
+. qui sum re78 if treat == 0
+
+. local mean_c = r(mean)
+
+. local naive = `mean_t' - `mean_c'
+
+. di as result _n "朴素 (treated - control) 收入差: $" %12.2fc `naive'
+
+朴素 (treated - control) 收入差: $     -635.03
+
+. di as text   "（与 Python notebook 的 -635.03 一致才算对齐）"
+（与 Python notebook 的 -635.03 一致才算对齐）
+
+. 
+. * 3f. 处理 vs 对照的 1978 年收入分布对比图
+. twoway (kdensity re78 if treat == 1, name(graph1, replace) lcolor("31 119 180
+> ") lwidth(medthick))        (kdensity re78 if treat == 0, lcolor("214 39 40")
+>  lwidth(medthick) lpattern(dash)),     legend(order(1 "Treated" 2 "Control") 
+> position(2) ring(0))     title("1978 年收入分布：处理组 vs 对照组", size(medi
+> um))     xtitle("re78 (USD)") ytitle("Density")
+
+. graph export "_stata_lalonde_outputs/figures/kde_re78.pdf", replace
+file _stata_lalonde_outputs/figures/kde_re78.pdf saved as PDF format
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 4 : 诊断检验                                                          
+>  *
+. *  用一个 OLS 锚点跑一组经典 postestimation 诊断。                           
+>  *
+. *  横截面数据 → 跳过 xtserial/xttest3/xtcsd/dfuller/kpss/hausman 这些面板/时
+> 序*
+. *============================================================================
+> =*
+. 
+. di as text _n "==== Step 4: 诊断检验 ===="
+
+==== Step 4: 诊断检验 ====
+
+. 
+. * 4a. 锚定 OLS（用于诊断）
+. reg re78 treat age educ black hispan married nodegree re74 re75
+
+      Source |       SS           df       MS      Number of obs   =       614
+-------------+----------------------------------   F(9, 604)       =     11.64
+       Model |  5.0554e+09         9   561713775   Prob > F        =    0.0000
+    Residual |  2.9157e+10       604  48273544.4   R-squared       =    0.1478
+-------------+----------------------------------   Adj R-squared   =    0.1351
+       Total |  3.4213e+10       613  55811818.5   Root MSE        =    6947.9
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244   781.2793     1.98   0.048     13.88986    3082.598
+         age |   12.97763   32.48891     0.40   0.690    -50.82731    76.78258
+        educ |   403.9412   158.9062     2.54   0.011     91.86538    716.0171
+       black |  -1240.644   768.7644    -1.61   0.107     -2750.42    269.1318
+      hispan |   498.8968   941.9425     0.53   0.597    -1350.984    2348.777
+     married |   406.6208   695.4723     0.58   0.559    -959.2168    1772.458
+    nodegree |   259.8174   847.4421     0.31   0.759    -1404.474    1924.108
+        re74 |   .2963774   .0582726     5.09   0.000     .1819358     .410819
+        re75 |   .2315259   .1046199     2.21   0.027      .026063    .4369888
+       _cons |   66.51451   2436.746     0.03   0.978    -4719.009    4852.038
+------------------------------------------------------------------------------
+
+. estimates store ols_anchor
+
+. 
+. * 4b. 异方差：Breusch–Pagan / Cook–Weisberg
+. estat hettest
+
+Breusch–Pagan/Cook–Weisberg test for heteroskedasticity 
+Assumption: Normal error terms
+Variable: Fitted values of re78
+
+H0: Constant variance
+
+    chi2(1) =  19.84
+Prob > chi2 = 0.0000
+
+. 
+. * 4c. White's general test（同时检验异方差 + 设定）
+. estat imtest, white
+
+White's test
+H0: Homoskedasticity
+Ha: Unrestricted heteroskedasticity
+
+   chi2(48) =  29.84
+Prob > chi2 = 0.9816
+
+Cameron & Trivedi's decomposition of IM-test
+
+--------------------------------------------------
+              Source |       chi2     df         p
+---------------------+----------------------------
+  Heteroskedasticity |      29.84     48    0.9816
+            Skewness |       9.21      9    0.4178
+            Kurtosis |       1.12      1    0.2907
+---------------------+----------------------------
+               Total |      40.17     58    0.9641
+--------------------------------------------------
+
+. 
+. * 4d. Ramsey RESET：函数形式是否正确
+. estat ovtest
+
+Ramsey RESET test for omitted variables
+Omitted: Powers of fitted values of re78
+
+H0: Model has no omitted variables
+
+F(3, 601) =   6.31
+ Prob > F = 0.0003
+
+. 
+. * 4e. linktest：另一种设定误差检测
+. linktest
+
+      Source |       SS           df       MS      Number of obs   =       614
+-------------+----------------------------------   F(2, 611)       =     60.34
+       Model |  5.6427e+09         2  2.8213e+09   Prob > F        =    0.0000
+    Residual |  2.8570e+10       611  46759391.6   R-squared       =    0.1649
+-------------+----------------------------------   Adj R-squared   =    0.1622
+       Total |  3.4213e+10       613  55811818.5   Root MSE        =    6838.1
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        _hat |  -.3007264   .3794323    -0.79   0.428    -1.045876    .4444234
+      _hatsq |   .0000777   .0000219     3.54   0.000     .0000346    .0001207
+       _cons |   4612.772     1482.3     3.11   0.002      1701.75    7523.794
+------------------------------------------------------------------------------
+
+. 
+. * 4f. 多重共线性
+. estat vif
+
+    Variable |       VIF       1/VIF  
+-------------+----------------------
+        educ |      2.22    0.451449
+    nodegree |      2.13    0.469808
+        re74 |      1.81    0.552640
+       black |      1.80    0.556302
+       treat |      1.63    0.611837
+        re75 |      1.51    0.662415
+     married |      1.49    0.669396
+         age |      1.31    0.764118
+      hispan |      1.17    0.856046
+-------------+----------------------
+    Mean VIF |      1.67
+
+. 
+. * 4g. 残差正态性
+. predict double resid_ols, resid
+
+. sktest resid_ols                                 // 偏度+峰度联合检验
+
+Skewness and kurtosis tests for normality
+                                                         ----- Joint test -----
+    Variable |       Obs   Pr(skewness)   Pr(kurtosis)   Adj chi2(2)  Prob>chi2
+-------------+-----------------------------------------------------------------
+   resid_ols |       614         0.0000         0.0000        163.57     0.0000
+
+. * swilk 在 N>5000 不可用，这里 N=614 安全
+. swilk resid_ols
+
+                   Shapiro–Wilk W test for normal data
+
+    Variable |        Obs       W           V         z       Prob>z
+-------------+------------------------------------------------------
+   resid_ols |        614    0.91569     34.140     8.564    0.00000
+
+. drop resid_ols
+
+. 
+. * —— 诊断决策（与 SKILL.md 表格一致）——
+. *   异方差是否拒绝？  → 用 vce(robust)
+. *   RESET 是否拒绝？  → 加非线性项 / log
+. *   VIF > 10 ？       → 删掉/合并共线变量
+. *   sktest 拒绝？      → 大样本可忽略（CLT），小样本 bootstrap
+. 
+. 
+. *============================================================================
+> =*
+. * Step 5 : 基线估计（横截面 selection-on-observables 的多估计器对照）        
+>  *
+. *  - 5a OLS 回归调整 + HC1 稳健 SE                                           
+>  *
+. *  - 5b teffects RA  ：仅结果模型                                            
+>  *
+. *  - 5c teffects IPW ：仅倾向得分                                            
+>  *
+. *  - 5d teffects IPWRA：双重稳健 ≈ AIPW                                      
+>  *
+. *  - 5e teffects AIPW ：增广 IPW（与 Python sp.aipw 严格对齐）               
+>  *
+. *  - 5f teffects PSMATCH：最近邻匹配 + Abadie–Imbens SE                      
+>  *
+. *  - 5g psmatch2 + pstest：经典 Stata 匹配 + 平衡检验                        
+>  *
+. *  - 5h ebalance：熵平衡（精确匹配前几阶矩）                                 
+>  *
+. *============================================================================
+> =*
+. 
+. di as text _n "==== Step 5: 基线估计 ===="
+
+==== Step 5: 基线估计 ====
+
+. 
+. eststo clear
+
+. 
+. * 5a. 经典 OLS 回归调整 + HC1 稳健 SE
+. eststo OLS: reg re78 treat age educ black hispan married nodegree re74 re75, 
+>     vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(9, 604)         =       9.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1478
+                                                Root MSE          =     6947.9
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244    740.576     2.09   0.037     93.82694    3002.661
+         age |   12.97763   31.70387     0.41   0.682    -49.28558    75.24085
+        educ |   403.9412   160.3946     2.52   0.012      88.9424    718.9401
+       black |  -1240.644   695.7661    -1.78   0.075    -2607.059    125.7704
+      hispan |   498.8968   952.8564     0.52   0.601    -1372.417    2370.211
+     married |   406.6208   658.5495     0.62   0.537    -886.7041    1699.946
+    nodegree |   259.8174   891.7856     0.29   0.771     -1491.56    2011.195
+        re74 |   .2963774   .0712699     4.16   0.000     .1564106    .4363443
+        re75 |   .2315259   .1194528     1.94   0.053    -.0030674    .4661192
+       _cons |   66.51451   2530.018     0.03   0.979    -4902.187    5035.216
+------------------------------------------------------------------------------
+
+. 
+. * 5b. 仅结果模型 RA：ATT
+. eststo RA: teffects ra     (re78 age educ black hispan married nodegree re74 
+> re75)     (treat), atet vce(robust)
+
+Iteration 0:  EE criterion =  7.438e-24  
+Iteration 1:  EE criterion =  5.503e-25  
+
+Treatment-effects estimation                    Number of obs     =        614
+Estimator      : regression adjustment
+Outcome model  : linear
+Treatment model: none
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATET         |
+       treat |
+   (1 vs 0)  |   1647.583   808.9795     2.04   0.042     62.01251    3233.154
+-------------+----------------------------------------------------------------
+POmean       |
+       treat |
+          0  |    4701.56   590.9973     7.96   0.000     3543.227    5859.894
+------------------------------------------------------------------------------
+
+. 
+. * 5c. 仅倾向得分 IPW：ATT
+. eststo IPW: teffects ipw     (re78)     (treat age educ black hispan married 
+> nodegree re74 re75, logit),     atet vce(robust)
+
+Iteration 0:  EE criterion =  9.329e-24  
+Iteration 1:  EE criterion =  4.524e-25  
+
+Treatment-effects estimation                    Number of obs     =        614
+Estimator      : inverse-probability weights
+Outcome model  : weighted mean
+Treatment model: logit
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATET         |
+       treat |
+   (1 vs 0)  |   1214.071   798.1546     1.52   0.128    -350.2832    2778.425
+-------------+----------------------------------------------------------------
+POmean       |
+       treat |
+          0  |   5135.072   583.7629     8.80   0.000     3990.918    6279.227
+------------------------------------------------------------------------------
+
+. 
+. * 5d. IPWRA（双重稳健 v1）：ATT
+. eststo IPWRA: teffects ipwra     (re78 age educ black hispan married nodegree
+>  re74 re75)     (treat age educ black hispan married nodegree re74 re75, logi
+> t),     atet vce(robust)
+
+Iteration 0:  EE criterion =  1.982e-22  (not concave)
+Iteration 1:  EE criterion =  1.242e-22  (not concave)
+Iteration 2:  EE criterion =  1.185e-22  (not concave)
+Iteration 3:  EE criterion =  1.185e-22  (not concave)
+Iteration 4:  EE criterion =  1.185e-22  (not concave)
+Iteration 5:  EE criterion =  1.185e-22  (not concave)
+Iteration 6:  EE criterion =  1.185e-22  (not concave)
+Iteration 7:  EE criterion =  1.185e-22  (not concave)
+Iteration 8:  EE criterion =  1.185e-22  (not concave)
+Iteration 9:  EE criterion =  1.185e-22  (not concave)
+Iteration 10: EE criterion =  1.185e-22  (not concave)
+Iteration 11: EE criterion =  1.185e-22  (not concave)
+Iteration 12: EE criterion =  1.185e-22  (not concave)
+Iteration 13: EE criterion =  1.185e-22  (not concave)
+Iteration 14: EE criterion =  1.185e-22  (not concave)
+Iteration 15: EE criterion =  1.185e-22  (not concave)
+Iteration 16: EE criterion =  1.185e-22  (not concave)
+Iteration 17: EE criterion =  1.185e-22  (not concave)
+Iteration 18: EE criterion =  1.185e-22  (not concave)
+Iteration 19: EE criterion =  1.185e-22  (not concave)
+Iteration 20: EE criterion =  1.185e-22  (not concave)
+Iteration 21: EE criterion =  1.185e-22  (not concave)
+Iteration 22: EE criterion =  1.185e-22  (not concave)
+Iteration 23: EE criterion =  1.185e-22  (not concave)
+Iteration 24: EE criterion =  1.185e-22  (not concave)
+Iteration 25: EE criterion =  1.185e-22  (not concave)
+Iteration 26: EE criterion =  1.185e-22  (not concave)
+Iteration 27: EE criterion =  1.185e-22  (not concave)
+Iteration 28: EE criterion =  1.185e-22  (not concave)
+Iteration 29: EE criterion =  1.185e-22  (not concave)
+Iteration 30: EE criterion =  1.185e-22  (not concave)
+Iteration 31: EE criterion =  1.185e-22  (not concave)
+Iteration 32: EE criterion =  1.185e-22  (not concave)
+Iteration 33: EE criterion =  1.185e-22  (not concave)
+Iteration 34: EE criterion =  1.185e-22  (not concave)
+Iteration 35: EE criterion =  1.185e-22  (not concave)
+Iteration 36: EE criterion =  1.185e-22  (not concave)
+Iteration 37: EE criterion =  1.185e-22  (not concave)
+Iteration 38: EE criterion =  1.185e-22  (not concave)
+Iteration 39: EE criterion =  1.185e-22  (not concave)
+Iteration 40: EE criterion =  1.185e-22  (not concave)
+Iteration 41: EE criterion =  1.185e-22  (not concave)
+Iteration 42: EE criterion =  1.185e-22  (not concave)
+Iteration 43: EE criterion =  1.185e-22  (not concave)
+Iteration 44: EE criterion =  1.185e-22  (not concave)
+Iteration 45: EE criterion =  1.185e-22  (not concave)
+Iteration 46: EE criterion =  1.185e-22  (not concave)
+Iteration 47: EE criterion =  1.185e-22  (not concave)
+Iteration 48: EE criterion =  1.185e-22  (not concave)
+Iteration 49: EE criterion =  1.185e-22  (not concave)
+Iteration 50: EE criterion =  1.185e-22  (not concave)
+Iteration 51: EE criterion =  1.185e-22  (not concave)
+Iteration 52: EE criterion =  1.185e-22  (not concave)
+Iteration 53: EE criterion =  1.185e-22  (not concave)
+Iteration 54: EE criterion =  1.185e-22  (not concave)
+Iteration 55: EE criterion =  1.185e-22  (not concave)
+Iteration 56: EE criterion =  1.185e-22  (not concave)
+Iteration 57: EE criterion =  1.185e-22  (not concave)
+Iteration 58: EE criterion =  1.185e-22  (not concave)
+Iteration 59: EE criterion =  1.185e-22  (not concave)
+Iteration 60: EE criterion =  1.185e-22  (not concave)
+Iteration 61: EE criterion =  1.185e-22  (not concave)
+Iteration 62: EE criterion =  1.185e-22  (not concave)
+Iteration 63: EE criterion =  1.185e-22  (not concave)
+Iteration 64: EE criterion =  1.185e-22  (not concave)
+Iteration 65: EE criterion =  1.185e-22  (not concave)
+Iteration 66: EE criterion =  1.185e-22  (not concave)
+Iteration 67: EE criterion =  1.185e-22  (not concave)
+Iteration 68: EE criterion =  1.185e-22  (not concave)
+Iteration 69: EE criterion =  1.185e-22  (not concave)
+Iteration 70: EE criterion =  1.185e-22  (not concave)
+Iteration 71: EE criterion =  1.185e-22  (not concave)
+Iteration 72: EE criterion =  1.185e-22  (not concave)
+Iteration 73: EE criterion =  1.185e-22  (not concave)
+Iteration 74: EE criterion =  1.185e-22  (not concave)
+Iteration 75: EE criterion =  1.185e-22  (not concave)
+Iteration 76: EE criterion =  1.185e-22  (not concave)
+Iteration 77: EE criterion =  1.185e-22  (not concave)
+Iteration 78: EE criterion =  1.185e-22  (not concave)
+Iteration 79: EE criterion =  1.185e-22  (not concave)
+Iteration 80: EE criterion =  1.185e-22  (not concave)
+Iteration 81: EE criterion =  1.185e-22  (not concave)
+Iteration 82: EE criterion =  1.185e-22  (not concave)
+Iteration 83: EE criterion =  1.185e-22  (not concave)
+Iteration 84: EE criterion =  1.185e-22  (not concave)
+Iteration 85: EE criterion =  1.185e-22  (not concave)
+Iteration 86: EE criterion =  1.185e-22  (not concave)
+Iteration 87: EE criterion =  1.185e-22  (not concave)
+Iteration 88: EE criterion =  1.185e-22  (not concave)
+Iteration 89: EE criterion =  1.185e-22  (not concave)
+Iteration 90: EE criterion =  1.185e-22  (not concave)
+Iteration 91: EE criterion =  1.185e-22  (not concave)
+Iteration 92: EE criterion =  1.185e-22  (not concave)
+Iteration 93: EE criterion =  1.185e-22  (not concave)
+Iteration 94: EE criterion =  1.185e-22  (not concave)
+Iteration 95: EE criterion =  1.185e-22  (not concave)
+Iteration 96: EE criterion =  1.185e-22  (not concave)
+Iteration 97: EE criterion =  1.185e-22  (not concave)
+Iteration 98: EE criterion =  1.185e-22  (not concave)
+Iteration 99: EE criterion =  1.185e-22  (not concave)
+Iteration 100: EE criterion =  1.185e-22  (not concave)
+Iteration 101: EE criterion =  1.185e-22  (not concave)
+Iteration 102: EE criterion =  1.185e-22  (not concave)
+Iteration 103: EE criterion =  1.185e-22  (not concave)
+Iteration 104: EE criterion =  1.185e-22  (not concave)
+Iteration 105: EE criterion =  1.185e-22  (not concave)
+Iteration 106: EE criterion =  1.185e-22  (not concave)
+Iteration 107: EE criterion =  1.185e-22  (not concave)
+Iteration 108: EE criterion =  1.185e-22  (not concave)
+Iteration 109: EE criterion =  1.185e-22  (not concave)
+Iteration 110: EE criterion =  1.185e-22  (not concave)
+Iteration 111: EE criterion =  1.185e-22  (not concave)
+Iteration 112: EE criterion =  1.185e-22  (not concave)
+Iteration 113: EE criterion =  1.185e-22  (not concave)
+Iteration 114: EE criterion =  1.185e-22  (not concave)
+Iteration 115: EE criterion =  1.185e-22  (not concave)
+Iteration 116: EE criterion =  1.185e-22  (not concave)
+Iteration 117: EE criterion =  1.185e-22  (not concave)
+Iteration 118: EE criterion =  1.185e-22  (not concave)
+Iteration 119: EE criterion =  1.185e-22  (not concave)
+Iteration 120: EE criterion =  1.185e-22  (not concave)
+Iteration 121: EE criterion =  1.185e-22  (not concave)
+Iteration 122: EE criterion =  1.185e-22  (not concave)
+Iteration 123: EE criterion =  1.185e-22  (not concave)
+Iteration 124: EE criterion =  1.185e-22  (not concave)
+Iteration 125: EE criterion =  1.185e-22  (not concave)
+Iteration 126: EE criterion =  1.185e-22  (not concave)
+Iteration 127: EE criterion =  1.185e-22  (not concave)
+Iteration 128: EE criterion =  1.185e-22  (not concave)
+Iteration 129: EE criterion =  1.185e-22  (not concave)
+Iteration 130: EE criterion =  1.185e-22  (not concave)
+Iteration 131: EE criterion =  1.185e-22  (not concave)
+Iteration 132: EE criterion =  1.185e-22  (not concave)
+Iteration 133: EE criterion =  1.185e-22  (not concave)
+Iteration 134: EE criterion =  1.185e-22  (not concave)
+Iteration 135: EE criterion =  1.185e-22  (not concave)
+Iteration 136: EE criterion =  1.185e-22  (not concave)
+Iteration 137: EE criterion =  1.185e-22  (not concave)
+Iteration 138: EE criterion =  1.185e-22  (not concave)
+Iteration 139: EE criterion =  1.185e-22  (not concave)
+Iteration 140: EE criterion =  1.185e-22  (not concave)
+Iteration 141: EE criterion =  1.185e-22  (not concave)
+Iteration 142: EE criterion =  1.185e-22  (not concave)
+Iteration 143: EE criterion =  1.185e-22  (not concave)
+Iteration 144: EE criterion =  1.185e-22  (not concave)
+Iteration 145: EE criterion =  1.185e-22  (not concave)
+Iteration 146: EE criterion =  1.185e-22  (not concave)
+Iteration 147: EE criterion =  1.185e-22  (not concave)
+Iteration 148: EE criterion =  1.185e-22  (not concave)
+Iteration 149: EE criterion =  1.185e-22  (not concave)
+Iteration 150: EE criterion =  1.185e-22  (not concave)
+Iteration 151: EE criterion =  1.185e-22  (not concave)
+Iteration 152: EE criterion =  1.185e-22  (not concave)
+Iteration 153: EE criterion =  1.185e-22  (not concave)
+Iteration 154: EE criterion =  1.185e-22  (not concave)
+Iteration 155: EE criterion =  1.185e-22  (not concave)
+Iteration 156: EE criterion =  1.185e-22  (not concave)
+Iteration 157: EE criterion =  1.185e-22  (not concave)
+Iteration 158: EE criterion =  1.185e-22  (not concave)
+Iteration 159: EE criterion =  1.185e-22  (not concave)
+Iteration 160: EE criterion =  1.185e-22  (not concave)
+Iteration 161: EE criterion =  1.185e-22  (not concave)
+Iteration 162: EE criterion =  1.185e-22  (not concave)
+Iteration 163: EE criterion =  1.185e-22  (not concave)
+Iteration 164: EE criterion =  1.185e-22  (not concave)
+Iteration 165: EE criterion =  1.185e-22  (not concave)
+Iteration 166: EE criterion =  1.185e-22  (not concave)
+Iteration 167: EE criterion =  1.185e-22  (not concave)
+Iteration 168: EE criterion =  1.185e-22  (not concave)
+Iteration 169: EE criterion =  1.185e-22  (not concave)
+Iteration 170: EE criterion =  1.185e-22  (not concave)
+Iteration 171: EE criterion =  1.185e-22  (not concave)
+Iteration 172: EE criterion =  1.185e-22  (not concave)
+Iteration 173: EE criterion =  1.185e-22  (not concave)
+Iteration 174: EE criterion =  1.185e-22  (not concave)
+Iteration 175: EE criterion =  1.185e-22  (not concave)
+Iteration 176: EE criterion =  1.185e-22  (not concave)
+Iteration 177: EE criterion =  1.185e-22  (not concave)
+Iteration 178: EE criterion =  1.185e-22  (not concave)
+Iteration 179: EE criterion =  1.185e-22  (not concave)
+Iteration 180: EE criterion =  1.185e-22  (not concave)
+Iteration 181: EE criterion =  1.185e-22  (not concave)
+Iteration 182: EE criterion =  1.185e-22  (not concave)
+Iteration 183: EE criterion =  1.185e-22  (not concave)
+Iteration 184: EE criterion =  1.185e-22  (not concave)
+Iteration 185: EE criterion =  1.185e-22  (not concave)
+Iteration 186: EE criterion =  1.185e-22  (not concave)
+Iteration 187: EE criterion =  1.185e-22  (not concave)
+Iteration 188: EE criterion =  1.185e-22  (not concave)
+Iteration 189: EE criterion =  1.185e-22  (not concave)
+Iteration 190: EE criterion =  1.185e-22  (not concave)
+Iteration 191: EE criterion =  1.185e-22  (not concave)
+Iteration 192: EE criterion =  1.185e-22  (not concave)
+Iteration 193: EE criterion =  1.185e-22  (not concave)
+Iteration 194: EE criterion =  1.185e-22  (not concave)
+Iteration 195: EE criterion =  1.185e-22  (not concave)
+Iteration 196: EE criterion =  1.185e-22  (not concave)
+Iteration 197: EE criterion =  1.185e-22  (not concave)
+Iteration 198: EE criterion =  1.185e-22  (not concave)
+Iteration 199: EE criterion =  1.185e-22  (not concave)
+Iteration 200: EE criterion =  1.185e-22  (not concave)
+Iteration 201: EE criterion =  1.185e-22  (not concave)
+Iteration 202: EE criterion =  1.185e-22  (not concave)
+Iteration 203: EE criterion =  1.185e-22  (not concave)
+Iteration 204: EE criterion =  1.185e-22  (not concave)
+Iteration 205: EE criterion =  1.185e-22  (not concave)
+Iteration 206: EE criterion =  1.185e-22  (not concave)
+Iteration 207: EE criterion =  1.185e-22  (not concave)
+Iteration 208: EE criterion =  1.185e-22  (not concave)
+Iteration 209: EE criterion =  1.185e-22  (not concave)
+Iteration 210: EE criterion =  1.185e-22  (not concave)
+Iteration 211: EE criterion =  1.185e-22  (not concave)
+Iteration 212: EE criterion =  1.185e-22  (not concave)
+Iteration 213: EE criterion =  1.185e-22  (not concave)
+Iteration 214: EE criterion =  1.185e-22  (not concave)
+Iteration 215: EE criterion =  1.185e-22  (not concave)
+Iteration 216: EE criterion =  1.185e-22  (not concave)
+Iteration 217: EE criterion =  1.185e-22  (not concave)
+Iteration 218: EE criterion =  1.185e-22  (not concave)
+Iteration 219: EE criterion =  1.185e-22  (not concave)
+Iteration 220: EE criterion =  1.185e-22  (not concave)
+Iteration 221: EE criterion =  1.185e-22  (not concave)
+Iteration 222: EE criterion =  1.185e-22  (not concave)
+Iteration 223: EE criterion =  1.185e-22  (not concave)
+Iteration 224: EE criterion =  1.185e-22  (not concave)
+Iteration 225: EE criterion =  1.185e-22  (not concave)
+Iteration 226: EE criterion =  1.185e-22  (not concave)
+Iteration 227: EE criterion =  1.185e-22  (not concave)
+Iteration 228: EE criterion =  1.185e-22  (not concave)
+Iteration 229: EE criterion =  1.185e-22  (not concave)
+Iteration 230: EE criterion =  1.185e-22  (not concave)
+Iteration 231: EE criterion =  1.185e-22  (not concave)
+Iteration 232: EE criterion =  1.185e-22  (not concave)
+Iteration 233: EE criterion =  1.185e-22  (not concave)
+Iteration 234: EE criterion =  1.185e-22  (not concave)
+Iteration 235: EE criterion =  1.185e-22  (not concave)
+Iteration 236: EE criterion =  1.185e-22  (not concave)
+Iteration 237: EE criterion =  1.185e-22  (not concave)
+Iteration 238: EE criterion =  1.185e-22  (not concave)
+Iteration 239: EE criterion =  1.185e-22  (not concave)
+Iteration 240: EE criterion =  1.185e-22  (not concave)
+Iteration 241: EE criterion =  1.185e-22  (not concave)
+Iteration 242: EE criterion =  1.185e-22  (not concave)
+Iteration 243: EE criterion =  1.185e-22  (not concave)
+Iteration 244: EE criterion =  1.185e-22  (not concave)
+Iteration 245: EE criterion =  1.185e-22  (not concave)
+Iteration 246: EE criterion =  1.185e-22  (not concave)
+Iteration 247: EE criterion =  1.185e-22  (not concave)
+Iteration 248: EE criterion =  1.185e-22  (not concave)
+Iteration 249: EE criterion =  1.185e-22  (not concave)
+Iteration 250: EE criterion =  1.185e-22  (not concave)
+Iteration 251: EE criterion =  1.185e-22  (not concave)
+Iteration 252: EE criterion =  1.185e-22  (not concave)
+Iteration 253: EE criterion =  1.185e-22  (not concave)
+Iteration 254: EE criterion =  1.185e-22  (not concave)
+Iteration 255: EE criterion =  1.185e-22  (not concave)
+Iteration 256: EE criterion =  1.185e-22  (not concave)
+Iteration 257: EE criterion =  1.185e-22  (not concave)
+Iteration 258: EE criterion =  1.185e-22  (not concave)
+Iteration 259: EE criterion =  1.185e-22  (not concave)
+Iteration 260: EE criterion =  1.185e-22  (not concave)
+Iteration 261: EE criterion =  1.185e-22  (not concave)
+Iteration 262: EE criterion =  1.185e-22  (not concave)
+Iteration 263: EE criterion =  1.185e-22  (not concave)
+Iteration 264: EE criterion =  1.185e-22  (not concave)
+Iteration 265: EE criterion =  1.185e-22  (not concave)
+Iteration 266: EE criterion =  1.185e-22  (not concave)
+Iteration 267: EE criterion =  1.185e-22  (not concave)
+Iteration 268: EE criterion =  1.185e-22  (not concave)
+Iteration 269: EE criterion =  1.185e-22  (not concave)
+Iteration 270: EE criterion =  1.185e-22  (not concave)
+Iteration 271: EE criterion =  1.185e-22  (not concave)
+Iteration 272: EE criterion =  1.185e-22  (not concave)
+Iteration 273: EE criterion =  1.185e-22  (not concave)
+Iteration 274: EE criterion =  1.185e-22  (not concave)
+Iteration 275: EE criterion =  1.185e-22  (not concave)
+Iteration 276: EE criterion =  1.185e-22  (not concave)
+Iteration 277: EE criterion =  1.185e-22  (not concave)
+Iteration 278: EE criterion =  1.185e-22  (not concave)
+Iteration 279: EE criterion =  1.185e-22  (not concave)
+Iteration 280: EE criterion =  1.185e-22  (not concave)
+Iteration 281: EE criterion =  1.185e-22  (not concave)
+Iteration 282: EE criterion =  1.185e-22  (not concave)
+Iteration 283: EE criterion =  1.185e-22  (not concave)
+Iteration 284: EE criterion =  1.185e-22  (not concave)
+Iteration 285: EE criterion =  1.185e-22  (not concave)
+Iteration 286: EE criterion =  1.185e-22  (not concave)
+Iteration 287: EE criterion =  1.185e-22  (not concave)
+Iteration 288: EE criterion =  1.185e-22  (not concave)
+Iteration 289: EE criterion =  1.185e-22  (not concave)
+Iteration 290: EE criterion =  1.185e-22  (not concave)
+Iteration 291: EE criterion =  1.185e-22  (not concave)
+Iteration 292: EE criterion =  1.185e-22  (not concave)
+Iteration 293: EE criterion =  1.185e-22  (not concave)
+Iteration 294: EE criterion =  1.185e-22  (not concave)
+Iteration 295: EE criterion =  1.185e-22  (not concave)
+Iteration 296: EE criterion =  1.185e-22  (not concave)
+Iteration 297: EE criterion =  1.185e-22  (not concave)
+Iteration 298: EE criterion =  1.185e-22  (not concave)
+Iteration 299: EE criterion =  1.185e-22  (not concave)
+Iteration 300: EE criterion =  1.185e-22  (not concave)
+convergence not achieved
+    The Gauss-Newton stopping criterion has been met but missing standard
+    errors indicate some of the parameters are not identified.
+
+Treatment-effects estimation                    Number of obs     =        614
+Estimator      : IPW regression adjustment
+Outcome model  : linear
+Treatment model: logit
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATET         |
+       treat |
+   (1 vs 0)  |   1270.125   783.1151     1.62   0.105    -264.7525    2805.002
+-------------+----------------------------------------------------------------
+POmean       |
+       treat |
+          0  |   5079.019   550.0536     9.23   0.000     4000.933    6157.104
+------------------------------------------------------------------------------
+Warning: Convergence not achieved.
+
+. 
+. * 5e. AIPW（增广 IPW，与 Python 的 sp.aipw 同款）：注意 teffects aipw 仅支持 
+> ATE
+. *     Stata 的 teffects aipw 不接受 atet（见 [TE] teffects aipw）；
+. *     若需 ATT，用 5d 的 ipwra 或 5b 的 ra 即可，二者也是 doubly robust。
+. eststo AIPW: teffects aipw     (re78 age educ black hispan married nodegree r
+> e74 re75)     (treat age educ black hispan married nodegree re74 re75, logit)
+> ,     ate vce(robust)
+
+Iteration 0:  EE criterion =  7.834e-24  (not concave)
+Iteration 1:  EE criterion =  7.583e-24  (not concave)
+Iteration 2:  EE criterion =  7.583e-24  (not concave)
+Iteration 3:  EE criterion =  7.583e-24  (not concave)
+Iteration 4:  EE criterion =  7.583e-24  (not concave)
+Iteration 5:  EE criterion =  7.583e-24  (not concave)
+Iteration 6:  EE criterion =  7.583e-24  (not concave)
+Iteration 7:  EE criterion =  7.583e-24  (not concave)
+Iteration 8:  EE criterion =  7.583e-24  (not concave)
+Iteration 9:  EE criterion =  7.583e-24  (not concave)
+Iteration 10: EE criterion =  7.583e-24  (not concave)
+Iteration 11: EE criterion =  7.583e-24  (not concave)
+Iteration 12: EE criterion =  7.583e-24  (not concave)
+Iteration 13: EE criterion =  7.583e-24  (not concave)
+Iteration 14: EE criterion =  7.583e-24  (not concave)
+Iteration 15: EE criterion =  7.583e-24  (not concave)
+Iteration 16: EE criterion =  7.583e-24  (not concave)
+Iteration 17: EE criterion =  7.583e-24  (not concave)
+Iteration 18: EE criterion =  7.583e-24  (not concave)
+Iteration 19: EE criterion =  7.583e-24  (not concave)
+Iteration 20: EE criterion =  7.583e-24  (not concave)
+Iteration 21: EE criterion =  7.583e-24  (not concave)
+Iteration 22: EE criterion =  7.583e-24  (not concave)
+Iteration 23: EE criterion =  7.583e-24  (not concave)
+Iteration 24: EE criterion =  7.583e-24  (not concave)
+Iteration 25: EE criterion =  7.583e-24  (not concave)
+Iteration 26: EE criterion =  7.583e-24  (not concave)
+Iteration 27: EE criterion =  7.583e-24  (not concave)
+Iteration 28: EE criterion =  7.583e-24  (not concave)
+Iteration 29: EE criterion =  7.583e-24  (not concave)
+Iteration 30: EE criterion =  7.583e-24  (not concave)
+Iteration 31: EE criterion =  7.583e-24  (not concave)
+Iteration 32: EE criterion =  7.583e-24  (not concave)
+Iteration 33: EE criterion =  7.583e-24  (not concave)
+Iteration 34: EE criterion =  7.583e-24  (not concave)
+Iteration 35: EE criterion =  7.583e-24  (not concave)
+Iteration 36: EE criterion =  7.583e-24  (not concave)
+Iteration 37: EE criterion =  7.583e-24  (not concave)
+Iteration 38: EE criterion =  7.583e-24  (not concave)
+Iteration 39: EE criterion =  7.583e-24  (not concave)
+Iteration 40: EE criterion =  7.583e-24  (not concave)
+Iteration 41: EE criterion =  7.583e-24  (not concave)
+Iteration 42: EE criterion =  7.583e-24  (not concave)
+Iteration 43: EE criterion =  7.583e-24  (not concave)
+Iteration 44: EE criterion =  7.583e-24  (not concave)
+Iteration 45: EE criterion =  7.583e-24  (not concave)
+Iteration 46: EE criterion =  7.583e-24  (not concave)
+Iteration 47: EE criterion =  7.583e-24  (not concave)
+Iteration 48: EE criterion =  7.583e-24  (not concave)
+Iteration 49: EE criterion =  7.583e-24  (not concave)
+Iteration 50: EE criterion =  7.583e-24  (not concave)
+Iteration 51: EE criterion =  7.583e-24  (not concave)
+Iteration 52: EE criterion =  7.583e-24  (not concave)
+Iteration 53: EE criterion =  7.583e-24  (not concave)
+Iteration 54: EE criterion =  7.583e-24  (not concave)
+Iteration 55: EE criterion =  7.583e-24  (not concave)
+Iteration 56: EE criterion =  7.583e-24  (not concave)
+Iteration 57: EE criterion =  7.583e-24  (not concave)
+Iteration 58: EE criterion =  7.583e-24  (not concave)
+Iteration 59: EE criterion =  7.583e-24  (not concave)
+Iteration 60: EE criterion =  7.583e-24  (not concave)
+Iteration 61: EE criterion =  7.583e-24  (not concave)
+Iteration 62: EE criterion =  7.583e-24  (not concave)
+Iteration 63: EE criterion =  7.583e-24  (not concave)
+Iteration 64: EE criterion =  7.583e-24  (not concave)
+Iteration 65: EE criterion =  7.583e-24  (not concave)
+Iteration 66: EE criterion =  7.583e-24  (not concave)
+Iteration 67: EE criterion =  7.583e-24  (not concave)
+Iteration 68: EE criterion =  7.583e-24  (not concave)
+Iteration 69: EE criterion =  7.583e-24  (not concave)
+Iteration 70: EE criterion =  7.583e-24  (not concave)
+Iteration 71: EE criterion =  7.583e-24  (not concave)
+Iteration 72: EE criterion =  7.583e-24  (not concave)
+Iteration 73: EE criterion =  7.583e-24  (not concave)
+Iteration 74: EE criterion =  7.583e-24  (not concave)
+Iteration 75: EE criterion =  7.583e-24  (not concave)
+Iteration 76: EE criterion =  7.583e-24  (not concave)
+Iteration 77: EE criterion =  7.583e-24  (not concave)
+Iteration 78: EE criterion =  7.583e-24  (not concave)
+Iteration 79: EE criterion =  7.583e-24  (not concave)
+Iteration 80: EE criterion =  7.583e-24  (not concave)
+Iteration 81: EE criterion =  7.583e-24  (not concave)
+Iteration 82: EE criterion =  7.583e-24  (not concave)
+Iteration 83: EE criterion =  7.583e-24  (not concave)
+Iteration 84: EE criterion =  7.583e-24  (not concave)
+Iteration 85: EE criterion =  7.583e-24  (not concave)
+Iteration 86: EE criterion =  7.583e-24  (not concave)
+Iteration 87: EE criterion =  7.583e-24  (not concave)
+Iteration 88: EE criterion =  7.583e-24  (not concave)
+Iteration 89: EE criterion =  7.583e-24  (not concave)
+Iteration 90: EE criterion =  7.583e-24  (not concave)
+Iteration 91: EE criterion =  7.583e-24  (not concave)
+Iteration 92: EE criterion =  7.583e-24  (not concave)
+Iteration 93: EE criterion =  7.583e-24  (not concave)
+Iteration 94: EE criterion =  7.583e-24  (not concave)
+Iteration 95: EE criterion =  7.583e-24  (not concave)
+Iteration 96: EE criterion =  7.583e-24  (not concave)
+Iteration 97: EE criterion =  7.583e-24  (not concave)
+Iteration 98: EE criterion =  7.583e-24  (not concave)
+Iteration 99: EE criterion =  7.583e-24  (not concave)
+Iteration 100: EE criterion =  7.583e-24  (not concave)
+Iteration 101: EE criterion =  7.583e-24  (not concave)
+Iteration 102: EE criterion =  7.583e-24  (not concave)
+Iteration 103: EE criterion =  7.583e-24  (not concave)
+Iteration 104: EE criterion =  7.583e-24  (not concave)
+Iteration 105: EE criterion =  7.583e-24  (not concave)
+Iteration 106: EE criterion =  7.583e-24  (not concave)
+Iteration 107: EE criterion =  7.583e-24  (not concave)
+Iteration 108: EE criterion =  7.583e-24  (not concave)
+Iteration 109: EE criterion =  7.583e-24  (not concave)
+Iteration 110: EE criterion =  7.583e-24  (not concave)
+Iteration 111: EE criterion =  7.583e-24  (not concave)
+Iteration 112: EE criterion =  7.583e-24  (not concave)
+Iteration 113: EE criterion =  7.583e-24  (not concave)
+Iteration 114: EE criterion =  7.583e-24  (not concave)
+Iteration 115: EE criterion =  7.583e-24  (not concave)
+Iteration 116: EE criterion =  7.583e-24  (not concave)
+Iteration 117: EE criterion =  7.583e-24  (not concave)
+Iteration 118: EE criterion =  7.583e-24  (not concave)
+Iteration 119: EE criterion =  7.583e-24  (not concave)
+Iteration 120: EE criterion =  7.583e-24  (not concave)
+Iteration 121: EE criterion =  7.583e-24  (not concave)
+Iteration 122: EE criterion =  7.583e-24  (not concave)
+Iteration 123: EE criterion =  7.583e-24  (not concave)
+Iteration 124: EE criterion =  7.583e-24  (not concave)
+Iteration 125: EE criterion =  7.583e-24  (not concave)
+Iteration 126: EE criterion =  7.583e-24  (not concave)
+Iteration 127: EE criterion =  7.583e-24  (not concave)
+Iteration 128: EE criterion =  7.583e-24  (not concave)
+Iteration 129: EE criterion =  7.583e-24  (not concave)
+Iteration 130: EE criterion =  7.583e-24  (not concave)
+Iteration 131: EE criterion =  7.583e-24  (not concave)
+Iteration 132: EE criterion =  7.583e-24  (not concave)
+Iteration 133: EE criterion =  7.583e-24  (not concave)
+Iteration 134: EE criterion =  7.583e-24  (not concave)
+Iteration 135: EE criterion =  7.583e-24  (not concave)
+Iteration 136: EE criterion =  7.583e-24  (not concave)
+Iteration 137: EE criterion =  7.583e-24  (not concave)
+Iteration 138: EE criterion =  7.583e-24  (not concave)
+Iteration 139: EE criterion =  7.583e-24  (not concave)
+Iteration 140: EE criterion =  7.583e-24  (not concave)
+Iteration 141: EE criterion =  7.583e-24  (not concave)
+Iteration 142: EE criterion =  7.583e-24  (not concave)
+Iteration 143: EE criterion =  7.583e-24  (not concave)
+Iteration 144: EE criterion =  7.583e-24  (not concave)
+Iteration 145: EE criterion =  7.583e-24  (not concave)
+Iteration 146: EE criterion =  7.583e-24  (not concave)
+Iteration 147: EE criterion =  7.583e-24  (not concave)
+Iteration 148: EE criterion =  7.583e-24  (not concave)
+Iteration 149: EE criterion =  7.583e-24  (not concave)
+Iteration 150: EE criterion =  7.583e-24  (not concave)
+Iteration 151: EE criterion =  7.583e-24  (not concave)
+Iteration 152: EE criterion =  7.583e-24  (not concave)
+Iteration 153: EE criterion =  7.583e-24  (not concave)
+Iteration 154: EE criterion =  7.583e-24  (not concave)
+Iteration 155: EE criterion =  7.583e-24  (not concave)
+Iteration 156: EE criterion =  7.583e-24  (not concave)
+Iteration 157: EE criterion =  7.583e-24  (not concave)
+Iteration 158: EE criterion =  7.583e-24  (not concave)
+Iteration 159: EE criterion =  7.583e-24  (not concave)
+Iteration 160: EE criterion =  7.583e-24  (not concave)
+Iteration 161: EE criterion =  7.583e-24  (not concave)
+Iteration 162: EE criterion =  7.583e-24  (not concave)
+Iteration 163: EE criterion =  7.583e-24  (not concave)
+Iteration 164: EE criterion =  7.583e-24  (not concave)
+Iteration 165: EE criterion =  7.583e-24  (not concave)
+Iteration 166: EE criterion =  7.583e-24  (not concave)
+Iteration 167: EE criterion =  7.583e-24  (not concave)
+Iteration 168: EE criterion =  7.583e-24  (not concave)
+Iteration 169: EE criterion =  7.583e-24  (not concave)
+Iteration 170: EE criterion =  7.583e-24  (not concave)
+Iteration 171: EE criterion =  7.583e-24  (not concave)
+Iteration 172: EE criterion =  7.583e-24  (not concave)
+Iteration 173: EE criterion =  7.583e-24  (not concave)
+Iteration 174: EE criterion =  7.583e-24  (not concave)
+Iteration 175: EE criterion =  7.583e-24  (not concave)
+Iteration 176: EE criterion =  7.583e-24  (not concave)
+Iteration 177: EE criterion =  7.583e-24  (not concave)
+Iteration 178: EE criterion =  7.583e-24  (not concave)
+Iteration 179: EE criterion =  7.583e-24  (not concave)
+Iteration 180: EE criterion =  7.583e-24  (not concave)
+Iteration 181: EE criterion =  7.583e-24  (not concave)
+Iteration 182: EE criterion =  7.583e-24  (not concave)
+Iteration 183: EE criterion =  7.583e-24  (not concave)
+Iteration 184: EE criterion =  7.583e-24  (not concave)
+Iteration 185: EE criterion =  7.583e-24  (not concave)
+Iteration 186: EE criterion =  7.583e-24  (not concave)
+Iteration 187: EE criterion =  7.583e-24  (not concave)
+Iteration 188: EE criterion =  7.583e-24  (not concave)
+Iteration 189: EE criterion =  7.583e-24  (not concave)
+Iteration 190: EE criterion =  7.583e-24  (not concave)
+Iteration 191: EE criterion =  7.583e-24  (not concave)
+Iteration 192: EE criterion =  7.583e-24  (not concave)
+Iteration 193: EE criterion =  7.583e-24  (not concave)
+Iteration 194: EE criterion =  7.583e-24  (not concave)
+Iteration 195: EE criterion =  7.583e-24  (not concave)
+Iteration 196: EE criterion =  7.583e-24  (not concave)
+Iteration 197: EE criterion =  7.583e-24  (not concave)
+Iteration 198: EE criterion =  7.583e-24  (not concave)
+Iteration 199: EE criterion =  7.583e-24  (not concave)
+Iteration 200: EE criterion =  7.583e-24  (not concave)
+Iteration 201: EE criterion =  7.583e-24  (not concave)
+Iteration 202: EE criterion =  7.583e-24  (not concave)
+Iteration 203: EE criterion =  7.583e-24  (not concave)
+Iteration 204: EE criterion =  7.583e-24  (not concave)
+Iteration 205: EE criterion =  7.583e-24  (not concave)
+Iteration 206: EE criterion =  7.583e-24  (not concave)
+Iteration 207: EE criterion =  7.583e-24  (not concave)
+Iteration 208: EE criterion =  7.583e-24  (not concave)
+Iteration 209: EE criterion =  7.583e-24  (not concave)
+Iteration 210: EE criterion =  7.583e-24  (not concave)
+Iteration 211: EE criterion =  7.583e-24  (not concave)
+Iteration 212: EE criterion =  7.583e-24  (not concave)
+Iteration 213: EE criterion =  7.583e-24  (not concave)
+Iteration 214: EE criterion =  7.583e-24  (not concave)
+Iteration 215: EE criterion =  7.583e-24  (not concave)
+Iteration 216: EE criterion =  7.583e-24  (not concave)
+Iteration 217: EE criterion =  7.583e-24  (not concave)
+Iteration 218: EE criterion =  7.583e-24  (not concave)
+Iteration 219: EE criterion =  7.583e-24  (not concave)
+Iteration 220: EE criterion =  7.583e-24  (not concave)
+Iteration 221: EE criterion =  7.583e-24  (not concave)
+Iteration 222: EE criterion =  7.583e-24  (not concave)
+Iteration 223: EE criterion =  7.583e-24  (not concave)
+Iteration 224: EE criterion =  7.583e-24  (not concave)
+Iteration 225: EE criterion =  7.583e-24  (not concave)
+Iteration 226: EE criterion =  7.583e-24  (not concave)
+Iteration 227: EE criterion =  7.583e-24  (not concave)
+Iteration 228: EE criterion =  7.583e-24  (not concave)
+Iteration 229: EE criterion =  7.583e-24  (not concave)
+Iteration 230: EE criterion =  7.583e-24  (not concave)
+Iteration 231: EE criterion =  7.583e-24  (not concave)
+Iteration 232: EE criterion =  7.583e-24  (not concave)
+Iteration 233: EE criterion =  7.583e-24  (not concave)
+Iteration 234: EE criterion =  7.583e-24  (not concave)
+Iteration 235: EE criterion =  7.583e-24  (not concave)
+Iteration 236: EE criterion =  7.583e-24  (not concave)
+Iteration 237: EE criterion =  7.583e-24  (not concave)
+Iteration 238: EE criterion =  7.583e-24  (not concave)
+Iteration 239: EE criterion =  7.583e-24  (not concave)
+Iteration 240: EE criterion =  7.583e-24  (not concave)
+Iteration 241: EE criterion =  7.583e-24  (not concave)
+Iteration 242: EE criterion =  7.583e-24  (not concave)
+Iteration 243: EE criterion =  7.583e-24  (not concave)
+Iteration 244: EE criterion =  7.583e-24  (not concave)
+Iteration 245: EE criterion =  7.583e-24  (not concave)
+Iteration 246: EE criterion =  7.583e-24  (not concave)
+Iteration 247: EE criterion =  7.583e-24  (not concave)
+Iteration 248: EE criterion =  7.583e-24  (not concave)
+Iteration 249: EE criterion =  7.583e-24  (not concave)
+Iteration 250: EE criterion =  7.583e-24  (not concave)
+Iteration 251: EE criterion =  7.583e-24  (not concave)
+Iteration 252: EE criterion =  7.583e-24  (not concave)
+Iteration 253: EE criterion =  7.583e-24  (not concave)
+Iteration 254: EE criterion =  7.583e-24  (not concave)
+Iteration 255: EE criterion =  7.583e-24  (not concave)
+Iteration 256: EE criterion =  7.583e-24  (not concave)
+Iteration 257: EE criterion =  7.583e-24  (not concave)
+Iteration 258: EE criterion =  7.583e-24  (not concave)
+Iteration 259: EE criterion =  7.583e-24  (not concave)
+Iteration 260: EE criterion =  7.583e-24  (not concave)
+Iteration 261: EE criterion =  7.583e-24  (not concave)
+Iteration 262: EE criterion =  7.583e-24  (not concave)
+Iteration 263: EE criterion =  7.583e-24  (not concave)
+Iteration 264: EE criterion =  7.583e-24  (not concave)
+Iteration 265: EE criterion =  7.583e-24  (not concave)
+Iteration 266: EE criterion =  7.583e-24  (not concave)
+Iteration 267: EE criterion =  7.583e-24  (not concave)
+Iteration 268: EE criterion =  7.583e-24  (not concave)
+Iteration 269: EE criterion =  7.583e-24  (not concave)
+Iteration 270: EE criterion =  7.583e-24  (not concave)
+Iteration 271: EE criterion =  7.583e-24  (not concave)
+Iteration 272: EE criterion =  7.583e-24  (not concave)
+Iteration 273: EE criterion =  7.583e-24  (not concave)
+Iteration 274: EE criterion =  7.583e-24  (not concave)
+Iteration 275: EE criterion =  7.583e-24  (not concave)
+Iteration 276: EE criterion =  7.583e-24  (not concave)
+Iteration 277: EE criterion =  7.583e-24  (not concave)
+Iteration 278: EE criterion =  7.583e-24  (not concave)
+Iteration 279: EE criterion =  7.583e-24  (not concave)
+Iteration 280: EE criterion =  7.583e-24  (not concave)
+Iteration 281: EE criterion =  7.583e-24  (not concave)
+Iteration 282: EE criterion =  7.583e-24  (not concave)
+Iteration 283: EE criterion =  7.583e-24  (not concave)
+Iteration 284: EE criterion =  7.583e-24  (not concave)
+Iteration 285: EE criterion =  7.583e-24  (not concave)
+Iteration 286: EE criterion =  7.583e-24  (not concave)
+Iteration 287: EE criterion =  7.583e-24  (not concave)
+Iteration 288: EE criterion =  7.583e-24  (not concave)
+Iteration 289: EE criterion =  7.583e-24  (not concave)
+Iteration 290: EE criterion =  7.583e-24  (not concave)
+Iteration 291: EE criterion =  7.583e-24  (not concave)
+Iteration 292: EE criterion =  7.583e-24  (not concave)
+Iteration 293: EE criterion =  7.583e-24  (not concave)
+Iteration 294: EE criterion =  7.583e-24  (not concave)
+Iteration 295: EE criterion =  7.583e-24  (not concave)
+Iteration 296: EE criterion =  7.583e-24  (not concave)
+Iteration 297: EE criterion =  7.583e-24  (not concave)
+Iteration 298: EE criterion =  7.583e-24  (not concave)
+Iteration 299: EE criterion =  7.583e-24  (not concave)
+Iteration 300: EE criterion =  7.583e-24  (not concave)
+convergence not achieved
+
+Treatment-effects estimation                    Number of obs     =        614
+Estimator      : augmented IPW
+Outcome model  : linear by ML
+Treatment model: logit
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATE          |
+       treat |
+   (1 vs 0)  |   469.6399   1180.449     0.40   0.691    -1843.997    2783.277
+-------------+----------------------------------------------------------------
+POmean       |
+       treat |
+          0  |   6423.273   351.3101    18.28   0.000     5734.718    7111.828
+------------------------------------------------------------------------------
+Warning: Convergence not achieved.
+
+. 
+. * 5f. teffects 最近邻 PSM（4 个近邻 + bias-correction）
+. eststo PSM_te: teffects psmatch     (re78)     (treat age educ black hispan m
+> arried nodegree re74 re75, logit),     atet nneighbor(4) vce(robust)
+
+Treatment-effects estimation                   Number of obs      =        614
+Estimator      : propensity-score matching     Matches: requested =          4
+Outcome model  : matching                                     min =          4
+Treatment model: logit                                        max =          6
+------------------------------------------------------------------------------
+             |              AI robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATET         |
+       treat |
+   (1 vs 0)  |   1273.893   1016.984     1.25   0.210    -719.3588    3267.144
+------------------------------------------------------------------------------
+
+. 
+. * 5g. psmatch2：经典 Stata 匹配 + 平衡检验
+. *     先估倾向得分、再 1 近邻配对、common support
+. logit treat age educ black hispan married nodegree re74 re75
+
+Iteration 0:  Log likelihood = -375.74604  
+Iteration 1:  Log likelihood = -255.07658  
+Iteration 2:  Log likelihood = -244.28231  
+Iteration 3:  Log likelihood =  -243.9229  
+Iteration 4:  Log likelihood = -243.92197  
+Iteration 5:  Log likelihood = -243.92197  
+
+Logistic regression                                     Number of obs =    614
+                                                        LR chi2(8)    = 263.65
+                                                        Prob > chi2   = 0.0000
+Log likelihood = -243.92197                             Pseudo R2     = 0.3508
+
+------------------------------------------------------------------------------
+       treat | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   .0157771   .0135771     1.16   0.245    -.0108335    .0423876
+        educ |   .1613069   .0651264     2.48   0.013     .0336614    .2889524
+       black |   3.065368   .2865262    10.70   0.000     2.503787    3.626949
+      hispan |   .9836336    .425664     2.31   0.021     .1493476     1.81792
+     married |  -.8321133   .2903292    -2.87   0.004    -1.401148   -.2630786
+    nodegree |   .7072969   .3376683     2.09   0.036     .0454792    1.369115
+        re74 |  -.0000718   .0000287    -2.50   0.013    -.0001281   -.0000154
+        re75 |   .0000534   .0000463     1.15   0.249    -.0000374    .0001443
+       _cons |  -4.728649   1.017069    -4.65   0.000    -6.722068    -2.73523
+------------------------------------------------------------------------------
+
+. predict double pscore, pr
+
+. psmatch2 treat, pscore(pscore) outcome(re78) neighbor(1) common ate
+-------------------------------------------------------------------------------
+> ---------
+        Variable     Sample |    Treated     Controls   Difference         S.E.
+>    T-stat
+----------------------------+--------------------------------------------------
+> ---------
+            re78  Unmatched |  6349.1435   6984.16975   -635.02625   657.137424
+>     -0.97
+                        ATT | 6082.05891   4318.00071    1764.0582   1010.94501
+>      1.74
+                        ATU | 6065.59082   6599.80525   534.214435            .
+>         .
+                        ATE |                           930.721442            .
+>         .
+----------------------------+--------------------------------------------------
+> ---------
+Note: S.E. does not take into account that the propensity score is estimated.
+
+ psmatch2: |   psmatch2: Common
+ Treatment |        support
+assignment | Off suppo  On suppor |     Total
+-----------+----------------------+----------
+ Untreated |        57        372 |       429 
+   Treated |         8        177 |       185 
+-----------+----------------------+----------
+     Total |        65        549 |       614 
+
+. 
+. * 平衡检验：处理-对照在协变量上的 SMD（匹配前后对比）
+. pstest age educ black hispan married nodegree re74 re75,     treated(treat) b
+> oth
+
+-------------------------------------------------------------------------------
+> ---------
+                Unmatched |       Mean               %reduct |     t-test    | 
+>  V(T)/
+Variable          Matched | Treated Control    %bias  |bias| |    t    p>|t| | 
+>  V(C)
+--------------------------+----------------------------------+---------------+-
+> ---------
+age                    U  | 25.816    28.03    -24.2         |  -2.56  0.011 | 
+>  0.44*
+                       M  | 25.446   24.266     12.9    46.7 |   1.32  0.189 | 
+>  0.52*
+                          |                                  |               |
+educ                   U  | 10.346   10.235      4.5         |   0.48  0.633 | 
+>  0.50*
+                       M  | 10.322    10.35     -1.1    74.4 |  -0.11  0.911 | 
+>  0.59*
+                          |                                  |               |
+black                  U  | .84324    .2028    166.8         |  18.60  0.000 | 
+>     .
+                       M  | .83616   .83051      1.5    99.1 |   0.14  0.887 | 
+>     .
+                          |                                  |               |
+hispan                 U  | .05946   .14219    -27.7         |  -2.94  0.003 | 
+>     .
+                       M  | .06215    .0678     -1.9    93.2 |  -0.22  0.830 | 
+>     .
+                          |                                  |               |
+married                U  | .18919   .51282    -71.9         |  -7.82  0.000 | 
+>     .
+                       M  | .19774   .13559     13.8    80.8 |   1.57  0.117 | 
+>     .
+                          |                                  |               |
+nodegree               U  | .70811   .59674     23.5         |   2.63  0.009 | 
+>     .
+                       M  | .69492   .68927      1.2    94.9 |   0.11  0.909 | 
+>     .
+                          |                                  |               |
+re74                   U  | 2095.6   5619.2    -59.6         |  -6.38  0.000 | 
+>  0.52*
+                       M  | 2179.4   2417.1     -4.0    93.3 |  -0.46  0.648 | 
+>  1.07
+                          |                                  |               |
+re75                   U  | 1532.1   2466.5    -28.7         |  -3.25  0.001 | 
+>  0.96
+                       M  | 1485.9   1389.2      3.0    89.6 |   0.33  0.740 | 
+>  2.24*
+                          |                                  |               |
+-------------------------------------------------------------------------------
+> ---------
+* if variance ratio outside [0.75; 1.34] for U and [0.74; 1.35] for M
+
+-------------------------------------------------------------------------------
+> ----
+ Sample    | Ps R2   LR chi2   p>chi2   MeanBias   MedBias      B      R     %V
+> ar
+-----------+-------------------------------------------------------------------
+> ----
+ Unmatched | 0.353    265.36    0.000     50.9      28.2     179.6*   0.54     
+> 75
+ Matched   | 0.009      4.36    0.823      4.9       2.4      22.2    1.19     
+> 75
+-------------------------------------------------------------------------------
+> ----
+* if B>25%, R outside [0.5; 2]
+
+. 
+. drop pscore _pscore _treated _support _weight _id _n1 _nn _pdif
+
+. 
+. * 5h. ebalance：熵平衡（match 前 3 阶矩，理论上比 PSM 更精确）
+. *     ebalance 直接给出 entropy 权重，再用加权 reg 估 ATT
+. preserve
+
+.     capture noisily ebalance treat age educ black hispan married nodegree re7
+> 4 re75,         targets(1) gen(eb_w)
+
+
+Data Setup
+Treatment variable:   treat
+Covariate adjustment: age educ black hispan married nodegree re74 re75 
+
+Optimizing...
+Iteration 1: Max Difference = 2408.55689
+Iteration 2: Max Difference = 885.509482
+Iteration 3: Max Difference = 325.219581
+Iteration 4: Max Difference = 119.121533
+Iteration 5: Max Difference = 43.3562024
+Iteration 6: Max Difference = 15.6059138
+Iteration 7: Max Difference = 5.58690582
+Iteration 8: Max Difference = 1.98288651
+Iteration 9: Max Difference = .596769402
+Iteration 10: Max Difference = .106113359
+Iteration 11: Max Difference = .005178185
+maximum difference smaller than the tolerance level; convergence achieved
+
+
+Treated units: 185     total of weights: 185
+Control units: 429     total of weights: 185
+
+
+Before: without weighting
+
+             |              Treat              |        Control       
+             |      mean   variance   skewness |      mean   variance 
+-------------+---------------------------------+----------------------
+         age |     25.82      51.19      1.115 |     28.03      116.4 
+        educ |     10.35      4.043     -.7212 |     10.24      8.152 
+       black |     .8432      .1329     -1.888 |     .2028       .162 
+      hispan |    .05946     .05623      3.726 |     .1422      .1223 
+     married |     .1892      .1542      1.587 |     .5128      .2504 
+    nodegree |     .7081      .2078     -.9155 |     .5967      .2412 
+        re74 |      2096   2.39e+07      3.387 |      5619   4.61e+07 
+        re75 |      1532   1.04e+07       3.78 |      2466   1.08e+07 
+
+             |  Control  
+             |  skewness 
+-------------+----------
+         age |     .8855 
+        educ |      -.68 
+       black |     1.478 
+      hispan |     2.049 
+     married |    -.0513 
+    nodegree |    -.3944 
+        re74 |     1.222 
+        re75 |     1.776 
+
+
+After:  eb_w as the weighting variable
+
+             |              Treat              |        Control       
+             |      mean   variance   skewness |      mean   variance 
+-------------+---------------------------------+----------------------
+         age |     25.82      51.19      1.115 |     25.82        124 
+        educ |     10.35      4.043     -.7212 |     10.35      6.047 
+       black |     .8432      .1329     -1.888 |     .8426      .1329 
+      hispan |    .05946     .05623      3.726 |    .05943     .05603 
+     married |     .1892      .1542      1.587 |     .1895      .1539 
+    nodegree |     .7081      .2078     -.9155 |      .708      .2072 
+        re74 |      2096   2.39e+07      3.387 |      2099   1.79e+07 
+        re75 |      1532   1.04e+07       3.78 |      1533    7703961 
+
+             |  Control  
+             |  skewness 
+-------------+----------
+         age |     1.234 
+        educ |    -.4195 
+       black |    -1.882 
+      hispan |     3.727 
+     married |     1.585 
+    nodegree |     -.915 
+        re74 |     2.706 
+        re75 |     2.563 
+
+.     if _rc == 0 {
+.         eststo EBAL: reg re78 treat [pweight=eb_w], vce(robust)
+(sum of wgt is 370.0000000000001)
+
+Linear regression                               Number of obs     =        614
+                                                F(1, 612)         =       2.37
+                                                Prob > F          =     0.1239
+                                                R-squared         =     0.0081
+                                                Root MSE          =     7060.7
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1271.826    825.417     1.54   0.124    -349.1669     2892.82
+       _cons |   5077.317   589.4584     8.61   0.000     3919.711    6234.924
+------------------------------------------------------------------------------
+.     }
+
+.     else {
+.         di as error "ebalance 收敛失败，跳过该估计器（不影响其他结果）"
+.     }
+
+. restore
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 6 : 稳健性电池                                                        
+>  *
+. *  - 6a 渐进式控制集 M1 → M5（教科书做法）                                   
+>  *
+. *  - 6b 替换不同 SE（iid / HC1 / HC3 / cluster by age 组）                   
+>  *
+. *  - 6c 子样本：1975 年收入>0 / 年龄<30                                      
+>  *
+. *  - 6d Oster (2019) δ：未观测混淆敏感性（替代 E-value）                     
+>  *
+. *  - 6e 缩尾稳健性 (winsor2 1/99)                                            
+>  *
+. *============================================================================
+> =*
+. 
+. di as text _n "==== Step 6: 稳健性电池 ===="
+
+==== Step 6: 稳健性电池 ====
+
+. 
+. * 6a. 渐进式控制集
+. eststo clear
+
+. eststo M1: reg re78 treat, vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(1, 612)         =       0.88
+                                                Prob > F          =     0.3484
+                                                R-squared         =     0.0015
+                                                Root MSE          =     7471.1
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |  -635.0263    676.748    -0.94   0.348    -1964.056    694.0037
+       _cons |    6984.17   352.3291    19.82   0.000     6292.249     7676.09
+------------------------------------------------------------------------------
+
+. eststo M2: reg re78 treat age educ, vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(3, 610)         =       8.11
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0432
+                                                Root MSE          =     7325.4
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |  -480.7288   662.5158    -0.73   0.468    -1781.817    820.3598
+         age |   94.92602   31.30202     3.03   0.003     33.45323    156.3988
+        educ |   505.6071   117.6957     4.30   0.000     274.4691    736.7451
+       _cons |  -851.7419   1582.361    -0.54   0.591    -3959.279    2255.795
+------------------------------------------------------------------------------
+
+. eststo M3: reg re78 treat age educ black hispan, vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(5, 608)         =       7.25
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0556
+                                                Root MSE          =     7289.8
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   821.9536   733.2691     1.12   0.263     -618.094    2262.001
+         age |   91.07847   31.13171     2.93   0.004     29.93972    152.2172
+        educ |   505.5539   116.9854     4.32   0.000     275.8095    735.2984
+       black |  -1986.452   695.3603    -2.86   0.004    -3352.052   -620.8527
+      hispan |   471.1603   954.2781     0.49   0.622    -1402.921    2345.242
+       _cons |  -407.4974   1628.513    -0.25   0.802    -3605.691    2790.697
+------------------------------------------------------------------------------
+
+. eststo M4: reg re78 treat age educ black hispan married nodegree, vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(7, 606)         =       6.61
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0708
+                                                Root MSE          =       7243
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1163.922   741.2807     1.57   0.117    -291.8688    2619.713
+         age |   55.89528   34.20311     1.63   0.103    -11.27574    123.0663
+        educ |   525.5796   164.6488     3.19   0.001     202.2282    848.9311
+       black |  -1538.072   710.8367    -2.16   0.031    -2934.074   -142.0695
+      hispan |   635.5281   968.5713     0.66   0.512    -1266.636    2537.692
+     married |   2136.947    677.418     3.15   0.002     806.5746    3467.319
+    nodegree |  -36.47756   917.0222    -0.04   0.968    -1837.405     1764.45
+       _cons |  -814.6786   2610.429    -0.31   0.755    -5941.264    4311.907
+------------------------------------------------------------------------------
+
+. eststo M5: reg re78 treat age educ black hispan married nodegree re74 re75, v
+> ce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(9, 604)         =       9.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1478
+                                                Root MSE          =     6947.9
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244    740.576     2.09   0.037     93.82694    3002.661
+         age |   12.97763   31.70387     0.41   0.682    -49.28558    75.24085
+        educ |   403.9412   160.3946     2.52   0.012      88.9424    718.9401
+       black |  -1240.644   695.7661    -1.78   0.075    -2607.059    125.7704
+      hispan |   498.8968   952.8564     0.52   0.601    -1372.417    2370.211
+     married |   406.6208   658.5495     0.62   0.537    -886.7041    1699.946
+    nodegree |   259.8174   891.7856     0.29   0.771     -1491.56    2011.195
+        re74 |   .2963774   .0712699     4.16   0.000     .1564106    .4363443
+        re75 |   .2315259   .1194528     1.94   0.053    -.0030674    .4661192
+       _cons |   66.51451   2530.018     0.03   0.979    -4902.187    5035.216
+------------------------------------------------------------------------------
+
+. 
+. esttab M1 M2 M3 M4 M5     using "_stata_lalonde_outputs/tables/table_progress
+> ive_specs.tex",     replace booktabs label     se star(* 0.10 ** 0.05 *** 0.0
+> 1)     stats(N r2 r2_a, labels("N" "R\textsuperscript{2}" "Adj. R\textsupersc
+> ript{2}"))     keep(treat)     mtitles("M1: bivariate" "M2: + age,educ" "M3: 
+> + race" "M4: + family" "M5: full")     title("渐进式控制集 (Progressive speci
+> fications) - Lalonde NSW")
+(output written to _stata_lalonde_outputs/tables/table_progressive_specs.tex)
+
+. 
+. * 同时输出 RTF 给 Word 用户
+. esttab M1 M2 M3 M4 M5     using "_stata_lalonde_outputs/tables/table_progress
+> ive_specs.rtf",     replace label se star(* 0.10 ** 0.05 *** 0.01)     stats(
+> N r2, labels("N" "R-squared")) keep(treat)
+(output written to _stata_lalonde_outputs/tables/table_progressive_specs.rtf)
+
+. 
+. * 6b. 不同 SE 类型对比
+. di as text _n "treat 系数在不同 SE 设定下的对比："
+
+treat 系数在不同 SE 设定下的对比：
+
+. foreach setype in "" "robust" "hc3" {
+  2.     if "`setype'" == "" {
+  3.         reg re78 treat age educ black hispan married nodegree re74 re75
+  4.         di as text "  iid SE     :  b=" %9.3f _b[treat] "  se=" %9.3f _se[
+> treat]
+  5.     }
+  6.     else {
+  7.         reg re78 treat age educ black hispan married nodegree re74 re75, v
+> ce(`setype')
+  8.         di as text "  vce(`setype')  :  b=" %9.3f _b[treat] "  se=" %9.3f 
+> _se[treat]
+  9.     }
+ 10. }
+
+      Source |       SS           df       MS      Number of obs   =       614
+-------------+----------------------------------   F(9, 604)       =     11.64
+       Model |  5.0554e+09         9   561713775   Prob > F        =    0.0000
+    Residual |  2.9157e+10       604  48273544.4   R-squared       =    0.1478
+-------------+----------------------------------   Adj R-squared   =    0.1351
+       Total |  3.4213e+10       613  55811818.5   Root MSE        =    6947.9
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244   781.2793     1.98   0.048     13.88986    3082.598
+         age |   12.97763   32.48891     0.40   0.690    -50.82731    76.78258
+        educ |   403.9412   158.9062     2.54   0.011     91.86538    716.0171
+       black |  -1240.644   768.7644    -1.61   0.107     -2750.42    269.1318
+      hispan |   498.8968   941.9425     0.53   0.597    -1350.984    2348.777
+     married |   406.6208   695.4723     0.58   0.559    -959.2168    1772.458
+    nodegree |   259.8174   847.4421     0.31   0.759    -1404.474    1924.108
+        re74 |   .2963774   .0582726     5.09   0.000     .1819358     .410819
+        re75 |   .2315259   .1046199     2.21   0.027      .026063    .4369888
+       _cons |   66.51451   2436.746     0.03   0.978    -4719.009    4852.038
+------------------------------------------------------------------------------
+  iid SE     :  b= 1548.244  se=  781.279
+
+Linear regression                               Number of obs     =        614
+                                                F(9, 604)         =       9.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1478
+                                                Root MSE          =     6947.9
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244    740.576     2.09   0.037     93.82694    3002.661
+         age |   12.97763   31.70387     0.41   0.682    -49.28558    75.24085
+        educ |   403.9412   160.3946     2.52   0.012      88.9424    718.9401
+       black |  -1240.644   695.7661    -1.78   0.075    -2607.059    125.7704
+      hispan |   498.8968   952.8564     0.52   0.601    -1372.417    2370.211
+     married |   406.6208   658.5495     0.62   0.537    -886.7041    1699.946
+    nodegree |   259.8174   891.7856     0.29   0.771     -1491.56    2011.195
+        re74 |   .2963774   .0712699     4.16   0.000     .1564106    .4363443
+        re75 |   .2315259   .1194528     1.94   0.053    -.0030674    .4661192
+       _cons |   66.51451   2530.018     0.03   0.979    -4902.187    5035.216
+------------------------------------------------------------------------------
+  vce(robust)  :  b= 1548.244  se=  740.576
+
+Linear regression                               Number of obs     =        614
+                                                F(9, 604)         =       9.48
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1478
+                                                Root MSE          =     6947.9
+
+------------------------------------------------------------------------------
+             |             Robust HC3
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244   749.9868     2.06   0.039     75.34526    3021.142
+         age |   12.97763    32.1732     0.40   0.687    -50.20729    76.16255
+        educ |   403.9412   163.1506     2.48   0.014     83.52983    724.3526
+       black |  -1240.644   704.7299    -1.76   0.079    -2624.663    143.3745
+      hispan |   498.8968   969.2809     0.51   0.607    -1404.673    2402.467
+     married |   406.6208   666.1824     0.61   0.542    -901.6944    1714.936
+    nodegree |   259.8174   901.9426     0.29   0.773    -1511.507    2031.142
+        re74 |   .2963774   .0731401     4.05   0.000     .1527377    .4400172
+        re75 |   .2315259   .1242251     1.86   0.063    -.0124397    .4754915
+       _cons |   66.51451   2570.295     0.03   0.979    -4981.286    5114.315
+------------------------------------------------------------------------------
+  vce(hc3)  :  b= 1548.244  se=  749.987
+
+. 
+. * 6c. 子样本
+. di as text _n "子样本 ATT 对比："
+
+子样本 ATT 对比：
+
+. foreach mask in "1==1" "pos_re75 == 1" "age < 30" {
+  2.     reg re78 treat age educ black hispan married nodegree re74 re75 if `ma
+> sk',         vce(robust)
+  3.     di as text "  样本: `mask'  →  b=" %9.3f _b[treat]         "  se=" %9.
+> 3f _se[treat] "  N=" e(N)
+  4. }
+
+Linear regression                               Number of obs     =        614
+                                                F(9, 604)         =       9.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1478
+                                                Root MSE          =     6947.9
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244    740.576     2.09   0.037     93.82694    3002.661
+         age |   12.97763   31.70387     0.41   0.682    -49.28558    75.24085
+        educ |   403.9412   160.3946     2.52   0.012      88.9424    718.9401
+       black |  -1240.644   695.7661    -1.78   0.075    -2607.059    125.7704
+      hispan |   498.8968   952.8564     0.52   0.601    -1372.417    2370.211
+     married |   406.6208   658.5495     0.62   0.537    -886.7041    1699.946
+    nodegree |   259.8174   891.7856     0.29   0.771     -1491.56    2011.195
+        re74 |   .2963774   .0712699     4.16   0.000     .1564106    .4363443
+        re75 |   .2315259   .1194528     1.94   0.053    -.0030674    .4661192
+       _cons |   66.51451   2530.018     0.03   0.979    -4902.187    5035.216
+------------------------------------------------------------------------------
+  样本: 1==1  →  b= 1548.244  se=  740.576  N=614
+
+Linear regression                               Number of obs     =        369
+                                                F(9, 359)         =       7.17
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1663
+                                                Root MSE          =     7165.8
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   611.1429   1179.698     0.52   0.605    -1708.843    2931.129
+         age |   3.156115   49.81184     0.06   0.950    -94.80354    101.1158
+        educ |   531.0597   209.2311     2.54   0.012      119.587    942.5323
+       black |   -1696.72    948.556    -1.79   0.074    -3562.144    168.7049
+      hispan |   -472.775   1055.906    -0.45   0.655    -2549.314    1603.764
+     married |  -45.91929   845.3351    -0.05   0.957     -1708.35    1616.512
+    nodegree |   1490.779   1137.328     1.31   0.191    -745.8833    3727.441
+        re74 |   .2853952    .086187     3.31   0.001     .1159004    .4548901
+        re75 |   .3661186   .1386519     2.64   0.009     .0934467    .6387905
+       _cons |  -1743.384   3340.258    -0.52   0.602    -8312.315    4825.546
+------------------------------------------------------------------------------
+  样本: pos_re75 == 1  →  b=  611.143  se= 1179.698  N=369
+
+Linear regression                               Number of obs     =        427
+                                                F(9, 417)         =       3.27
+                                                Prob > F          =     0.0007
+                                                R-squared         =     0.0713
+                                                Root MSE          =     6728.3
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   709.2684   789.0737     0.90   0.369    -841.7894    2260.326
+         age |   100.2429    129.331     0.78   0.439    -153.9792    354.4649
+        educ |   308.2238   247.8037     1.24   0.214    -178.8763     795.324
+       black |  -1109.152   789.7797    -1.40   0.161    -2661.598    443.2932
+      hispan |   370.3678   993.3926     0.37   0.709    -1582.313    2323.049
+     married |   -597.871    876.373    -0.68   0.495     -2320.53    1124.788
+    nodegree |   442.7598   1165.849     0.38   0.704    -1848.913    2734.433
+        re74 |    .064802   .1144522     0.57   0.572    -.1601731    .2897771
+        re75 |   .4716582   .1476011     3.20   0.002     .1815233    .7617932
+       _cons |  -270.0146   4430.372    -0.06   0.951     -8978.66    8438.631
+------------------------------------------------------------------------------
+  样本: age < 30  →  b=  709.268  se=  789.074  N=427
+
+. 
+. * 6d. Oster (2019) δ ：未观测混淆敏感性
+. *     与 Python notebook 的 sp.oster_delta 完全一致：
+. *       beta_short ：仅 treat 的短回归系数
+. *       beta_full  ：full controls 后的长回归系数
+. *       delta*     ：让效应归零所需的"未观测/已观测选择强度"比；|δ*|>1 则稳健
+. reg re78 treat
+
+      Source |       SS           df       MS      Number of obs   =       614
+-------------+----------------------------------   F(1, 612)       =      0.93
+       Model |  52124752.5         1  52124752.5   Prob > F        =    0.3342
+    Residual |  3.4161e+10       612  55817843.2   R-squared       =    0.0015
+-------------+----------------------------------   Adj R-squared   =   -0.0001
+       Total |  3.4213e+10       613  55811818.5   Root MSE        =    7471.1
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |  -635.0263   657.1374    -0.97   0.334    -1925.544    655.4916
+       _cons |    6984.17   360.7097    19.36   0.000     6275.791    7692.549
+------------------------------------------------------------------------------
+
+. scalar bs_short  = _b[treat]
+
+. scalar r2_short  = e(r2)
+
+. 
+. reg re78 treat age educ black hispan married nodegree re74 re75
+
+      Source |       SS           df       MS      Number of obs   =       614
+-------------+----------------------------------   F(9, 604)       =     11.64
+       Model |  5.0554e+09         9   561713775   Prob > F        =    0.0000
+    Residual |  2.9157e+10       604  48273544.4   R-squared       =    0.1478
+-------------+----------------------------------   Adj R-squared   =    0.1351
+       Total |  3.4213e+10       613  55811818.5   Root MSE        =    6947.9
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244   781.2793     1.98   0.048     13.88986    3082.598
+         age |   12.97763   32.48891     0.40   0.690    -50.82731    76.78258
+        educ |   403.9412   158.9062     2.54   0.011     91.86538    716.0171
+       black |  -1240.644   768.7644    -1.61   0.107     -2750.42    269.1318
+      hispan |   498.8968   941.9425     0.53   0.597    -1350.984    2348.777
+     married |   406.6208   695.4723     0.58   0.559    -959.2168    1772.458
+    nodegree |   259.8174   847.4421     0.31   0.759    -1404.474    1924.108
+        re74 |   .2963774   .0582726     5.09   0.000     .1819358     .410819
+        re75 |   .2315259   .1046199     2.21   0.027      .026063    .4369888
+       _cons |   66.51451   2436.746     0.03   0.978    -4719.009    4852.038
+------------------------------------------------------------------------------
+
+. scalar bs_full   = _b[treat]
+
+. scalar r2_full   = e(r2)
+
+. 
+. di as text _n "Oster δ 关键输入："
+
+Oster δ 关键输入：
+
+. di as text "  beta_short = " %12.4f bs_short "  R²_short = " %6.4f r2_short
+  beta_short =    -635.0263  R²_short = 0.0015
+
+. di as text "  beta_full  = " %12.4f bs_full  "  R²_full  = " %6.4f r2_full
+  beta_full  =    1548.2438  R²_full  = 0.1478
+
+. 
+. * psacalc delta : Oster 经验法则 r_max = 1.3 * R²_full
+. psacalc delta treat, mcontrol(age educ black hispan married nodegree re74 re7
+> 5)     rmax(`= 1.3 * r2_full ')
+
+                 ---- Bound Estimate ----
+-------------+----------------------------------------------------------------
+delta        |             .
+-------------+----------------------------------------------------------------
+
+                 ---- Inputs from Regressions ----
+             |      Coeff.                      R-Squared
+-------------+----------------------------------------------------------------
+Uncontrolled |     1548.24375                   0.148
+Controlled   |     1548.24375                   0.148
+-------------+----------------------------------------------------------------
+
+                 ---- Other Inputs ----
+-------------+----------------------------------------------------------------
+R_max        |   0.192
+Beta         |    0.000000
+Unr. Controls|   age educ black hispan married nodegree re74 re75
+-------------+----------------------------------------------------------------
+
+. 
+. * psacalc beta : 假设 δ=1 给出处理效应识别区间
+. psacalc beta treat, mcontrol(age educ black hispan married nodegree re74 re75
+> )     rmax(`= 1.3 * r2_full ') delta(1)
+
+                 ---- Treatment Effect Estimate ----
+             |     Estimate           Sq. difference      Bias changes
+             |                      from controlled beta    direction
+-------------+----------------------------------------------------------------
+Beta         |             .                    .             Yes
+Alt. sol. 1  |             .                    .             Yes
+Alt. sol. 2  |                                                
+-------------+----------------------------------------------------------------
+
+                 ---- Inputs from Regressions ----
+             |      Coeff.            R-Squared
+-------------+----------------------------------------------------------------
+Uncontrolled |     1548.24375         0.148
+Controlled   |     1548.24375         0.148
+-------------+----------------------------------------------------------------
+
+                 ---- Other Inputs ----
+-------------+----------------------------------------------------------------
+R_max        |   0.192
+Delta        |   1.000
+Unr. Controls|   age educ black hispan married nodegree re74 re75
+-------------+----------------------------------------------------------------
+
+. 
+. di as text _n "解读：psacalc 输出的 delta 即 δ*。"
+
+解读：psacalc 输出的 delta 即 δ*。
+
+. di as text "  |δ*| > 1 → 稳健（未观测要比已观测更强才能推翻结论）"
+  |δ*| > 1 → 稳健（未观测要比已观测更强才能推翻结论）
+
+. di as text "  |δ*| ≤ 1 → 脆弱（未观测与已观测同等强度即可推翻结论）"
+  |δ*| ≤ 1 → 脆弱（未观测与已观测同等强度即可推翻结论）
+
+. 
+. * 6e. 缩尾稳健性
+. reg re78_w1 treat age educ black hispan married nodegree re74_w1 re75_w1,    
+>  vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(9, 604)         =      11.06
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1585
+                                                Root MSE          =     6538.2
+
+------------------------------------------------------------------------------
+             |               Robust
+     re78_w1 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1325.345   698.2888     1.90   0.058    -46.02436    2696.713
+         age |    11.9874   30.56916     0.39   0.695    -48.04735    72.02215
+        educ |   374.1978   151.7804     2.47   0.014     76.11641    672.2792
+       black |  -1339.968   685.2083    -1.96   0.051    -2685.648    5.712109
+      hispan |   435.4293   945.3302     0.46   0.645    -1421.104    2291.963
+     married |   436.8188   650.8918     0.67   0.502    -841.4671    1715.105
+    nodegree |   129.4576   832.6227     0.16   0.876     -1505.73    1764.645
+     re74_w1 |   .2787697   .0676684     4.12   0.000     .1458758    .4116635
+     re75_w1 |   .2644516   .1179595     2.24   0.025      .032791    .4961121
+       _cons |   514.3299   2378.616     0.22   0.829    -4157.032    5185.691
+------------------------------------------------------------------------------
+
+. di as text _n "缩尾 1/99 后的 treat 系数：" %9.3f _b[treat]     "  se=" %9.3f
+>  _se[treat]
+
+缩尾 1/99 后的 treat 系数： 1325.345  se=  698.289
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 7 : 异质性 / 进一步分析                                               
+>  *
+. *  - 7a 与种族的交互（培训对黑人 vs 非黑人是否不同？）                       
+>  *
+. *  - 7b 与教育水平的交互                                                     
+>  *
+. *  - 7c 子组分别估计 + Wald 检验                                             
+>  *
+. *============================================================================
+> =*
+. 
+. di as text _n "==== Step 7: 异质性分析 ===="
+
+==== Step 7: 异质性分析 ====
+
+. 
+. * 7a. 培训 × 黑人 交互
+. reg re78 i.treat##i.black age educ hispan married nodegree re74 re75, vce(rob
+> ust)
+
+Linear regression                               Number of obs     =        614
+                                                F(10, 603)        =       8.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1478
+                                                Root MSE          =     6953.7
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.treat |    1480.43   1291.072     1.15   0.252    -1055.113    4015.974
+     1.black |  -1265.877   781.4109    -1.62   0.106    -2800.495    268.7401
+             |
+ treat#black |
+        1 1  |   98.61625   1586.931     0.06   0.950    -3017.966    3215.199
+             |
+         age |   12.96166   31.71394     0.41   0.683    -49.32153    75.24485
+        educ |   403.8624   160.4611     2.52   0.012     88.73188    718.9929
+      hispan |   504.6252   953.6455     0.53   0.597    -1368.245    2377.495
+     married |   404.1689   660.1748     0.61   0.541    -892.3523     1700.69
+    nodegree |   257.9385   893.8831     0.29   0.773    -1497.564    2013.441
+        re74 |   .2961322   .0716963     4.13   0.000     .1553275    .4369369
+        re75 |   .2317237   .1197365     1.94   0.053    -.0034276    .4668749
+       _cons |   75.34074   2531.489     0.03   0.976    -4896.266    5046.947
+------------------------------------------------------------------------------
+
+. margins, dydx(treat) at(black=(0 1))
+
+Average marginal effects                                   Number of obs = 614
+Model VCE: Robust
+
+Expression: Linear prediction, predict()
+dy/dx wrt:  1.treat
+1._at: black = 0
+2._at: black = 1
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+0.treat      |  (base outcome)
+-------------+----------------------------------------------------------------
+1.treat      |
+         _at |
+          1  |    1480.43   1291.072     1.15   0.252    -1055.113    4015.974
+          2  |   1579.047   910.0605     1.74   0.083    -208.2266     3366.32
+------------------------------------------------------------------------------
+Note: dy/dx for factor levels is the discrete change from the base level.
+
+. marginsplot,     title("培训对 1978 年收入的边际效应：按种族")     ytitle("dY
+>  / d(treat)")     xtitle("Race = Black")
+
+Variables that uniquely identify margins: black
+
+. graph export "_stata_lalonde_outputs/figures/het_treat_by_black.pdf", replace
+file _stata_lalonde_outputs/figures/het_treat_by_black.pdf saved as PDF
+    format
+
+. 
+. * 7b. 培训 × 受教育年限 交互（连续）
+. reg re78 c.treat##c.educ age black hispan married nodegree re74 re75, vce(rob
+> ust)
+
+Linear regression                               Number of obs     =        614
+                                                F(10, 603)        =       9.02
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1492
+                                                Root MSE          =     6947.9
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |  -1383.121   2826.004    -0.49   0.625    -6933.127    4166.886
+        educ |   359.8915   168.3212     2.14   0.033     29.32447    690.4586
+             |
+     c.treat#|
+      c.educ |   283.0379   283.2105     1.00   0.318    -273.1608    839.2365
+             |
+         age |   11.74524   31.73026     0.37   0.711    -50.57001    74.06048
+       black |  -1253.383   694.4072    -1.80   0.072    -2617.134    110.3671
+      hispan |   448.9168   953.0282     0.47   0.638    -1422.741    2320.575
+     married |   376.2224   659.0959     0.57   0.568    -918.1799    1670.625
+    nodegree |   326.2887   891.6848     0.37   0.715    -1424.896    2077.474
+        re74 |   .2983768   .0713227     4.18   0.000     .1583057    .4384479
+        re75 |   .2325559   .1199542     1.94   0.053    -.0030228    .4681347
+       _cons |   523.7643   2581.643     0.20   0.839     -4546.34    5593.868
+------------------------------------------------------------------------------
+
+. margins, dydx(treat) at(educ=(6(2)16))
+
+Average marginal effects                                   Number of obs = 614
+Model VCE: Robust
+
+Expression: Linear prediction, predict()
+dy/dx wrt:  treat
+1._at: educ =  6
+2._at: educ =  8
+3._at: educ = 10
+4._at: educ = 12
+5._at: educ = 14
+6._at: educ = 16
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+treat        |
+         _at |
+          1  |   315.1066   1257.679     0.25   0.802    -2154.856    2785.069
+          2  |   881.1824   854.5392     1.03   0.303    -797.0521    2559.417
+          3  |   1447.258   721.3768     2.01   0.045     30.54202    2863.974
+          4  |   2013.334   975.8058     2.06   0.040     96.94309    3929.725
+          5  |    2579.41   1423.262     1.81   0.070     -215.743    5374.562
+          6  |   3145.485   1934.119     1.63   0.104    -652.9431    6943.914
+------------------------------------------------------------------------------
+
+. marginsplot,     title("培训对 1978 年收入的边际效应：按受教育年限")     ytit
+> le("dY / d(treat)") xtitle("Education (years)")
+
+Variables that uniquely identify margins: educ
+
+. graph export "_stata_lalonde_outputs/figures/het_treat_by_educ.pdf", replace
+file _stata_lalonde_outputs/figures/het_treat_by_educ.pdf saved as PDF format
+
+. 
+. * 7c. 子组单独估计 + suest 联合 Wald
+. *     注意：suest 要求子模型用 OIM SE（不能带 vce(robust)），
+. *     suest 在合并时会自动给出 robust 协方差矩阵。
+. eststo clear
+
+. eststo M_black: reg re78 treat age educ married nodegree re74 re75 if black =
+> = 1
+
+      Source |       SS           df       MS      Number of obs   =       243
+-------------+----------------------------------   F(7, 235)       =      2.23
+       Model |   851248814         7   121606973   Prob > F        =    0.0328
+    Residual |  1.2827e+10       235  54584418.6   R-squared       =    0.0622
+-------------+----------------------------------   Adj R-squared   =    0.0343
+       Total |  1.3679e+10       242  56523087.5   Root MSE        =    7388.1
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1371.454   1012.392     1.35   0.177    -623.0696    3365.977
+         age |   40.84492   59.61105     0.69   0.494    -76.59541    158.2853
+        educ |   537.2477   279.0327     1.93   0.055    -12.47743    1086.973
+     married |   427.4812   1301.989     0.33   0.743    -2137.581    2992.543
+    nodegree |  -356.5465   1408.636    -0.25   0.800    -3131.715    2418.622
+        re74 |   .0804512   .1223587     0.66   0.512    -.1606089    .3215113
+        re75 |   .1593685   .1969258     0.81   0.419     -.228597    .5473339
+       _cons |  -2069.691   4114.615    -0.50   0.615    -10175.93    6036.553
+------------------------------------------------------------------------------
+
+. eststo M_other: reg re78 treat age educ hispan married nodegree re74 re75 if 
+> black == 0
+
+      Source |       SS           df       MS      Number of obs   =       371
+-------------+----------------------------------   F(8, 362)       =     12.45
+       Model |  4.3214e+09         8   540169800   Prob > F        =    0.0000
+    Residual |  1.5712e+10       362  43403276.6   R-squared       =    0.2157
+-------------+----------------------------------   Adj R-squared   =    0.1984
+       Total |  2.0033e+10       370  54144174.4   Root MSE        =    6588.1
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1806.983    1317.63     1.37   0.171    -784.1879    4398.153
+         age |  -11.73728   38.23924    -0.31   0.759    -86.93622    63.46166
+        educ |   358.0948   192.6245     1.86   0.064    -20.70868    736.8983
+      hispan |   328.8384   909.7658     0.36   0.718    -1460.251    2117.928
+     married |   116.8449    813.731     0.14   0.886    -1483.389    1717.079
+    nodegree |   705.5873   1053.201     0.67   0.503    -1365.574    2776.749
+        re74 |   .3823756   .0660608     5.79   0.000     .2524645    .5122867
+        re75 |   .3496738   .1234796     2.83   0.005     .1068463    .5925012
+       _cons |   334.0954   2991.429     0.11   0.911    -5548.666    6216.857
+------------------------------------------------------------------------------
+
+. suest M_black M_other, vce(robust)
+
+Simultaneous results for M_black, M_other                  Number of obs = 614
+
+------------------------------------------------------------------------------
+             |               Robust
+             | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+M_black_mean |
+       treat |   1371.454   909.3886     1.51   0.132    -410.9155    3153.823
+         age |   40.84492   56.34342     0.72   0.468    -69.58616     151.276
+        educ |   537.2477   246.0582     2.18   0.029     54.98259    1019.513
+     married |   427.4812   1247.957     0.34   0.732     -2018.47    2873.432
+    nodegree |  -356.5465    1460.57    -0.24   0.807    -3219.212    2506.119
+        re74 |   .0804512   .1817122     0.44   0.658    -.2756982    .4366006
+        re75 |   .1593685   .1944617     0.82   0.412    -.2217695    .5405064
+       _cons |  -2069.691   3967.374    -0.52   0.602    -9845.601    5706.218
+-------------+----------------------------------------------------------------
+M_black_ln~r |
+       _cons |   17.81526   .2346925    75.91   0.000     17.35527    18.27525
+-------------+----------------------------------------------------------------
+M_other_mean |
+       treat |   1806.983   1304.413     1.39   0.166    -749.6201    4363.585
+         age |  -11.73728   38.10599    -0.31   0.758    -86.42364    62.94908
+        educ |   358.0948    209.886     1.71   0.088    -53.27425    769.4638
+      hispan |   328.8384   953.5727     0.34   0.730     -1540.13    2197.807
+     married |   116.8449   771.4176     0.15   0.880    -1395.106    1628.796
+    nodegree |   705.5873   1105.957     0.64   0.523    -1462.048    2873.223
+        re74 |   .3823756   .0774629     4.94   0.000      .230551    .5342002
+        re75 |   .3496738   .1326233     2.64   0.008     .0897368    .6096107
+       _cons |   334.0954   3290.711     0.10   0.919     -6115.58    6783.771
+-------------+----------------------------------------------------------------
+M_other_ln~r |
+       _cons |   17.58605   .0715555   245.77   0.000      17.4458    17.72629
+------------------------------------------------------------------------------
+
+. test [M_black_mean]treat = [M_other_mean]treat
+
+ ( 1)  [M_black_mean]treat - [M_other_mean]treat = 0
+
+           chi2(  1) =    0.08
+         Prob > chi2 =    0.7842
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 8 : 出版级表格 & 图                                                   
+>  *
+. *  - 8a 主表：OLS / IPW / IPWRA / AIPW / PSM 横向对照                        
+>  *
+. *  - 8b coefplot：所有估计器的 treat 系数 + 95% CI                           
+>  *
+. *  - 8c overlap 图：倾向得分分布                                             
+>  *
+. *============================================================================
+> =*
+. 
+. di as text _n "==== Step 8: 出版表格 & 图 ===="
+
+==== Step 8: 出版表格 & 图 ====
+
+. 
+. * 8a. 多估计器主表
+. *     重新跑一遍并存到 eststo（前面 Step 6 把 eststo 给清掉了）
+. *     主表选择 5 个收敛稳定的 ATT 估计器：OLS / RA / IPW / IPWRA / PSM。
+. *     AIPW 在该数据上 logit 不收敛（弱 overlap 导致近似 separation），
+. *     5e 已用 ate 跑过示例，主表用 IPWRA（同为 doubly robust）替代位置，
+. *     避免单点数值问题阻塞整个管线产出。
+. eststo clear
+
+. eststo OLS:    reg re78 treat age educ black hispan married nodegree re74 re7
+> 5, vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(9, 604)         =       9.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1478
+                                                Root MSE          =     6947.9
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244    740.576     2.09   0.037     93.82694    3002.661
+         age |   12.97763   31.70387     0.41   0.682    -49.28558    75.24085
+        educ |   403.9412   160.3946     2.52   0.012      88.9424    718.9401
+       black |  -1240.644   695.7661    -1.78   0.075    -2607.059    125.7704
+      hispan |   498.8968   952.8564     0.52   0.601    -1372.417    2370.211
+     married |   406.6208   658.5495     0.62   0.537    -886.7041    1699.946
+    nodegree |   259.8174   891.7856     0.29   0.771     -1491.56    2011.195
+        re74 |   .2963774   .0712699     4.16   0.000     .1564106    .4363443
+        re75 |   .2315259   .1194528     1.94   0.053    -.0030674    .4661192
+       _cons |   66.51451   2530.018     0.03   0.979    -4902.187    5035.216
+------------------------------------------------------------------------------
+
+. eststo RA:     teffects ra                   (re78 age educ black hispan marr
+> ied nodegree re74 re75)                   (treat), atet vce(robust)
+
+Iteration 0:  EE criterion =  7.438e-24  
+Iteration 1:  EE criterion =  5.503e-25  
+
+Treatment-effects estimation                    Number of obs     =        614
+Estimator      : regression adjustment
+Outcome model  : linear
+Treatment model: none
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATET         |
+       treat |
+   (1 vs 0)  |   1647.583   808.9795     2.04   0.042     62.01251    3233.154
+-------------+----------------------------------------------------------------
+POmean       |
+       treat |
+          0  |    4701.56   590.9973     7.96   0.000     3543.227    5859.894
+------------------------------------------------------------------------------
+
+. eststo IPW:    teffects ipw                   (re78)                   (treat
+>  age educ black hispan married nodegree re74 re75, logit),                   
+> atet vce(robust)
+
+Iteration 0:  EE criterion =  9.329e-24  
+Iteration 1:  EE criterion =  4.524e-25  
+
+Treatment-effects estimation                    Number of obs     =        614
+Estimator      : inverse-probability weights
+Outcome model  : weighted mean
+Treatment model: logit
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATET         |
+       treat |
+   (1 vs 0)  |   1214.071   798.1546     1.52   0.128    -350.2832    2778.425
+-------------+----------------------------------------------------------------
+POmean       |
+       treat |
+          0  |   5135.072   583.7629     8.80   0.000     3990.918    6279.227
+------------------------------------------------------------------------------
+
+. eststo IPWRA:  teffects ipwra                   (re78 age educ black hispan m
+> arried nodegree re74 re75)                   (treat age educ black hispan mar
+> ried nodegree re74 re75, logit),                   atet vce(robust)
+
+Iteration 0:  EE criterion =  1.982e-22  (not concave)
+Iteration 1:  EE criterion =  1.242e-22  (not concave)
+Iteration 2:  EE criterion =  1.185e-22  (not concave)
+Iteration 3:  EE criterion =  1.185e-22  (not concave)
+Iteration 4:  EE criterion =  1.185e-22  (not concave)
+Iteration 5:  EE criterion =  1.185e-22  (not concave)
+Iteration 6:  EE criterion =  1.185e-22  (not concave)
+Iteration 7:  EE criterion =  1.185e-22  (not concave)
+Iteration 8:  EE criterion =  1.185e-22  (not concave)
+Iteration 9:  EE criterion =  1.185e-22  (not concave)
+Iteration 10: EE criterion =  1.185e-22  (not concave)
+Iteration 11: EE criterion =  1.185e-22  (not concave)
+Iteration 12: EE criterion =  1.185e-22  (not concave)
+Iteration 13: EE criterion =  1.185e-22  (not concave)
+Iteration 14: EE criterion =  1.185e-22  (not concave)
+Iteration 15: EE criterion =  1.185e-22  (not concave)
+Iteration 16: EE criterion =  1.185e-22  (not concave)
+Iteration 17: EE criterion =  1.185e-22  (not concave)
+Iteration 18: EE criterion =  1.185e-22  (not concave)
+Iteration 19: EE criterion =  1.185e-22  (not concave)
+Iteration 20: EE criterion =  1.185e-22  (not concave)
+Iteration 21: EE criterion =  1.185e-22  (not concave)
+Iteration 22: EE criterion =  1.185e-22  (not concave)
+Iteration 23: EE criterion =  1.185e-22  (not concave)
+Iteration 24: EE criterion =  1.185e-22  (not concave)
+Iteration 25: EE criterion =  1.185e-22  (not concave)
+Iteration 26: EE criterion =  1.185e-22  (not concave)
+Iteration 27: EE criterion =  1.185e-22  (not concave)
+Iteration 28: EE criterion =  1.185e-22  (not concave)
+Iteration 29: EE criterion =  1.185e-22  (not concave)
+Iteration 30: EE criterion =  1.185e-22  (not concave)
+Iteration 31: EE criterion =  1.185e-22  (not concave)
+Iteration 32: EE criterion =  1.185e-22  (not concave)
+Iteration 33: EE criterion =  1.185e-22  (not concave)
+Iteration 34: EE criterion =  1.185e-22  (not concave)
+Iteration 35: EE criterion =  1.185e-22  (not concave)
+Iteration 36: EE criterion =  1.185e-22  (not concave)
+Iteration 37: EE criterion =  1.185e-22  (not concave)
+Iteration 38: EE criterion =  1.185e-22  (not concave)
+Iteration 39: EE criterion =  1.185e-22  (not concave)
+Iteration 40: EE criterion =  1.185e-22  (not concave)
+Iteration 41: EE criterion =  1.185e-22  (not concave)
+Iteration 42: EE criterion =  1.185e-22  (not concave)
+Iteration 43: EE criterion =  1.185e-22  (not concave)
+Iteration 44: EE criterion =  1.185e-22  (not concave)
+Iteration 45: EE criterion =  1.185e-22  (not concave)
+Iteration 46: EE criterion =  1.185e-22  (not concave)
+Iteration 47: EE criterion =  1.185e-22  (not concave)
+Iteration 48: EE criterion =  1.185e-22  (not concave)
+Iteration 49: EE criterion =  1.185e-22  (not concave)
+Iteration 50: EE criterion =  1.185e-22  (not concave)
+Iteration 51: EE criterion =  1.185e-22  (not concave)
+Iteration 52: EE criterion =  1.185e-22  (not concave)
+Iteration 53: EE criterion =  1.185e-22  (not concave)
+Iteration 54: EE criterion =  1.185e-22  (not concave)
+Iteration 55: EE criterion =  1.185e-22  (not concave)
+Iteration 56: EE criterion =  1.185e-22  (not concave)
+Iteration 57: EE criterion =  1.185e-22  (not concave)
+Iteration 58: EE criterion =  1.185e-22  (not concave)
+Iteration 59: EE criterion =  1.185e-22  (not concave)
+Iteration 60: EE criterion =  1.185e-22  (not concave)
+Iteration 61: EE criterion =  1.185e-22  (not concave)
+Iteration 62: EE criterion =  1.185e-22  (not concave)
+Iteration 63: EE criterion =  1.185e-22  (not concave)
+Iteration 64: EE criterion =  1.185e-22  (not concave)
+Iteration 65: EE criterion =  1.185e-22  (not concave)
+Iteration 66: EE criterion =  1.185e-22  (not concave)
+Iteration 67: EE criterion =  1.185e-22  (not concave)
+Iteration 68: EE criterion =  1.185e-22  (not concave)
+Iteration 69: EE criterion =  1.185e-22  (not concave)
+Iteration 70: EE criterion =  1.185e-22  (not concave)
+Iteration 71: EE criterion =  1.185e-22  (not concave)
+Iteration 72: EE criterion =  1.185e-22  (not concave)
+Iteration 73: EE criterion =  1.185e-22  (not concave)
+Iteration 74: EE criterion =  1.185e-22  (not concave)
+Iteration 75: EE criterion =  1.185e-22  (not concave)
+Iteration 76: EE criterion =  1.185e-22  (not concave)
+Iteration 77: EE criterion =  1.185e-22  (not concave)
+Iteration 78: EE criterion =  1.185e-22  (not concave)
+Iteration 79: EE criterion =  1.185e-22  (not concave)
+Iteration 80: EE criterion =  1.185e-22  (not concave)
+Iteration 81: EE criterion =  1.185e-22  (not concave)
+Iteration 82: EE criterion =  1.185e-22  (not concave)
+Iteration 83: EE criterion =  1.185e-22  (not concave)
+Iteration 84: EE criterion =  1.185e-22  (not concave)
+Iteration 85: EE criterion =  1.185e-22  (not concave)
+Iteration 86: EE criterion =  1.185e-22  (not concave)
+Iteration 87: EE criterion =  1.185e-22  (not concave)
+Iteration 88: EE criterion =  1.185e-22  (not concave)
+Iteration 89: EE criterion =  1.185e-22  (not concave)
+Iteration 90: EE criterion =  1.185e-22  (not concave)
+Iteration 91: EE criterion =  1.185e-22  (not concave)
+Iteration 92: EE criterion =  1.185e-22  (not concave)
+Iteration 93: EE criterion =  1.185e-22  (not concave)
+Iteration 94: EE criterion =  1.185e-22  (not concave)
+Iteration 95: EE criterion =  1.185e-22  (not concave)
+Iteration 96: EE criterion =  1.185e-22  (not concave)
+Iteration 97: EE criterion =  1.185e-22  (not concave)
+Iteration 98: EE criterion =  1.185e-22  (not concave)
+Iteration 99: EE criterion =  1.185e-22  (not concave)
+Iteration 100: EE criterion =  1.185e-22  (not concave)
+Iteration 101: EE criterion =  1.185e-22  (not concave)
+Iteration 102: EE criterion =  1.185e-22  (not concave)
+Iteration 103: EE criterion =  1.185e-22  (not concave)
+Iteration 104: EE criterion =  1.185e-22  (not concave)
+Iteration 105: EE criterion =  1.185e-22  (not concave)
+Iteration 106: EE criterion =  1.185e-22  (not concave)
+Iteration 107: EE criterion =  1.185e-22  (not concave)
+Iteration 108: EE criterion =  1.185e-22  (not concave)
+Iteration 109: EE criterion =  1.185e-22  (not concave)
+Iteration 110: EE criterion =  1.185e-22  (not concave)
+Iteration 111: EE criterion =  1.185e-22  (not concave)
+Iteration 112: EE criterion =  1.185e-22  (not concave)
+Iteration 113: EE criterion =  1.185e-22  (not concave)
+Iteration 114: EE criterion =  1.185e-22  (not concave)
+Iteration 115: EE criterion =  1.185e-22  (not concave)
+Iteration 116: EE criterion =  1.185e-22  (not concave)
+Iteration 117: EE criterion =  1.185e-22  (not concave)
+Iteration 118: EE criterion =  1.185e-22  (not concave)
+Iteration 119: EE criterion =  1.185e-22  (not concave)
+Iteration 120: EE criterion =  1.185e-22  (not concave)
+Iteration 121: EE criterion =  1.185e-22  (not concave)
+Iteration 122: EE criterion =  1.185e-22  (not concave)
+Iteration 123: EE criterion =  1.185e-22  (not concave)
+Iteration 124: EE criterion =  1.185e-22  (not concave)
+Iteration 125: EE criterion =  1.185e-22  (not concave)
+Iteration 126: EE criterion =  1.185e-22  (not concave)
+Iteration 127: EE criterion =  1.185e-22  (not concave)
+Iteration 128: EE criterion =  1.185e-22  (not concave)
+Iteration 129: EE criterion =  1.185e-22  (not concave)
+Iteration 130: EE criterion =  1.185e-22  (not concave)
+Iteration 131: EE criterion =  1.185e-22  (not concave)
+Iteration 132: EE criterion =  1.185e-22  (not concave)
+Iteration 133: EE criterion =  1.185e-22  (not concave)
+Iteration 134: EE criterion =  1.185e-22  (not concave)
+Iteration 135: EE criterion =  1.185e-22  (not concave)
+Iteration 136: EE criterion =  1.185e-22  (not concave)
+Iteration 137: EE criterion =  1.185e-22  (not concave)
+Iteration 138: EE criterion =  1.185e-22  (not concave)
+Iteration 139: EE criterion =  1.185e-22  (not concave)
+Iteration 140: EE criterion =  1.185e-22  (not concave)
+Iteration 141: EE criterion =  1.185e-22  (not concave)
+Iteration 142: EE criterion =  1.185e-22  (not concave)
+Iteration 143: EE criterion =  1.185e-22  (not concave)
+Iteration 144: EE criterion =  1.185e-22  (not concave)
+Iteration 145: EE criterion =  1.185e-22  (not concave)
+Iteration 146: EE criterion =  1.185e-22  (not concave)
+Iteration 147: EE criterion =  1.185e-22  (not concave)
+Iteration 148: EE criterion =  1.185e-22  (not concave)
+Iteration 149: EE criterion =  1.185e-22  (not concave)
+Iteration 150: EE criterion =  1.185e-22  (not concave)
+Iteration 151: EE criterion =  1.185e-22  (not concave)
+Iteration 152: EE criterion =  1.185e-22  (not concave)
+Iteration 153: EE criterion =  1.185e-22  (not concave)
+Iteration 154: EE criterion =  1.185e-22  (not concave)
+Iteration 155: EE criterion =  1.185e-22  (not concave)
+Iteration 156: EE criterion =  1.185e-22  (not concave)
+Iteration 157: EE criterion =  1.185e-22  (not concave)
+Iteration 158: EE criterion =  1.185e-22  (not concave)
+Iteration 159: EE criterion =  1.185e-22  (not concave)
+Iteration 160: EE criterion =  1.185e-22  (not concave)
+Iteration 161: EE criterion =  1.185e-22  (not concave)
+Iteration 162: EE criterion =  1.185e-22  (not concave)
+Iteration 163: EE criterion =  1.185e-22  (not concave)
+Iteration 164: EE criterion =  1.185e-22  (not concave)
+Iteration 165: EE criterion =  1.185e-22  (not concave)
+Iteration 166: EE criterion =  1.185e-22  (not concave)
+Iteration 167: EE criterion =  1.185e-22  (not concave)
+Iteration 168: EE criterion =  1.185e-22  (not concave)
+Iteration 169: EE criterion =  1.185e-22  (not concave)
+Iteration 170: EE criterion =  1.185e-22  (not concave)
+Iteration 171: EE criterion =  1.185e-22  (not concave)
+Iteration 172: EE criterion =  1.185e-22  (not concave)
+Iteration 173: EE criterion =  1.185e-22  (not concave)
+Iteration 174: EE criterion =  1.185e-22  (not concave)
+Iteration 175: EE criterion =  1.185e-22  (not concave)
+Iteration 176: EE criterion =  1.185e-22  (not concave)
+Iteration 177: EE criterion =  1.185e-22  (not concave)
+Iteration 178: EE criterion =  1.185e-22  (not concave)
+Iteration 179: EE criterion =  1.185e-22  (not concave)
+Iteration 180: EE criterion =  1.185e-22  (not concave)
+Iteration 181: EE criterion =  1.185e-22  (not concave)
+Iteration 182: EE criterion =  1.185e-22  (not concave)
+Iteration 183: EE criterion =  1.185e-22  (not concave)
+Iteration 184: EE criterion =  1.185e-22  (not concave)
+Iteration 185: EE criterion =  1.185e-22  (not concave)
+Iteration 186: EE criterion =  1.185e-22  (not concave)
+Iteration 187: EE criterion =  1.185e-22  (not concave)
+Iteration 188: EE criterion =  1.185e-22  (not concave)
+Iteration 189: EE criterion =  1.185e-22  (not concave)
+Iteration 190: EE criterion =  1.185e-22  (not concave)
+Iteration 191: EE criterion =  1.185e-22  (not concave)
+Iteration 192: EE criterion =  1.185e-22  (not concave)
+Iteration 193: EE criterion =  1.185e-22  (not concave)
+Iteration 194: EE criterion =  1.185e-22  (not concave)
+Iteration 195: EE criterion =  1.185e-22  (not concave)
+Iteration 196: EE criterion =  1.185e-22  (not concave)
+Iteration 197: EE criterion =  1.185e-22  (not concave)
+Iteration 198: EE criterion =  1.185e-22  (not concave)
+Iteration 199: EE criterion =  1.185e-22  (not concave)
+Iteration 200: EE criterion =  1.185e-22  (not concave)
+Iteration 201: EE criterion =  1.185e-22  (not concave)
+Iteration 202: EE criterion =  1.185e-22  (not concave)
+Iteration 203: EE criterion =  1.185e-22  (not concave)
+Iteration 204: EE criterion =  1.185e-22  (not concave)
+Iteration 205: EE criterion =  1.185e-22  (not concave)
+Iteration 206: EE criterion =  1.185e-22  (not concave)
+Iteration 207: EE criterion =  1.185e-22  (not concave)
+Iteration 208: EE criterion =  1.185e-22  (not concave)
+Iteration 209: EE criterion =  1.185e-22  (not concave)
+Iteration 210: EE criterion =  1.185e-22  (not concave)
+Iteration 211: EE criterion =  1.185e-22  (not concave)
+Iteration 212: EE criterion =  1.185e-22  (not concave)
+Iteration 213: EE criterion =  1.185e-22  (not concave)
+Iteration 214: EE criterion =  1.185e-22  (not concave)
+Iteration 215: EE criterion =  1.185e-22  (not concave)
+Iteration 216: EE criterion =  1.185e-22  (not concave)
+Iteration 217: EE criterion =  1.185e-22  (not concave)
+Iteration 218: EE criterion =  1.185e-22  (not concave)
+Iteration 219: EE criterion =  1.185e-22  (not concave)
+Iteration 220: EE criterion =  1.185e-22  (not concave)
+Iteration 221: EE criterion =  1.185e-22  (not concave)
+Iteration 222: EE criterion =  1.185e-22  (not concave)
+Iteration 223: EE criterion =  1.185e-22  (not concave)
+Iteration 224: EE criterion =  1.185e-22  (not concave)
+Iteration 225: EE criterion =  1.185e-22  (not concave)
+Iteration 226: EE criterion =  1.185e-22  (not concave)
+Iteration 227: EE criterion =  1.185e-22  (not concave)
+Iteration 228: EE criterion =  1.185e-22  (not concave)
+Iteration 229: EE criterion =  1.185e-22  (not concave)
+Iteration 230: EE criterion =  1.185e-22  (not concave)
+Iteration 231: EE criterion =  1.185e-22  (not concave)
+Iteration 232: EE criterion =  1.185e-22  (not concave)
+Iteration 233: EE criterion =  1.185e-22  (not concave)
+Iteration 234: EE criterion =  1.185e-22  (not concave)
+Iteration 235: EE criterion =  1.185e-22  (not concave)
+Iteration 236: EE criterion =  1.185e-22  (not concave)
+Iteration 237: EE criterion =  1.185e-22  (not concave)
+Iteration 238: EE criterion =  1.185e-22  (not concave)
+Iteration 239: EE criterion =  1.185e-22  (not concave)
+Iteration 240: EE criterion =  1.185e-22  (not concave)
+Iteration 241: EE criterion =  1.185e-22  (not concave)
+Iteration 242: EE criterion =  1.185e-22  (not concave)
+Iteration 243: EE criterion =  1.185e-22  (not concave)
+Iteration 244: EE criterion =  1.185e-22  (not concave)
+Iteration 245: EE criterion =  1.185e-22  (not concave)
+Iteration 246: EE criterion =  1.185e-22  (not concave)
+Iteration 247: EE criterion =  1.185e-22  (not concave)
+Iteration 248: EE criterion =  1.185e-22  (not concave)
+Iteration 249: EE criterion =  1.185e-22  (not concave)
+Iteration 250: EE criterion =  1.185e-22  (not concave)
+Iteration 251: EE criterion =  1.185e-22  (not concave)
+Iteration 252: EE criterion =  1.185e-22  (not concave)
+Iteration 253: EE criterion =  1.185e-22  (not concave)
+Iteration 254: EE criterion =  1.185e-22  (not concave)
+Iteration 255: EE criterion =  1.185e-22  (not concave)
+Iteration 256: EE criterion =  1.185e-22  (not concave)
+Iteration 257: EE criterion =  1.185e-22  (not concave)
+Iteration 258: EE criterion =  1.185e-22  (not concave)
+Iteration 259: EE criterion =  1.185e-22  (not concave)
+Iteration 260: EE criterion =  1.185e-22  (not concave)
+Iteration 261: EE criterion =  1.185e-22  (not concave)
+Iteration 262: EE criterion =  1.185e-22  (not concave)
+Iteration 263: EE criterion =  1.185e-22  (not concave)
+Iteration 264: EE criterion =  1.185e-22  (not concave)
+Iteration 265: EE criterion =  1.185e-22  (not concave)
+Iteration 266: EE criterion =  1.185e-22  (not concave)
+Iteration 267: EE criterion =  1.185e-22  (not concave)
+Iteration 268: EE criterion =  1.185e-22  (not concave)
+Iteration 269: EE criterion =  1.185e-22  (not concave)
+Iteration 270: EE criterion =  1.185e-22  (not concave)
+Iteration 271: EE criterion =  1.185e-22  (not concave)
+Iteration 272: EE criterion =  1.185e-22  (not concave)
+Iteration 273: EE criterion =  1.185e-22  (not concave)
+Iteration 274: EE criterion =  1.185e-22  (not concave)
+Iteration 275: EE criterion =  1.185e-22  (not concave)
+Iteration 276: EE criterion =  1.185e-22  (not concave)
+Iteration 277: EE criterion =  1.185e-22  (not concave)
+Iteration 278: EE criterion =  1.185e-22  (not concave)
+Iteration 279: EE criterion =  1.185e-22  (not concave)
+Iteration 280: EE criterion =  1.185e-22  (not concave)
+Iteration 281: EE criterion =  1.185e-22  (not concave)
+Iteration 282: EE criterion =  1.185e-22  (not concave)
+Iteration 283: EE criterion =  1.185e-22  (not concave)
+Iteration 284: EE criterion =  1.185e-22  (not concave)
+Iteration 285: EE criterion =  1.185e-22  (not concave)
+Iteration 286: EE criterion =  1.185e-22  (not concave)
+Iteration 287: EE criterion =  1.185e-22  (not concave)
+Iteration 288: EE criterion =  1.185e-22  (not concave)
+Iteration 289: EE criterion =  1.185e-22  (not concave)
+Iteration 290: EE criterion =  1.185e-22  (not concave)
+Iteration 291: EE criterion =  1.185e-22  (not concave)
+Iteration 292: EE criterion =  1.185e-22  (not concave)
+Iteration 293: EE criterion =  1.185e-22  (not concave)
+Iteration 294: EE criterion =  1.185e-22  (not concave)
+Iteration 295: EE criterion =  1.185e-22  (not concave)
+Iteration 296: EE criterion =  1.185e-22  (not concave)
+Iteration 297: EE criterion =  1.185e-22  (not concave)
+Iteration 298: EE criterion =  1.185e-22  (not concave)
+Iteration 299: EE criterion =  1.185e-22  (not concave)
+Iteration 300: EE criterion =  1.185e-22  (not concave)
+convergence not achieved
+    The Gauss-Newton stopping criterion has been met but missing standard
+    errors indicate some of the parameters are not identified.
+
+Treatment-effects estimation                    Number of obs     =        614
+Estimator      : IPW regression adjustment
+Outcome model  : linear
+Treatment model: logit
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATET         |
+       treat |
+   (1 vs 0)  |   1270.125   783.1151     1.62   0.105    -264.7525    2805.002
+-------------+----------------------------------------------------------------
+POmean       |
+       treat |
+          0  |   5079.019   550.0536     9.23   0.000     4000.933    6157.104
+------------------------------------------------------------------------------
+Warning: Convergence not achieved.
+
+. eststo PSM:    teffects psmatch                   (re78)                   (t
+> reat age educ black hispan married nodegree re74 re75, logit),               
+>     atet nneighbor(4) vce(robust)
+
+Treatment-effects estimation                   Number of obs      =        614
+Estimator      : propensity-score matching     Matches: requested =          4
+Outcome model  : matching                                     min =          4
+Treatment model: logit                                        max =          6
+------------------------------------------------------------------------------
+             |              AI robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATET         |
+       treat |
+   (1 vs 0)  |   1273.893   1016.984     1.25   0.210    -719.3588    3267.144
+------------------------------------------------------------------------------
+
+. 
+. * 注意：esttab 的 rename 先于 keep 生效，因此 rename 后只剩 treat 一个名字。
+. esttab OLS RA IPW IPWRA PSM     using "_stata_lalonde_outputs/tables/table_ma
+> in_estimators.tex",     replace booktabs label se     star(* 0.10 ** 0.05 ***
+>  0.01)     rename(r1vs0.treat treat)     keep(treat)     mtitles("OLS" "RA" "
+> IPW" "IPWRA" "PSM")     title("Lalonde NSW: 培训对 1978 年收入的 ATT (多估计
+> 器对照)")     nonotes     addnotes("HC1 稳健 SE。teffects 估计量给出 ATT (ate
+> t)，OLS 给出 ATE 系数。AIPW 因弱 overlap 在此数据上不收敛，详见 5e。")
+(file _stata_lalonde_outputs/tables/table_main_estimators.tex not found)
+(output written to _stata_lalonde_outputs/tables/table_main_estimators.tex)
+
+. 
+. esttab OLS RA IPW IPWRA PSM     using "_stata_lalonde_outputs/tables/table_ma
+> in_estimators.rtf",     replace label se star(* 0.10 ** 0.05 *** 0.01)     re
+> name(r1vs0.treat treat) keep(treat)     mtitles("OLS" "RA" "IPW" "IPWRA" "PSM
+> ")
+(file _stata_lalonde_outputs/tables/table_main_estimators.rtf not found)
+(output written to _stata_lalonde_outputs/tables/table_main_estimators.rtf)
+
+. 
+. * 8b. coefplot：所有估计器横向对照（与 8a 主表一致，剔除 AIPW）
+. coefplot     (OLS,    rename(treat = "OLS"))     (RA,     rename(r1vs0.treat 
+> = "RA"))     (IPW,    rename(r1vs0.treat = "IPW"))     (IPWRA,  rename(r1vs0.
+> treat = "IPWRA"))     (PSM,    rename(r1vs0.treat = "PSM")),     keep(OLS RA 
+> IPW IPWRA PSM)     xline(0, lpattern(dash) lcolor(gs8))     xtitle("ATT 估计 
+> (95% CI)")     title("Lalonde NSW · 不同估计器的 ATT")     ciopts(recast(rcap
+> ))     msymbol(D) mcolor("31 119 180")
+(OLS: no coefficients found, all dropped, or none kept)
+(RA: no coefficients found, all dropped, or none kept)
+(IPW: no coefficients found, all dropped, or none kept)
+(IPWRA: no coefficients found, all dropped, or none kept)
+(PSM: no coefficients found, all dropped, or none kept)
+(nothing to plot)
+
+. graph export "_stata_lalonde_outputs/figures/coefplot_estimators.pdf", replac
+> e
+file _stata_lalonde_outputs/figures/coefplot_estimators.pdf saved as PDF
+    format
+
+. 
+. * 8c. 倾向得分 overlap 图（重要！selection-on-observables 的核心假设）
+. logit treat age educ black hispan married nodegree re74 re75
+
+Iteration 0:  Log likelihood = -375.74604  
+Iteration 1:  Log likelihood = -255.07658  
+Iteration 2:  Log likelihood = -244.28231  
+Iteration 3:  Log likelihood =  -243.9229  
+Iteration 4:  Log likelihood = -243.92197  
+Iteration 5:  Log likelihood = -243.92197  
+
+Logistic regression                                     Number of obs =    614
+                                                        LR chi2(8)    = 263.65
+                                                        Prob > chi2   = 0.0000
+Log likelihood = -243.92197                             Pseudo R2     = 0.3508
+
+------------------------------------------------------------------------------
+       treat | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   .0157771   .0135771     1.16   0.245    -.0108335    .0423876
+        educ |   .1613069   .0651264     2.48   0.013     .0336614    .2889524
+       black |   3.065368   .2865262    10.70   0.000     2.503787    3.626949
+      hispan |   .9836336    .425664     2.31   0.021     .1493476     1.81792
+     married |  -.8321133   .2903292    -2.87   0.004    -1.401148   -.2630786
+    nodegree |   .7072969   .3376683     2.09   0.036     .0454792    1.369115
+        re74 |  -.0000718   .0000287    -2.50   0.013    -.0001281   -.0000154
+        re75 |   .0000534   .0000463     1.15   0.249    -.0000374    .0001443
+       _cons |  -4.728649   1.017069    -4.65   0.000    -6.722068    -2.73523
+------------------------------------------------------------------------------
+
+. predict double pscore, pr
+
+. twoway (kdensity pscore if treat == 1, name(graph2, replace) lcolor("31 119 1
+> 80") lwidth(medthick))        (kdensity pscore if treat == 0, lcolor("214 39 
+> 40") lwidth(medthick) lpattern(dash)),     legend(order(1 "Treated" 2 "Contro
+> l") position(2) ring(0))     title("倾向得分分布：处理组 vs 对照组 (overlap 
+> 检验)", size(medium))     xtitle("propensity score") ytitle("density")
+
+. graph export "_stata_lalonde_outputs/figures/pscore_overlap.pdf", replace
+file _stata_lalonde_outputs/figures/pscore_overlap.pdf saved as PDF format
+
+. 
+. * overlap 数值汇总：两组 min/max 越重叠越好
+. tabstat pscore, by(treat)     stats(n min mean median max) columns(statistics
+> )
+
+Summary for variables: pscore
+Group variable: treat (NSW 职业培训 (0/1))
+
+   treat |         N       Min      Mean       p50       Max
+---------+--------------------------------------------------
+       0 |       429  .0090802  .1822248  .0758491  .7891728
+       1 |       185  .0249518  .5774355  .6536843  .8531528
+---------+--------------------------------------------------
+   Total |       614  .0090802  .3013029  .1206765  .8531528
+------------------------------------------------------------
+
+. drop pscore
+
+. 
+. 
+. *============================================================================
+> =*
+. * 结论 (与 Python notebook 的判断对齐)                                       
+>  *
+. *----------------------------------------------------------------------------
+> -*
+. * 1) 朴素差值（treated - control）= 约 -635 美元，处理组反而更穷             
+>  *
+. *    —— 因为处理组在 pre-treatment 协变量上系统性更弱（balance 表很糟）。    
+>  *
+. * 2) 加入协变量调整后，OLS / IPWRA / AIPW / PSM 多数给出正向 ATT，           
+>  *
+. *    但点估和 SE 跨估计器有差异 —— 这是 selection-on-observables 设计        
+>  *
+. *    在弱重叠样本上的典型现象。                                              
+>  *
+. * 3) Oster δ 给出未观测混淆敏感性的量化界限：                                
+>  *
+. *    重点看 |δ*| 是否大于 1（>1 才算"未观测要比观测更强才能推翻结论"）。     
+>  *
+. * 4) 真要给政策建议前，请补：                                                
+>  *
+. *    - 重新检视 overlap（倾向得分尾部样本是否要 trim）                       
+>  *
+. *    - 用 Dehejia–Wahba 的子样本（pre-treat 收入 ≥ 0 等）跑                  
+>  *
+. *    - 与实验组（NSW PSID/CPS 比较）做对照                                   
+>  *
+. *============================================================================
+> =*
+. 
+. di as text _n(2) "==== 管线运行完毕 ===="
+
+
+==== 管线运行完毕 ====
+
+. di as text "输出位置：$PROJECT_ROOT/_stata_lalonde_outputs/"
+输出位置：/Users/brycewang/Documents/GitHub/Awesome-Agent-Skills-for-Empirical-
+> Research/demo-notebooks/_stata_lalonde_outputs/
+
+. di as text "  - tables/  : esttab 表 (.tex / .rtf)"
+  - tables/  : esttab 表 (.tex / .rtf)
+
+. di as text "  - figures/ : 所有图 (.pdf)"
+  - figures/ : 所有图 (.pdf)
+
+. di as text "  - logs/    : 完整日志 lalonde_pipeline.log"
+  - logs/    : 完整日志 lalonde_pipeline.log
+
+. di as text "  - data/    : 清洗后样本 lalonde_analysis.dta"
+  - data/    : 清洗后样本 lalonde_analysis.dta
+
+. 
+. * 只关本 pipeline 的命名 log，MCP / GUI 的默认 log 不动
+. log close pipelog
+      name:  pipelog
+       log:  /Users/brycewang/Documents/GitHub/Awesome-Agent-Skills-for-Empiric
+> al-Research/demo-notebooks/_stata_lalonde_outputs/logs/lalonde_pipeline.log
+  log type:  text
+ closed on:  25 Apr 2026, 02:06:08
+-------------------------------------------------------------------------------

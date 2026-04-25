@@ -1,0 +1,8 @@
+{
+  "design": "rct (lalonde-approx)",
+  "n": 614,
+  "alpha": 0.05,
+  "power_target": 0.8,
+  "mde_in_sd_units": null,
+  "note": "sp.power_rct call deferred: TypeError(\"power_rct() got an unexpected keyword argument 'power_target'\")"
+}
