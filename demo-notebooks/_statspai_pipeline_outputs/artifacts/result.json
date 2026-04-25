@@ -1,0 +1,25 @@
+{
+  "statspai_version": "1.6.6",
+  "seed": 7,
+  "n_obs": 614,
+  "estimand": "ATT (selection on observables)",
+  "headline_estimate": 1548.2438019995936,
+  "headline_ci95": [
+    93.82699210969872,
+    3002.660611889489
+  ],
+  "naive_unadjusted": -635.0262120374209,
+  "pre_registration": "_statspai_pipeline_outputs/artifacts/empirical_strategy.md",
+  "data_contract": "_statspai_pipeline_outputs/artifacts/data_contract.json",
+  "sample_log": "_statspai_pipeline_outputs/artifacts/sample_construction.json",
+  "pap_power": "_statspai_pipeline_outputs/artifacts/pap_power.json",
+  "table2_main": "_statspai_pipeline_outputs/tables/table2_main.tex",
+  "table2b_design_race": "_statspai_pipeline_outputs/tables/table2b_design_race.tex",
+  "table3_heterogeneity": "_statspai_pipeline_outputs/tables/table3_heterogeneity.tex",
+  "tableA1_robustness": "_statspai_pipeline_outputs/tables/tableA1_robustness.tex",
+  "fig1_distributions": "_statspai_pipeline_outputs/figures/fig1_distributions.png",
+  "fig2c_love_plot": "_statspai_pipeline_outputs/figures/fig2c_love_plot.png",
+  "fig3_coefplot": "_statspai_pipeline_outputs/figures/fig3_coefplot.png",
+  "fig5_robustness": "_statspai_pipeline_outputs/figures/fig5_robustness_forest.png",
+  "fig5b_spec_curve": "_statspai_pipeline_outputs/figures/fig5b_spec_curve.png"
+}
