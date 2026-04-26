@@ -340,7 +340,6 @@ M4 = sp.regress("lwage ~ educ + " + " + ".join(CONTROLS_FULL),
 rt2 = sp.regtable(
     M1, M2, M3, M4,
     template="aer",
-    keep=["educ"],
     coef_labels={"educ": "Years of schooling"},
     model_labels=["(1) Bivariate", "(2) +Mincer", "(3) +Demog.", "(4) +Region FE"],
     stats=["N", "R2"],
@@ -388,7 +387,6 @@ labels_for_horserace = [lbl for lbl, m in zip(
 rt2c = sp.regtable(
     *models_for_horserace,
     template="aer",
-    keep=["educ"],
     coef_labels={"educ": "Years of schooling (β̂)"},
     model_labels=labels_for_horserace,
     stats=["N"],
@@ -407,7 +405,6 @@ multi_y = [
 rt2d = sp.regtable(
     *multi_y,
     template="aer",
-    keep=["educ"],
     coef_labels={"educ": "Years of schooling"},
     dep_var_labels=ys,
     model_labels=[f"({i+1})" for i in range(len(ys))],
@@ -472,7 +469,6 @@ g_models = [
 rt3 = sp.regtable(
     *g_models,
     template="aer",
-    keep=["educ"],
     coef_labels={"educ": "Years of schooling"},
     model_labels=list(slices),
     stats=["N", "R2"],
@@ -664,7 +660,6 @@ rob_vals = list(rob_models.values())
 rt_rob = sp.regtable(
     *rob_vals,
     template="aer",
-    keep=["educ"],
     coef_labels={"educ": "Years of schooling"},
     model_labels=rob_keys,
     stats=["N"],
@@ -728,7 +723,6 @@ c.add_text(
 c.add_heading("§4. Main results", level=1)
 c.add_regression(
     M1, M2, M3, M4,
-    keep=["educ"],
     model_labels=["(1)", "(2)", "(3)", "(4)"],
     stats=["N", "R2"],
     title="Table 2. OLS Mincer wage equation",
@@ -742,14 +736,12 @@ c.add_regression(
 c.add_heading("§5. Heterogeneity", level=1)
 c.add_regression(
     *g_models,
-    keep=["educ"],
     model_labels=list(slices),
     title="Table 3. Heterogeneous effects",
 )
 c.add_heading("§7. Robustness", level=1)
 c.add_regression(
     *rob_vals,
-    keep=["educ"],
     model_labels=rob_keys,
     title="Table A1. Robustness gauntlet",
 )
