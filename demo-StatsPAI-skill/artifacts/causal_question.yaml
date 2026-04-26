@@ -1,0 +1,30 @@
+question:
+  treatment: "educ"
+  outcome: "lwage"
+  population: "NLSYM men aged 24-34 in 1976, with non-missing wage and education"
+  estimand: "LATE"
+  design: "iv"
+  time_structure: "cross_section"
+  time: null
+  id: null
+  covariates:
+    - "exper"
+    - "expersq"
+    - "black"
+    - "south"
+    - "smsa"
+    - "smsa66"
+    - "reg662"
+    - "reg663"
+    - "reg664"
+    - "reg665"
+    - "reg666"
+    - "reg667"
+    - "reg668"
+    - "reg669"
+  instruments:
+    - "nearc4"
+  running_variable: null
+  cutoff: null
+  cohort: null
+  notes: ""

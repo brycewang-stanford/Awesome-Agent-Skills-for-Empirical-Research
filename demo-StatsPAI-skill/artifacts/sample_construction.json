@@ -1,0 +1,22 @@
+[
+  [
+    "0. raw NLSYM extract",
+    3010
+  ],
+  [
+    "1. drop missing lwage / educ / nearc4",
+    3010
+  ],
+  [
+    "2. drop missing core controls",
+    3010
+  ],
+  [
+    "3. keep educ in [1, 18]",
+    3010
+  ],
+  [
+    "4. final analysis sample",
+    3010
+  ]
+]

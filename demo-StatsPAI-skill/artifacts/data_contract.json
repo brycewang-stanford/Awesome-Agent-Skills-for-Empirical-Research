@@ -1,0 +1,52 @@
+{
+  "n_obs": 3010,
+  "dtypes": {
+    "lwage": "float64",
+    "educ": "int64",
+    "exper": "int64",
+    "expersq": "int64",
+    "black": "int64",
+    "south": "int64",
+    "smsa": "int64",
+    "smsa66": "int64",
+    "reg662": "int64",
+    "reg663": "int64",
+    "reg664": "int64",
+    "reg665": "int64",
+    "reg666": "int64",
+    "reg667": "int64",
+    "reg668": "int64",
+    "reg669": "int64",
+    "nearc4": "int64"
+  },
+  "n_missing": {
+    "lwage": 0,
+    "educ": 0,
+    "exper": 0,
+    "expersq": 0,
+    "black": 0,
+    "south": 0,
+    "smsa": 0,
+    "smsa66": 0,
+    "reg662": 0,
+    "reg663": 0,
+    "reg664": 0,
+    "reg665": 0,
+    "reg666": 0,
+    "reg667": 0,
+    "reg668": 0,
+    "reg669": 0,
+    "nearc4": 0
+  },
+  "y_range": [
+    4.605170249938965,
+    7.784889221191406
+  ],
+  "treatment_range": [
+    1.0,
+    18.0
+  ],
+  "instrument_share": 0.6820598006644518,
+  "instrument_y_corr": 0.16362064421508501,
+  "instrument_t_corr": 0.14424020879622318
+}
