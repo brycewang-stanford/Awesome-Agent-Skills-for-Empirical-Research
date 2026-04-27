@@ -1,9 +1,15 @@
-SubgroupResult(results_df=   estimate        se  ci_lower  ci_upper  ...  nobs  group_var group_val     label
-0  0.074198  0.004089  0.066180  0.082216  ...  2307      black         0  black: 0
-1  0.071107  0.008060  0.055283  0.086931  ...   703      black         1  black: 1
-2  0.069695  0.004644  0.060587  0.078804  ...  1795      south         0  south: 0
-3  0.078498  0.005957  0.066812  0.090184  ...  1215      south         1  south: 1
-4  0.070476  0.006567  0.057586  0.083365  ...   864       smsa         0   smsa: 0
-5  0.075160  0.004397  0.066537  0.083782  ...  2146       smsa         1   smsa: 1
+SubgroupResult(results_df=   estimate        se  ci_lower  ci_upper  pvalue  nobs group_var group_val  \
+0  0.074198  0.004089  0.066180  0.082216     0.0  2307     black         0   
+1  0.071107  0.008060  0.055283  0.086931     0.0   703     black         1   
+2  0.069695  0.004644  0.060587  0.078804     0.0  1795     south         0   
+3  0.078498  0.005957  0.066812  0.090184     0.0  1215     south         1   
+4  0.070476  0.006567  0.057586  0.083365     0.0   864      smsa         0   
+5  0.075160  0.004397  0.066537  0.083782     0.0  2146      smsa         1   
 
-[6 rows x 9 columns], x='educ', overall_estimate=np.float64(0.07400899420056786), overall_se=np.float64(0.003642033530509231), het_tests={'black': {'chi2': 9.181846862861432, 'pvalue': np.float64(0.0024442725535118726), 'df': 1.0}, 'south': {'chi2': 13.467573143203573, 'pvalue': np.float64(0.0002427220571381561), 'df': 1.0}, 'smsa': {'chi2': 0.2715303255552455, 'pvalue': np.float64(0.6023070595944431), 'df': 1.0}})
+      label  
+0  black: 0  
+1  black: 1  
+2  south: 0  
+3  south: 1  
+4   smsa: 0  
+5   smsa: 1  , x='educ', overall_estimate=np.float64(0.07400899420056786), overall_se=np.float64(0.003642033530509231), het_tests={'black': {'chi2': 9.181846862861432, 'pvalue': np.float64(0.0024442725535118726), 'df': 1.0}, 'south': {'chi2': 13.467573143203573, 'pvalue': np.float64(0.0002427220571381561), 'df': 1.0}, 'smsa': {'chi2': 0.2715303255552455, 'pvalue': np.float64(0.6023070595944431), 'df': 1.0}})

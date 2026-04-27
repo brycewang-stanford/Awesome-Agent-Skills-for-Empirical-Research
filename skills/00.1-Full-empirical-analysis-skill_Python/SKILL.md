@@ -1,6 +1,6 @@
 ---
 name: Full-empirical-analysis-skill
-description: Classical end-to-end empirical analysis workflow in the traditional Python econometric stack — pandas + numpy + scipy + statsmodels + linearmodels + pyfixest + rdrobust + econml + causalml + matplotlib/seaborn. **Defaults to economics empirical-paper style** — every run produces a publication-ready output set with a multi-column regression table (M1→M6 progressive controls/FE) as the centerpiece, plus Table 1 (descriptives), mechanism / heterogeneity / robustness tables, and event-study + coefficient + trend figures. Covers the full 8-step pipeline an applied economist or quantitative social scientist runs on every paper — (1) data cleaning, (2) variable construction & transformation, (3) descriptive statistics & Table 1, (4) statistical diagnostic tests, (5) baseline empirical modeling, (6) robustness battery, (7) further analysis (mechanism, heterogeneity, mediation, moderation), (8) publication-ready tables & figures. Prescribes which library to reach for at each step, shows the canonical code, and links to deeper `references/` files for variant-specific patterns. Use when the user asks for a **complete empirical analysis** in Python, wants to replicate an applied-economics paper from scratch, needs a reproducible workflow that is NOT opinionated on any single vertical package (contrast with StatsPAI), wants explicit control over every estimator and diagnostic, or asks "how do I write a full empirical pipeline in Python?". Also triggers when the user names a specific classical step in isolation — "winsorize at 1/99%", "run Breusch-Pagan", "build a Table 1 balance table", "do a placebo test", "event study plot", "mediation analysis" — and wants it wired into the broader pipeline.
+description: Classical end-to-end empirical analysis workflow in the traditional Python econometric stack — pandas + numpy + scipy + statsmodels + linearmodels + pyfixest + rdrobust + econml + causalml + matplotlib/seaborn. **Defaults to economics empirical-paper style** (AER / QJE / AEJ) — every run produces a publication-ready output set with a multi-column regression table (M1→M6 progressive controls/FE) as the centerpiece, plus Table 1 (descriptives), mechanism / heterogeneity / robustness tables, and event-study + coefficient + trend figures. Covers the full 8-step pipeline an applied economist or quantitative social scientist runs on every paper — (1) data cleaning, (2) variable construction & transformation, (3) descriptive statistics & Table 1, (4) statistical diagnostic tests, (5) baseline empirical modeling, (6) robustness battery, (7) further analysis (mechanism, heterogeneity, mediation, moderation), (8) publication-ready tables & figures. **Also covers two parallel domain modes that share the same 8-step scaffolding** — **Mode A — Epidemiology / public health** (target-trial emulation via `zepid` / hand-rolled `pandas`, IPTW + g-formula + TMLE doubly-robust triplet via `zepid` / `econml` / `lifelines`, Mendelian randomization via `pymr` / `mrtool` (or `rpy2` → `MendelianRandomization`/`TwoSampleMR`), KM / AFT / Cox survival via `lifelines`, E-value sensitivity, principal stratification — STROBE / TRIPOD reporting), and **Mode B — ML causal inference** (DML via `econml.dml` / `doubleml`, S/T/X/R/DR meta-learners via `econml.metalearners` / `causalml`, causal forest via `econml.grf` / `causalml`, Dragonnet / TARNet / CEVAE neural causal via `causalml`, BCF via `pymc-bart` / `bcf-py`, matrix completion, CATE distribution + policy tree via `econml.policy` / `policytree-py`, off-policy evaluation, conformal causal via `mapie`, fairness audit via `fairlearn`, DAG learning via `causal-learn` / `cdt` / LLM-assisted). Prescribes which library to reach for at each step, shows the canonical code, and links to deeper `references/` files for variant-specific patterns. Use when the user asks for a **complete empirical analysis** in Python, wants to replicate an applied-economics paper from scratch, needs a reproducible workflow that is NOT opinionated on any single vertical package (contrast with StatsPAI), wants explicit control over every estimator and diagnostic, or asks "how do I write a full empirical pipeline in Python?". Also triggers when the user names a specific classical step in isolation — "winsorize at 1/99%", "run Breusch-Pagan", "build a Table 1 balance table", "do a placebo test", "event study plot", "mediation analysis" — and wants it wired into the broader pipeline. Mode A triggers on "target trial emulation", "IPTW", "TMLE", "Mendelian randomization", "STROBE", "公共健康", "流行病学". Mode B triggers on "DML", "double machine learning", "causal forest", "meta-learner", "Dragonnet", "BCF", "policy tree", "conformal causal", "fairness audit", "因果机器学习".
 triggers:
   - full empirical analysis in Python
   - classical econometrics pipeline
@@ -41,6 +41,42 @@ triggers:
   - coefplot
   - binscatter
   - event study plot
+  # Mode A — Epidemiology / public health
+  - epidemiology pipeline python
+  - public health causal inference python
+  - target trial emulation python
+  - g-formula python
+  - IPTW marginal structural model python
+  - TMLE doubly robust python
+  - HAL-TMLE python
+  - Mendelian randomization python
+  - MR-Egger weighted median python
+  - STROBE TRIPOD reporting python
+  - E-value sensitivity python
+  - Kaplan-Meier AFT survival python
+  - lifelines survival python
+  - zepid epidemiology
+  - 流行病学 python
+  - 公共健康 python
+  # Mode B — ML causal inference
+  - ML causal inference python
+  - double machine learning DML python
+  - econml DoubleML
+  - meta-learner S T X R DR python
+  - causal forest GRF python
+  - causalml meta-learner
+  - Dragonnet TARNet CEVAE python
+  - Bayesian causal forest BCF python
+  - CATE distribution python
+  - policy tree python
+  - off-policy evaluation python
+  - conformal causal prediction python
+  - mapie conformal
+  - fairness audit python
+  - fairlearn audit
+  - causal discovery PC NOTEARS python
+  - causal-learn cdt
+  - 因果机器学习 python
 ---
 
 # Full Empirical Analysis — Classical Python Workflow
@@ -56,6 +92,29 @@ This skill is the *canonical* 8-step pipeline an applied economist runs on every
 3. **Rich outputs.** Every step produces at least one table or figure — never a single point estimate in isolation.
 4. **Progressive disclosure.** SKILL.md gives the canonical call at each step; `references/` holds variant-specific depth (dozens of tests, estimator-specific diagnostics, plot recipes).
 5. **Reproducible.** Every code block is runnable after `pip install -r requirements.txt` and `df = pd.read_csv(...)`.
+
+---
+
+## Three domain modes (default = AER econ; alternates = epi & ML-causal)
+
+The default playbook above is **AER-style applied econometrics** — the AEA convention: written-out estimating equation, identifying assumption, design horse-race, full robustness gauntlet. The skill **also** ships two parallel sub-pipelines for the other two big causal-inference traditions, each reusing the same Steps 1–4 (cleaning / construction / descriptives / diagnostics) and Step 8 (tables & figures) — only Step 5 (estimator) and Step 6/7 (robustness / mechanism) swap libraries:
+
+| Mode | Reader convention | Step-5 estimator stack | Reporting stack | Jump to |
+|---|---|---|---|---|
+| **Default — Applied Econ (AER / QJE / AEJ)** | "Show the equation + identifying assumption + design horse-race; controls visible; clustered SE" | DID / IV / RD / SCM / matching / `pyfixest.feols` HDFE | AER house-style multi-column `pf.etable` / `Stargazer` + 8-section paper layout | Steps 1 → 8 (entire playbook below) |
+| **Mode A — Epidemiology / Public Health** | "STROBE / TRIPOD-AI; target trial protocol; doubly-robust estimand; absolute & relative risk; KM survival" | Target-trial emulation · IPTW (`zepid`) · g-formula (`zepid` / hand-rolled) · TMLE (`zepid.causal.gformula` / `econml`) · Mendelian randomization (`pymr` / `rpy2`+`TwoSampleMR`) · KM/AFT (`lifelines`) | Same `pf.etable` + risk-difference / hazard-ratio / E-value rows | §A. Epidemiology pipeline |
+| **Mode B — ML Causal Inference** | "DML / meta-learners / causal forest / DR-learner; CATE distribution; policy value" | DML (`econml.dml` / `doubleml`) · S/T/X/R/DR-Learner (`econml.metalearners` / `causalml`) · GRF causal forest (`econml.grf`) · Dragonnet/TARNet/CEVAE (`causalml`) · BCF (`pymc-bart`/`bcf-py`) · matrix completion | `pf.etable` ML horse-race + CATE plot + policy-value table + conformal PI (`mapie`) | §B. ML causal pipeline |
+
+**How to invoke a non-default mode** (Claude / agent picks this up from the user's wording):
+
+| User says... | Mode the skill switches to |
+|---|---|
+| "Run a DID / IV / RD / event study", "AER table", "applied micro" | Default (AER econ) — Steps 1 → 8 |
+| "Target trial emulation", "g-formula", "IPTW", "TMLE", "Mendelian randomization", "STROBE / TRIPOD", "公共健康 / 流行病学", "epi pipeline", "RWE study", "cohort study", "case-control" | Mode A (Epi) — §A |
+| "DML", "double machine learning", "causal forest", "meta-learner", "CATE", "Dragonnet", "BCF", "policy learning", "conformal causal", "fairness audit", "ML causal", "uplift modeling", "因果机器学习" | Mode B (ML causal) — §B |
+| "Mix" (e.g. "estimate DID + then ML CATE on the heterogeneity") | Default + Mode B in sequence — every estimator returns a coefficient + SE pair, drop them all into one `pf.etable(...)` for the horse-race column |
+
+The three modes share **the same Step 1–4 cleaning / Table 1 / diagnostics scaffolding, the same Step 8 export stack, and the same DAG-first identification logic** — switching modes only changes which Step-5 estimator family you reach for, not the surrounding paper structure. If you only want descriptive stats / Table 1 / a balance check, the AER `tableone` / `gtsummary`-style calls in Step 3 work identically across all three modes.
 
 ---
 
@@ -695,6 +754,334 @@ from rdrobust import rdplot                                  # RD plot (only whe
 [ ] tables/table3_mechanism.tex   [ ] figures/fig3_coefplot.pdf
 [ ] tables/table4_heterogeneity.tex
 [ ] tables/table5_robustness.tex  [ ] figures/fig4_sensitivity.pdf
+```
+
+---
+
+## §A — Epidemiology / Public Health Mode
+
+When the user's wording flags Mode A (target-trial emulation / IPTW / TMLE / MR / STROBE / 流行病学 / 公共健康 / RWE / cohort), the 8 steps still apply — but Step 5 swaps the OLS-and-FE stack for the doubly-robust + survival + MR triplet, and the deliverables follow STROBE / TRIPOD-AI conventions. **Steps 1–4 (cleaning, construction, Table 1, diagnostics) and Step 8 (tables/figures export) are identical to the Default mode.**
+
+**Library footprint** (install on top of the Default stack):
+
+```bash
+pip install zepid                # IPTW, g-formula, TMLE, AIPW, E-value
+pip install lifelines            # KM, Cox, AFT, RMST
+pip install scikit-survival      # alternative survival stack (scaling-friendly)
+# Mendelian randomization — Python coverage is thin; for IVW/Egger/weighted-median:
+pip install pymr                 # if available
+# Or call R from Python:
+pip install rpy2                 # then import TwoSampleMR / MendelianRandomization via rpy2
+```
+
+### A.0 Cohort construction + target-trial protocol
+
+Write the protocol **before** touching the data. Save it as `protocol.yml` and quote it in the paper.
+
+```python
+# protocol.yml — target-trial emulation skeleton
+target_trial = {
+    "eligibility":    {"age": "40-75", "no_prior_event": True, "ascertained_at": "t0"},
+    "treatment":      {"A=1": "statin initiation", "A=0": "no initiation"},
+    "assignment":     "random at t0 (emulated by IPTW on baseline covariates)",
+    "follow_up_start":"t0 (treatment initiation date)",
+    "outcome":        "incident MI within 5 years",
+    "estimand":       "intention-to-treat ATE on risk difference + hazard ratio",
+    "censoring":      {"loss_to_FU": True, "competing_risk": "death from non-MI causes"},
+}
+```
+
+```python
+# Cohort construction in pandas — eligibility + index date + censoring date
+cohort = (df
+    .query("age >= 40 & age <= 75 & prior_MI == 0")            # eligibility
+    .assign(t0 = lambda d: d["statin_initiation_date"].fillna(d["enrollment_date"]),
+            event_5y = lambda d: ((d["MI_date"] - d["t0"]).dt.days <= 365*5).astype(int),
+            time_at_risk = lambda d: ((d["censor_date"] - d["t0"]).dt.days.clip(0, 365*5))))
+```
+
+### A.1 Table 1 by exposure (identical to Default Step 3)
+
+Use the same `tableone` / `gtsummary`-style call from Step 3, just `groupby="A"` (treatment indicator). E-values for unmeasured confounding go in the footer.
+
+### A.2 DAG + propensity-score overlap (positivity check)
+
+```python
+# Estimate PS, plot overlap (positivity), love-plot SMDs
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+
+X = df[["age", "edu", "smoke", "bmi", "ldl", "sbp"]]
+y = df["A"]
+ps = LogisticRegression(max_iter=1000).fit(StandardScaler().fit_transform(X), y).predict_proba(StandardScaler().fit_transform(X))[:, 1]
+df["ps"] = ps
+
+# Overlap plot
+import matplotlib.pyplot as plt, seaborn as sns
+sns.kdeplot(data=df, x="ps", hue="A", common_norm=False)
+plt.savefig("figures/figA2_ps_overlap.pdf")
+
+# Love plot (SMDs before vs after IPTW) — see zepid.causal.ipw.diagnostics
+```
+
+### A.3 IPTW + g-formula + TMLE doubly-robust triplet (Step 5 swap)
+
+The "AER Table 2" of epi: a 3-column table where each column is one of {IPTW-MSM, g-formula, TMLE} so the reader can confirm doubly-robust agreement.
+
+```python
+import zepid as ze
+from zepid.causal.ipw import IPTW
+from zepid.causal.gformula import TimeFixedGFormula
+from zepid.causal.doublyrobust import TMLE
+
+# IPTW (marginal structural model)
+iptw = IPTW(df, treatment="A", outcome="event_5y")
+iptw.treatment_model("age + edu + smoke + bmi + ldl + sbp", print_results=False)
+iptw.outcome_model("A", print_results=False)
+iptw.fit()
+RD_iptw, CI_iptw = iptw.risk_difference, iptw.risk_difference_ci
+
+# g-formula (parametric)
+gf = TimeFixedGFormula(df, exposure="A", outcome="event_5y")
+gf.outcome_model("A + age + edu + smoke + bmi + ldl + sbp")
+gf.fit(treatment="all")  ; r1 = gf.marginal_outcome
+gf.fit(treatment="none") ; r0 = gf.marginal_outcome
+RD_gf = r1 - r0
+
+# TMLE (doubly robust)
+tmle = TMLE(df, exposure="A", outcome="event_5y")
+tmle.exposure_model("age + edu + smoke + bmi + ldl + sbp")
+tmle.outcome_model("A + age + edu + smoke + bmi + ldl + sbp")
+tmle.fit()
+RD_tmle, CI_tmle = tmle.risk_difference, tmle.risk_difference_ci
+
+# Stack the triplet into one paper table
+import pandas as pd
+tableA3 = pd.DataFrame({
+    "Estimator": ["IPTW-MSM", "g-formula", "TMLE"],
+    "RD":        [RD_iptw, RD_gf, RD_tmle],
+    "95% CI":    [CI_iptw, "—", CI_tmle],
+})
+tableA3.to_latex("tables/tableA3_dr_triplet.tex", index=False, float_format="%.3f")
+```
+
+### A.4 Survival outcomes — KM / Cox / AFT / RMST
+
+```python
+from lifelines import KaplanMeierFitter, CoxPHFitter, WeibullAFTFitter
+from lifelines.utils import restricted_mean_survival_time
+
+# KM by treatment
+fig, ax = plt.subplots()
+for a, sub in df.groupby("A"):
+    KaplanMeierFitter().fit(sub["time_at_risk"], sub["event_5y"], label=f"A={a}").plot_survival_function(ax=ax)
+plt.savefig("figures/figA4_km.pdf")
+
+# Cox HR (covariate-adjusted)
+cox = CoxPHFitter().fit(df[["time_at_risk","event_5y","A","age","edu","smoke","bmi","ldl","sbp"]],
+                        duration_col="time_at_risk", event_col="event_5y")
+HR = cox.hazard_ratios_["A"]; HR_CI = cox.confidence_intervals_.loc["A"].values
+
+# AFT (Weibull) for time-ratio interpretation
+aft = WeibullAFTFitter().fit(df[["time_at_risk","event_5y","A","age","edu","smoke","bmi","ldl","sbp"]],
+                             duration_col="time_at_risk", event_col="event_5y")
+
+# RMST contrast at t=5y
+rmst1 = restricted_mean_survival_time(df.query("A==1")["time_at_risk"], df.query("A==1")["event_5y"], t=5*365)
+rmst0 = restricted_mean_survival_time(df.query("A==0")["time_at_risk"], df.query("A==0")["event_5y"], t=5*365)
+```
+
+### A.5 Mendelian randomization (IVW / Egger / weighted-median triplet)
+
+Two-sample MR is most ergonomic via R; from Python use `rpy2` or pre-export betas/SEs and call `TwoSampleMR` / `MendelianRandomization` in a sister R script.
+
+```python
+# Pure-Python: pymr (or write the IVW/Egger formulas by hand — they're closed-form)
+# Cross-language: rpy2 is the de-facto path for IVW/Egger/weighted median.
+import rpy2.robjects as ro
+ro.r('''
+library(MendelianRandomization)
+mr_input <- mr_input(bx=BX, bxse=BXSE, by=BY, byse=BYSE)
+ivw    <- mr_ivw(mr_input)
+egger  <- mr_egger(mr_input)
+median <- mr_median(mr_input, weighting="weighted")
+''')
+# Stack the triplet (IVW, Egger, weighted-median) in one tableA5.
+```
+
+### A.6 Robustness — E-value / bounds / principal stratification
+
+```python
+# E-value from zepid (Linden & VanderWeele formula)
+from zepid.sensitivity_analysis import e_value
+ev = e_value(measure="RR", est=1.45, lcl=1.10, ucl=1.91)   # → required strength of unmeasured confounding
+print(ev)
+```
+
+### A.7 STROBE / TRIPOD-AI reporting checklist
+
+Save as `replication/strobe_checklist.md` and tick before submission:
+
+```
+[ ] Eligibility criteria + dates                           (target-trial protocol)
+[ ] Adjustment set with DAG justification                  (A.2)
+[ ] Positivity / overlap diagnostic                        (A.2)
+[ ] Doubly-robust triplet (IPTW + g-formula + TMLE)        (A.3)
+[ ] Risk difference + hazard ratio + RMST                  (A.3, A.4)
+[ ] E-value for unmeasured confounding                     (A.6)
+[ ] Loss-to-follow-up rate + censoring assumption          (A.0)
+[ ] Pre-registered protocol or analysis plan               (A.0)
+```
+
+---
+
+## §B — ML Causal Inference Mode
+
+When the user's wording flags Mode B (DML / meta-learner / causal forest / Dragonnet / BCF / CATE / policy learning / conformal causal / fairness / 因果机器学习), the pipeline keeps Steps 1–4 and Step 8 from the Default mode, swaps Step 5 for the ML estimator stack, and adds a CATE-distribution + policy-value layer between Step 7 and Step 8.
+
+**Library footprint** (install on top of the Default stack):
+
+```bash
+pip install econml doubleml causalml dowhy             # core estimators
+pip install causal-learn cdt                          # causal discovery (PC / NOTEARS / GES)
+pip install mapie                                      # conformal prediction (incl. causal)
+pip install fairlearn                                  # fairness audit
+pip install policytree-py                              # discrete policy learning (optional; also via econml.policy)
+```
+
+### B.0 Train/holdout split + nuisance learner stack
+
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingRegressor, GradientBoostingClassifier
+
+train, holdout = train_test_split(df, test_size=0.3, random_state=42, stratify=df["A"])
+
+# Standard nuisance pair: outcome regression Q(X,A) and propensity score g(A|X)
+Q_learner = GradientBoostingRegressor(n_estimators=300, max_depth=3)
+g_learner = GradientBoostingClassifier(n_estimators=300, max_depth=3)
+```
+
+### B.1 DAG / estimand declaration (optionally LLM-assisted)
+
+```python
+# Causal discovery on observational data — start with PC algorithm
+from causallearn.search.ConstraintBased.PC import pc
+cg = pc(df[["A","Y","X1","X2","X3","X4"]].to_numpy())
+cg.draw_pydot_graph(labels=["A","Y","X1","X2","X3","X4"])
+
+# OR: NOTEARS for a fully differentiable DAG learner
+# from cdt.causality.graph import NOTEARS
+# notears = NOTEARS().predict(df[["A","Y","X1","X2","X3","X4"]])
+
+# Always sanity-check the recovered DAG against domain knowledge before reading off the adjustment set.
+```
+
+### B.2 Estimator stack — DML · meta-learners · causal forest · neural · BCF (Step 5 swap)
+
+The "AER Table 2" of ML causal: a horse-race table where each column is one estimator family on the same `(Y, A, X)` data — readers want to see DML, T-learner, X-learner, causal forest, and Dragonnet all agree (or disagree) on the ATE.
+
+```python
+from econml.dml             import LinearDML, NonParamDML
+from econml.metalearners    import SLearner, TLearner, XLearner, DomainAdaptationLearner
+from econml.dr              import DRLearner
+from econml.grf             import CausalForest
+from causalml.inference.tf  import DragonNet
+# from bcf_py import BayesianCausalForest  # if BCF needed
+
+X_train, A_train, Y_train = train[["X1","X2","X3","X4"]], train["A"], train["Y"]
+X_hold,  A_hold,  Y_hold  = holdout[["X1","X2","X3","X4"]], holdout["A"], holdout["Y"]
+
+# DML — semi-parametric, doubly robust to nuisance ML
+dml = LinearDML(model_y=Q_learner, model_t=g_learner, discrete_treatment=True, cv=5).fit(Y_train, A_train, X=X_train, W=X_train)
+ate_dml = dml.ate(X_hold); ci_dml = dml.ate_interval(X_hold, alpha=0.05)
+
+# Meta-learners — drop the same Q/g into S/T/X
+sl = SLearner(overall_model=Q_learner).fit(Y_train, A_train, X=X_train); ate_S = sl.ate(X_hold)
+tl = TLearner(models=Q_learner).fit(Y_train, A_train, X=X_train); ate_T = tl.ate(X_hold)
+xl = XLearner(models=Q_learner, propensity_model=g_learner).fit(Y_train, A_train, X=X_train); ate_X = xl.ate(X_hold)
+
+# DR-Learner — orthogonal CATE
+dr = DRLearner(model_propensity=g_learner, model_regression=Q_learner, model_final=GradientBoostingRegressor()).fit(Y_train, A_train, X=X_train)
+ate_DR = dr.ate(X_hold)
+
+# Causal forest — non-parametric CATE
+cf = CausalForest(n_estimators=500).fit(X=X_train, T=A_train, y=Y_train); cate_cf = cf.predict(X_hold)
+ate_cf = cate_cf.mean()
+
+# Dragonnet — joint propensity + outcome neural net
+dn = DragonNet(); dn.fit(X_train.values, A_train.values, Y_train.values); ate_dn = dn.predict(X_hold.values).mean()
+
+# Stack the horse-race
+import pandas as pd
+tableB2 = pd.DataFrame({
+    "Estimator": ["DML (linear)", "S-learner", "T-learner", "X-learner", "DR-learner", "Causal Forest", "Dragonnet"],
+    "ATE":       [ate_dml, ate_S, ate_T, ate_X, ate_DR, ate_cf, ate_dn],
+})
+tableB2.to_latex("tables/tableB2_ml_horserace.tex", index=False, float_format="%.4f")
+```
+
+### B.3 CATE distribution + subgroup CATE plot (Step 7 extension)
+
+```python
+# CATE histogram and quantile plot — heterogeneity from causal forest
+import numpy as np
+cate = cf.predict(X_hold)
+plt.figure(); plt.hist(cate, bins=30); plt.axvline(0, ls="--", color="k"); plt.xlabel("CATE")
+plt.savefig("figures/figB3_cate_hist.pdf")
+
+# CATE by quartile of a covariate
+df_h = X_hold.assign(cate=cate, age_q=pd.qcut(X_hold["X1"], 4, labels=False))
+df_h.groupby("age_q")["cate"].mean().plot(kind="bar"); plt.ylabel("Mean CATE")
+plt.savefig("figures/figB3_cate_by_age_q.pdf")
+```
+
+### B.4 Policy learning + off-policy evaluation
+
+```python
+from econml.policy import DRPolicyTree            # honest discrete policy tree
+
+policy = DRPolicyTree(max_depth=3).fit(Y_train, A_train, X=X_train)
+policy.plot()   # prose-readable tree of "treat if X1<a and X2>b"
+plt.savefig("figures/figB4_policy_tree.pdf")
+
+# Off-policy evaluation (DR-style policy-value)
+pred_policy = policy.predict(X_hold)
+policy_value_DR = ((Y_hold * (pred_policy == A_hold).astype(int)).mean()
+                   - (Y_hold * (pred_policy != A_hold).astype(int)).mean())
+print(f"DR policy value (holdout): {policy_value_DR:.3f}")
+```
+
+### B.5 Uncertainty (conformal causal) + fairness + sensitivity
+
+```python
+from mapie.regression import MapieRegressor
+
+# Conformal prediction interval around CATE — distribution-free coverage guarantee
+mapie = MapieRegressor(estimator=GradientBoostingRegressor(), method="plus", cv=10).fit(X_train, cf.predict(X_train))
+y_pred, y_pis = mapie.predict(X_hold, alpha=0.1)   # 90% conformal PI
+
+# Fairness audit — disparate-impact / equalized-odds for the learned policy
+from fairlearn.metrics import MetricFrame, demographic_parity_difference, equalized_odds_difference
+sens = X_hold["sensitive_attr"]              # e.g. female
+mf = MetricFrame(metrics={"acc": (lambda y,y_hat: (y == y_hat).mean())},
+                 y_true=A_hold, y_pred=policy.predict(X_hold), sensitive_features=sens)
+print("Demographic parity diff:", demographic_parity_difference(A_hold, policy.predict(X_hold), sensitive_features=sens))
+```
+
+### B.6 ML-causal-specific reporting checklist
+
+Save as `replication/ml_causal_checklist.md`:
+
+```
+[ ] Nuisance learners listed (Q model, g model, hyperparameters, CV folds)
+[ ] Cross-fitting / sample-splitting documented (DML K-fold)
+[ ] Overlap / propensity diagnostics (B.0 + A.2-style overlap plot)
+[ ] CATE summary (mean, SD, quartiles) + heterogeneity p-value
+[ ] Policy value with confidence interval (B.4)
+[ ] Conformal coverage rate on holdout (B.5)
+[ ] Fairness gaps across sensitive attributes (B.5)
+[ ] DAG / adjustment set + sensitivity to unmeasured confounding (E-value or Manski bounds)
 ```
 
 ---

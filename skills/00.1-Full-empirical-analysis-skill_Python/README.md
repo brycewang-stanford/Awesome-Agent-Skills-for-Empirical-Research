@@ -1,10 +1,36 @@
-# Full Empirical Analysis Skill for Claude Code
+# Full Empirical Analysis Skill for Claude Code (Python)
 
 This folder is a **Claude Code Skill** that teaches Claude (or any compatible
 agent harness) how to drive a complete empirical analysis end-to-end in the
 **traditional Python econometric stack** — `pandas + numpy + scipy +
 statsmodels + linearmodels + pyfixest + rdrobust + econml + causalml +
-matplotlib/seaborn` — with explicit control at every step.
+matplotlib/seaborn` — with explicit control at every step, covering
+**three domain modes** that share the same 8-step scaffolding:
+
+- **Default — Applied Econ (AER / QJE / AEJ).** The canonical 8-step pipeline:
+  cleaning → variable construction → Table 1 → diagnostic tests → baseline
+  modeling (OLS / `pyfixest.feols` HDFE / IV / DID / RD / SCM / matching /
+  DML) → robustness gauntlet (placebo / Oster / `honest_did` / spec curve /
+  alt-SE) → mechanism + heterogeneity → publication-ready Word / Excel /
+  LaTeX bundle.
+- **Mode A — Epidemiology / public health (§A).** Target-trial emulation
+  in `pandas`, IPTW + g-formula + TMLE doubly-robust triplet via `zepid`
+  / `econml`, Mendelian randomization (IVW / Egger / weighted median) via
+  `pymr` or `rpy2`+`TwoSampleMR`, KM / Cox / AFT / RMST survival via
+  `lifelines`, E-value sensitivity, principal stratification — under
+  STROBE / TRIPOD-AI reporting conventions.
+- **Mode B — ML causal inference (§B).** DML (`econml.dml` / `doubleml`),
+  S/T/X/R/DR meta-learners (`econml.metalearners` / `causalml`), causal
+  forest (`econml.grf`), Dragonnet / TARNet / CEVAE neural causal
+  (`causalml`), BCF, matrix completion, CATE distribution + policy tree
+  (`econml.policy` / `policytree-py`) + off-policy evaluation, conformal
+  causal prediction (`mapie`), fairness audit (`fairlearn`), and DAG
+  learning (`causal-learn` PC / `cdt` NOTEARS / LLM-assisted).
+
+All three modes reuse the same Step 1–4 (cleaning → Table 1 → diagnostics)
+and Step 8 (publication tables / figures) scaffolding — switching modes
+only changes which Step-5 estimator family you reach for, not the surrounding
+paper structure.
 
 ## Philosophy
 
@@ -15,11 +41,13 @@ repository:
 |-|---------------------|--------------------------------------|
 | Import style | `import statspai as sp` (one package) | explicit, per-library imports |
 | Abstraction | agent-native high-level DSL | raw, inspectable classical calls |
+| Three modes | Default Econ + §A Epi + §B ML causal | Default Econ + §A Epi + §B ML causal (parallel) |
 | Scope       | EDA → DSL → DAG → estimate → robust | **cleaning → transforms → descriptive → tests → model → robust → mechanism → tables** |
 | Best when   | you want a one-shot pipeline | you want full control, or need to teach / audit each step |
 
-Both co-exist: use StatsPAI when you trust the DSL; use this skill when you
-want every line explicit and every library choice visible.
+Both co-exist and ship the same three domain modes: use StatsPAI when you
+trust the DSL; use this skill when you want every line explicit and every
+library choice visible.
 
 ## Install
 
@@ -104,12 +132,33 @@ grep -n "^## " references/05-modeling.md
 
 ---
 
-# 完整实证分析技能（中文）
+# 完整实证分析技能（中文，Python）
 
 本文件夹是一份 **Claude Code Skill**，教 Claude（或任何兼容的 agent 运行时）
 端到端地完成一次实证分析，使用的是**传统 Python 计量生态** —— `pandas +
 numpy + scipy + statsmodels + linearmodels + pyfixest + rdrobust + econml
-+ causalml + matplotlib/seaborn`，每一步都显式可控。
++ causalml + matplotlib/seaborn`，每一步都显式可控。覆盖**三种领域模式**，
+共用同一套 8 步骨架（清洗 / Table 1 / 诊断 / 出表）：
+
+- **默认 — 应用经济学（AER / QJE / AEJ）**。8 步流程：清洗 → 变量构造 →
+  Table 1 → 诊断检验 → 基准建模（OLS / `pyfixest.feols` HDFE / IV / DID /
+  RD / SCM / 匹配 / DML）→ 稳健 gauntlet（安慰剂 / Oster / `honest_did` /
+  规范曲线 / 替代 SE）→ 机制 + 异质性 → 论文级 Word / Excel / LaTeX 三件套。
+- **模式 A — 流行病学 / 公共健康（§A）**。`pandas` 写 target-trial 协议、
+  `zepid` / `econml` 跑 IPTW + g-formula + TMLE 双稳健三件套，
+  `pymr` 或 `rpy2`+`TwoSampleMR` 做孟德尔随机化（IVW / Egger / 加权中位数），
+  `lifelines` 做 KM / Cox / AFT / RMST 生存分析，E-value 敏感性，
+  principal stratification——按 STROBE / TRIPOD-AI 报告规范输出。
+- **模式 B — 因果机器学习（§B）**。DML（`econml.dml` / `doubleml`），
+  S/T/X/R/DR meta-learner（`econml.metalearners` / `causalml`），
+  causal forest（`econml.grf`），Dragonnet / TARNet / CEVAE 神经因果
+  （`causalml`），BCF，matrix completion，CATE 分布 + policy tree
+  （`econml.policy` / `policytree-py`）+ off-policy 评估，conformal causal
+  预测区间（`mapie`），fairness audit（`fairlearn`），DAG 学习
+  （`causal-learn` PC / `cdt` NOTEARS / LLM 辅助）。
+
+三种模式共用同一套 Step 1–4（清洗 / Table 1 / 诊断）和 Step 8（出表 / 出图）
+骨架——切换模式只换 Step-5 估计器组合，前后骨架保持一致。
 
 ## 哲学
 
@@ -119,10 +168,12 @@ numpy + scipy + statsmodels + linearmodels + pyfixest + rdrobust + econml
 |-|---------------------|--------------------------------------|
 | 引入风格 | `import statspai as sp` | 各库显式引入 |
 | 抽象层次 | 面向 agent 的高层 DSL | 原始、可审计的经典调用 |
+| 三种模式 | 默认 Econ + §A 流行病 + §B ML 因果 | 默认 Econ + §A 流行病 + §B ML 因果（一一对应） |
 | 覆盖步骤 | EDA → DSL → DAG → 估计 → 稳健 | **清洗 → 变量构造 → 描述 → 检验 → 建模 → 稳健 → 机制 → 出表** |
 | 适用场景 | 一键跑完整 pipeline | 需要全量控制、审计每一步、或做教学 |
 
-两者并行存在：信任 DSL 时用 StatsPAI；要逐行审计、展示每个库选择时用本 skill。
+两者并行存在，且三种领域模式一一对应：信任 DSL 时用 StatsPAI；要逐行审计、
+展示每个库选择时用本 skill。
 
 ## 安装
 

@@ -1,6 +1,6 @@
 ---
 name: Full-empirical-analysis-skill-Stata
-description: Classical end-to-end empirical analysis workflow in the traditional Stata ecosystem — native Stata + reghdfe + ivreg2 + csdid + did_imputation + eventstudyinteract + sdid + rdrobust + rddensity + synth + synth_runner + psmatch2 + teffects + ebalance + coefplot + esttab + asdoc + binscatter. **Defaults to economics empirical-paper style** — every run produces a publication-ready output set with a multi-column regression table (M1→M6 progressive controls/FE) as the centerpiece, plus Table 1 (descriptives), mechanism / heterogeneity / robustness tables, and event-study + coefficient + trend figures. Covers the full 8-step Stata pipeline an applied economist runs on every paper — (1) data import & cleaning (use/import, destring, misstable, duplicates, merge assert), (2) variable construction (gen/egen/winsor2/xtile/xtset with L./F./D.), (3) descriptive statistics & Table 1 (tabstat/balancetable/asdoc), (4) classical diagnostic tests (sktest/swilk/hettest/imtest/xtserial/xttest3/vif/dfuller/kpss/hausman/estat overid), (5) baseline modeling (reg/xtreg/reghdfe/ivreg2/ivregress/csdid/did_imputation/eventstudyinteract/sdid/rdrobust/synth/psmatch2/teffects/heckman/qreg/ppmlhdfe), (6) robustness battery (bacondecomp/honestdid/rwolf/ritest/wildbootstrap/oster), (7) further analysis (subgroup/triple-diff/interactions/medsem/marginsplot/binscatter by group), (8) publication-ready tables & figures (esttab/outreg2/estout/coefplot/marginsplot/rdplot/twoway combined). Use when the user asks for a complete Stata empirical analysis, wants a reproducible .do-file pipeline, needs a Stata counterpart to the Python StatsPAI / Full-empirical-analysis-skill, or names a specific Stata step in isolation ("run reghdfe with two-way clustering", "csdid event study", "winsor2 at 1%", "esttab to LaTeX", "coefplot with CI", "ivreg2 weak-IV test", "synth_runner placebos", "teffects psmatch balance check").
+description: Classical end-to-end empirical analysis workflow in the traditional Stata ecosystem — native Stata + reghdfe + ivreg2 + csdid + did_imputation + eventstudyinteract + sdid + rdrobust + rddensity + synth + synth_runner + psmatch2 + teffects + ebalance + coefplot + esttab + asdoc + binscatter. **Defaults to economics empirical-paper style** (AER / QJE / AEJ) — every run produces a publication-ready output set with a multi-column regression table (M1→M6 progressive controls/FE) as the centerpiece, plus Table 1 (descriptives), mechanism / heterogeneity / robustness tables, and event-study + coefficient + trend figures. Covers the full 8-step Stata pipeline an applied economist runs on every paper — (1) data import & cleaning (use/import, destring, misstable, duplicates, merge assert), (2) variable construction (gen/egen/winsor2/xtile/xtset with L./F./D.), (3) descriptive statistics & Table 1 (tabstat/balancetable/asdoc), (4) classical diagnostic tests (sktest/swilk/hettest/imtest/xtserial/xttest3/vif/dfuller/kpss/hausman/estat overid), (5) baseline modeling (reg/xtreg/reghdfe/ivreg2/ivregress/csdid/did_imputation/eventstudyinteract/sdid/rdrobust/synth/psmatch2/teffects/heckman/qreg/ppmlhdfe), (6) robustness battery (bacondecomp/honestdid/rwolf/ritest/wildbootstrap/oster), (7) further analysis (subgroup/triple-diff/interactions/medsem/marginsplot/binscatter by group), (8) publication-ready tables & figures (esttab/outreg2/estout/coefplot/marginsplot/rdplot/twoway combined). **Also covers two parallel domain modes that share the same 8-step scaffolding** — **Mode A — Epidemiology / public health** (target-trial emulation, IPTW + g-formula + TMLE doubly-robust triplet via `teffects ipw` / `teffects ipwra` / `teffects aipw` / `eltmle`, Mendelian randomization via `mrrobust` (IVW / Egger / weighted median) and `mregger` / `mrpresso`, KM / Cox / AFT / RMST survival via `sts` / `stcox` / `streg` / `strmst2`, E-value sensitivity via `evalue` (Linden-Mathur), principal stratification — STROBE / TRIPOD reporting), and **Mode B — ML causal inference** (DML via `ddml` / `pdslasso`, S/T/X/R/DR meta-learners via `crforest` and `ddml interactive`, causal forest via `crforest` / `cforest`, BART/BCF via `bart` / `bartCause`-style externals, CATE distribution + policy tree via `crforest`, off-policy evaluation, conformal causal externals, fairness audit, DAG learning via `pcalg` / external Python callouts). Use when the user asks for a complete Stata empirical analysis, wants a reproducible .do-file pipeline, needs a Stata counterpart to the Python StatsPAI / Full-empirical-analysis-skill, or names a specific Stata step in isolation ("run reghdfe with two-way clustering", "csdid event study", "winsor2 at 1%", "esttab to LaTeX", "coefplot with CI", "ivreg2 weak-IV test", "synth_runner placebos", "teffects psmatch balance check"). Mode A triggers on "target trial emulation Stata", "teffects ipw aipw", "eltmle", "mrrobust", "mregger weighted median", "stcox AFT survival", "strmst2", "evalue Stata", "STROBE Stata", "公共健康 Stata", "流行病学 Stata". Mode B triggers on "ddml Stata", "pdslasso", "crforest causal forest Stata", "policy tree Stata", "因果机器学习 Stata".
 triggers:
   - Stata empirical analysis
   - full Stata pipeline
@@ -44,6 +44,37 @@ triggers:
   - misstable patterns
   - destring dates
   - xtset panel
+  # Mode A — Epidemiology / public health
+  - epidemiology pipeline Stata
+  - public health causal inference Stata
+  - target trial emulation Stata
+  - teffects ipw aipw ipwra
+  - g-formula Stata
+  - eltmle TMLE Stata
+  - HAL-TMLE Stata
+  - Mendelian randomization Stata
+  - mrrobust mregger
+  - MR-PRESSO Stata
+  - MR-Egger weighted median Stata
+  - STROBE TRIPOD reporting Stata
+  - evalue sensitivity Stata
+  - Kaplan-Meier AFT survival Stata
+  - sts stcox streg strmst2
+  - 流行病学 Stata
+  - 公共健康 Stata
+  # Mode B — ML causal inference
+  - ML causal inference Stata
+  - ddml double machine learning Stata
+  - pdslasso ivlasso
+  - crforest causal forest Stata
+  - cforest Stata
+  - meta-learner S T X R DR Stata
+  - CATE distribution Stata
+  - policy tree Stata
+  - off-policy evaluation Stata
+  - conformal causal Stata
+  - causal discovery PC Stata
+  - 因果机器学习 Stata
 ---
 
 # Full Empirical Analysis — Classical Stata Workflow
@@ -59,6 +90,31 @@ This skill is the *canonical* 8-step pipeline an applied economist runs on every
 3. **Full pipeline, not just regressions.** Stata users historically over-invest in Step 5 (modeling) and under-invest in Steps 1–4 and 6–8. This skill treats them as first-class.
 4. **Rich outputs.** Every step yields at least one table (`.tex`/`.rtf`) or figure (`.pdf`/`.png`) — never a coefficient printed to the Results window and forgotten.
 5. **Progressive disclosure.** `SKILL.md` gives the canonical command at each step; [`references/`](references/) holds variant-specific depth (dozens of tests, estimator-specific diagnostics, graph recipes).
+
+---
+
+## Three domain modes (default = AER econ; alternates = epi & ML-causal)
+
+The default playbook above is **AER-style applied econometrics** — the AEA convention: written-out estimating equation, identifying assumption, design horse-race, full robustness gauntlet. The skill **also** ships two parallel sub-pipelines for the other two big causal-inference traditions, each reusing the same Steps 1–4 (cleaning / construction / Table 1 / diagnostics) and Step 8 (tables/figures) — only Step 5 (estimator) and Step 6/7 swap commands:
+
+| Mode | Reader convention | Step-5 estimator stack | Reporting stack | Jump to |
+|---|---|---|---|---|
+| **Default — Applied Econ (AER / QJE / AEJ)** | "Show the equation + identifying assumption + design horse-race; controls visible; clustered SE" | DID / IV / RD / SCM / matching / `reghdfe` HDFE | AER house-style multi-column `esttab` / `outreg2` / `coefplot` + 8-section paper layout | Steps 1 → 8 (entire playbook below) |
+| **Mode A — Epidemiology / Public Health** | "STROBE / TRIPOD-AI; target trial protocol; doubly-robust estimand; absolute & relative risk; KM survival" | Target-trial emulation · IPTW (`teffects ipw`) · IPWRA / AIPW (`teffects ipwra` / `teffects aipw`) · g-formula (`gformula`) · TMLE (`eltmle`) · Mendelian randomization (`mrrobust` IVW / `mregger` / `mrpresso`) · KM/Cox/AFT (`sts`/`stcox`/`streg`/`strmst2`) | Same `esttab` + risk-difference / hazard-ratio / E-value rows | §A. Epidemiology pipeline |
+| **Mode B — ML Causal Inference** | "DML / meta-learners / causal forest / DR-learner; CATE distribution; policy value" | DML (`ddml` / `pdslasso`) · S/T/X/R/DR-Learner (`ddml interactive`) · GRF causal forest (`crforest` / `cforest`) · BART / BCF (external Python via `python_user`) · matrix completion (external) | `esttab` ML horse-race + `crforest` CATE plot + policy-value table | §B. ML causal pipeline |
+
+**How to invoke a non-default mode** (Claude / agent picks this up from the user's wording):
+
+| User says... | Mode the skill switches to |
+|---|---|
+| "Run a DID / IV / RD / event study", "AER table", "applied micro" | Default (AER econ) — Steps 1 → 8 |
+| "Target trial emulation", "g-formula", "IPTW", "TMLE", "Mendelian randomization", "STROBE / TRIPOD", "公共健康 / 流行病学", "epi pipeline", "RWE study", "cohort study", "case-control" | Mode A (Epi) — §A |
+| "DML", "double machine learning", "ddml", "causal forest", "crforest", "meta-learner", "CATE", "policy learning", "ML causal", "因果机器学习" | Mode B (ML causal) — §B |
+| "Mix" (e.g. "estimate DID + then ML CATE on the heterogeneity") | Default + Mode B in sequence — every estimator stores results via `eststo`, drop them all into one `esttab` for the horse-race column |
+
+The three modes share **the same Step 1–4 cleaning / Table 1 / diagnostics scaffolding, the same Step 8 export stack, and the same DAG-first identification logic** — switching modes only changes which Step-5 command family you reach for. If you only want descriptive stats / Table 1 / a balance check, the AER `tabstat` / `balancetable` / `asdoc` calls in Step 3 work identically across all three modes.
+
+> **Stata-specific caveat for Mode B**: Stata's first-party ML-causal coverage is thinner than Python/R. For Dragonnet / TARNet / CEVAE / cfcausal / fairness audit, call out to Python via Stata 18's `python:` / `python script` block (or shell out to a sister `.py`) and read the result back via `frame` or `import delimited`. The skill prefers native Stata commands (`ddml`, `pdslasso`, `crforest`) where they exist, and explicitly marks the Python callouts in §B.
 
 ---
 
@@ -847,6 +903,307 @@ set scheme s2color
 [ ] tables/table3_mechanism.tex   [ ] figures/fig3_coefplot.pdf
 [ ] tables/table4_heterogeneity.tex
 [ ] tables/table5_robustness.tex  [ ] figures/fig4_sensitivity.pdf
+```
+
+---
+
+## §A — Epidemiology / Public Health Mode
+
+When the user's wording flags Mode A (target-trial emulation / IPTW / TMLE / MR / STROBE / 流行病学 / 公共健康 / RWE / cohort), the 8 steps still apply — but Step 5 swaps the OLS-and-FE stack for the doubly-robust + survival + MR triplet, and the deliverables follow STROBE / TRIPOD-AI conventions. **Steps 1–4 (cleaning, construction, Table 1, diagnostics) and Step 8 (tables/figures export) are identical to the Default mode.**
+
+**Command footprint** (install on top of the Default Stata stack):
+
+```stata
+ssc install eltmle           // TMLE for binary outcome
+ssc install mrrobust         // Mendelian randomization (IVW / Egger / weighted median)
+ssc install mregger          // alternative MR-Egger implementation
+ssc install mrpresso         // outlier-robust MR
+ssc install evalue           // E-value sensitivity (Linden-Mathur)
+ssc install strmst2          // RMST contrast for survival
+ssc install gformula         // parametric g-formula (time-varying)
+* `teffects ipw / ipwra / aipw` are native to Stata 13+; no install needed.
+```
+
+### A.0 Cohort construction + target-trial protocol
+
+Write the protocol **before** touching the data. Save it as `protocol.do` and quote it in the paper.
+
+```stata
+*--- protocol.do — target-trial emulation skeleton ---
+* eligibility:  age 40-75, no prior MI, ascertained at t0
+* treatment:    A=1 statin initiation; A=0 no initiation
+* assignment:   emulated random at t0 via IPTW on baseline covariates
+* outcome:      incident MI within 5 years
+* estimand:     ITT ATE on risk difference + hazard ratio
+
+use raw/cohort.dta, clear
+keep if inrange(age, 40, 75) & prior_MI == 0
+gen t0           = cond(missing(statin_initiation_date), enrollment_date, statin_initiation_date)
+gen event_5y     = (MI_date - t0 <= 365 * 5) & !missing(MI_date)
+gen time_at_risk = min(censor_date - t0, 365 * 5)
+stset time_at_risk, failure(event_5y)
+```
+
+### A.1 Table 1 by exposure (identical to Default Step 3)
+
+Use the same `balancetable` / `asdoc tabstat` from Step 3, just `by(A)`. E-values for unmeasured confounding go in the footer.
+
+```stata
+balancetable A age edu smoke bmi ldl sbp using tables/tableA1_strobe.tex, ///
+    replace ctitles("Untreated" "Treated" "Diff (SE)") pvalues
+```
+
+### A.2 DAG + propensity-score overlap (positivity check)
+
+```stata
+* Estimate PS via logit
+logit A age edu smoke bmi ldl sbp
+predict ps, pr
+
+* Overlap density (positivity)
+twoway (kdensity ps if A == 0) (kdensity ps if A == 1), ///
+    legend(order(1 "A=0" 2 "A=1")) xtitle("Propensity score")
+graph export figures/figA2_ps_overlap.pdf, replace
+
+* Love plot — pre vs post-IPTW SMDs
+teffects ipw (event_5y) (A age edu smoke bmi ldl sbp)
+tebalance summarize
+tebalance density ps
+graph export figures/figA2_love.pdf, replace
+```
+
+### A.3 IPTW + g-formula + TMLE doubly-robust triplet (Step 5 swap)
+
+The "AER Table 2" of epi: a 3-row table where each row is one of {IPTW-MSM via `teffects ipw`, IPWRA / AIPW via `teffects aipw`, TMLE via `eltmle`}, so the reader can confirm doubly-robust agreement.
+
+```stata
+* IPTW-MSM (marginal effect on risk difference)
+eststo m_iptw: teffects ipw (event_5y) (A age edu smoke bmi ldl sbp), atet
+* AIPW (doubly robust ATE)
+eststo m_aipw: teffects aipw (event_5y age edu smoke bmi ldl sbp) ///
+                              (A age edu smoke bmi ldl sbp)
+* IPWRA — alternative DR estimator
+eststo m_ipwra: teffects ipwra (event_5y age edu smoke bmi ldl sbp) ///
+                                (A age edu smoke bmi ldl sbp)
+* TMLE via eltmle (uses SuperLearner under the hood)
+preserve
+    eltmle event_5y A age edu smoke bmi ldl sbp, tmle
+restore
+
+* Stack the triplet
+esttab m_iptw m_aipw m_ipwra using tables/tableA3_dr_triplet.tex, ///
+    replace b(3) se(3) star(* 0.10 ** 0.05 *** 0.01) ///
+    mtitles("IPTW" "AIPW" "IPWRA") ///
+    title("Doubly-robust risk-difference triplet")
+```
+
+### A.4 Survival outcomes — KM / Cox / AFT / RMST
+
+```stata
+* KM by treatment (already stset above)
+sts graph, by(A) ci risktable
+graph export figures/figA4_km.pdf, replace
+
+* Cox HR (covariate-adjusted)
+stcox A age edu smoke bmi ldl sbp
+estimates store m_cox
+* HR + 95% CI for A:
+matrix b  = e(b);   matrix V = e(V)
+local HR    = exp(b[1, "A"])
+local lo    = exp(b[1, "A"] - 1.96*sqrt(V["A","A"]))
+local hi    = exp(b[1, "A"] + 1.96*sqrt(V["A","A"]))
+display "HR = " %5.3f `HR' "  95% CI [" %5.3f `lo' ", " %5.3f `hi' "]"
+
+* AFT (Weibull) for time-ratio interpretation
+streg A age edu smoke bmi ldl sbp, distribution(weibull) time
+
+* RMST contrast at t = 5 years
+strmst2 A, tau(1825) covariates(age edu smoke bmi ldl sbp)
+```
+
+### A.5 Mendelian randomization (IVW / Egger / weighted-median triplet)
+
+```stata
+* Two-sample MR with pre-extracted instrument betas/SEs
+* (BX, BXSE, BY, BYSE in long format, one row per SNP)
+mrrobust, beta_outcome(by) se_outcome(byse) beta_exposure(bx) se_exposure(bxse)
+mregger by bx [aw=1/byse^2], gxse(bxse)
+mrmedian by bx, weighted gxse(bxse) gyse(byse)
+
+* Outlier-robust + heterogeneity sensitivity
+mrpresso by bx, gxse(bxse) gyse(byse) outlier distortion seed(1) niter(1000)
+
+* Stack the triplet
+esttab using tables/tableA5_mr_triplet.tex, ///
+    replace mtitles("IVW" "MR-Egger" "Weighted median") ///
+    title("Mendelian randomization triplet")
+```
+
+### A.6 Robustness — E-value / bounds / principal stratification
+
+```stata
+* E-value (Linden-Mathur Stata implementation) — required strength of unmeasured confounding
+evalue rr, est(1.45) lcl(1.10) ucl(1.91)
+```
+
+### A.7 STROBE / TRIPOD-AI reporting checklist
+
+Save as `replication/strobe_checklist.do` (or `.md`) and tick before submission:
+
+```
+[ ] Eligibility criteria + dates                           (target-trial protocol)
+[ ] Adjustment set with DAG justification                  (A.2)
+[ ] Positivity / overlap diagnostic                        (A.2)
+[ ] Doubly-robust triplet (IPTW + AIPW + TMLE)             (A.3)
+[ ] Risk difference + hazard ratio + RMST                  (A.3, A.4)
+[ ] E-value for unmeasured confounding                     (A.6)
+[ ] Loss-to-follow-up rate + censoring assumption          (A.0)
+[ ] Pre-registered protocol or analysis plan               (A.0)
+```
+
+---
+
+## §B — ML Causal Inference Mode
+
+When the user's wording flags Mode B (DML / meta-learner / causal forest / CATE / policy learning / 因果机器学习), the pipeline keeps Steps 1–4 and Step 8 from the Default mode, swaps Step 5 for the ML estimator stack, and adds a CATE-distribution + policy-value layer between Step 7 and Step 8.
+
+> **Native vs Python callout**: Stata 17+ ships first-class ML-causal commands for DML and causal forests. For neural causal (Dragonnet / TARNet / CEVAE), conformal causal, and fairness audit, the skill calls out to Python via Stata 18's `python:` block — clearly marked at each step.
+
+**Command footprint** (install on top of the Default Stata stack):
+
+```stata
+ssc install ddml             // double machine learning (Ahrens-Hansen-Schaffer-Wiemann)
+ssc install pdslasso         // post-double-selection lasso for high-dim controls
+ssc install ivlasso          // IV variant of pdslasso
+ssc install crforest         // causal forest (Athey-Tibshirani-Wager) for Stata
+ssc install lassopack        // covariate selection helpers
+* For BART / BCF / Dragonnet / conformal: shell out to Python via `python:` block
+* (Stata 18 ships first-class Python integration)
+```
+
+### B.0 Train/holdout split + nuisance learner stack
+
+```stata
+set seed 42
+gen u = runiform()
+gen byte holdout = u > 0.7
+* Standard nuisance pair: outcome regression Q(X,A) and propensity g(A|X)
+* Use ddml's CV-fitted learners (no manual split needed for DML cross-fitting)
+```
+
+### B.1 DAG / estimand declaration (optionally LLM-assisted)
+
+```stata
+* Causal discovery is thin in Stata — call out to Python's causal-learn:
+python:
+import pandas as pd
+from causallearn.search.ConstraintBased.PC import pc
+from sfi import Data
+df = pd.DataFrame({v: Data.get(v) for v in ["A","Y","X1","X2","X3","X4"]})
+cg = pc(df.to_numpy())
+cg.draw_pydot_graph(labels=list(df.columns)).write_pdf("figures/figB1_dag.pdf")
+end
+```
+
+### B.2 Estimator stack — DML · meta-learners · causal forest (Step 5 swap)
+
+The "AER Table 2" of ML causal: a horse-race table where each column is one estimator family on the same `(Y, A, X)` data — readers want to see DML (PLR), DML (interactive), and causal forest all agree (or disagree) on the ATE.
+
+```stata
+*--- 1. DML — partially linear regression ---
+ddml init partial, kfolds(5) reps(5)
+ddml E[Y|X]: reg Y X1 X2 X3 X4
+ddml E[Y|X]: pystacked Y X1 X2 X3 X4, type(reg) methods(rf gradboost lassocv)
+ddml E[D|X]: reg A X1 X2 X3 X4
+ddml E[D|X]: pystacked A X1 X2 X3 X4, type(reg) methods(rf gradboost lassocv)
+ddml crossfit
+ddml estimate, robust
+eststo m_dml_plr
+
+*--- 2. DML — interactive (heterogeneous treatment effects) ---
+ddml init interactive, kfolds(5) reps(5)
+ddml E[Y|X,D]: pystacked Y X1 X2 X3 X4, type(reg) methods(rf gradboost)
+ddml E[D|X]:   pystacked A X1 X2 X3 X4, type(class) methods(rf gradboost logit)
+ddml crossfit
+ddml estimate, atet
+eststo m_dml_atet
+
+*--- 3. Causal forest — non-parametric CATE ---
+crforest Y A X1 X2 X3 X4, ntrees(2000) honesty
+predict cate, te
+eststo m_cf
+
+*--- 4. Stack the horse-race ---
+esttab m_dml_plr m_dml_atet m_cf using tables/tableB2_ml_horserace.tex, ///
+    replace b(4) se(4) star(* 0.10 ** 0.05 *** 0.01) ///
+    mtitles("DML (PLR)" "DML (ATET)" "Causal forest") ///
+    title("ML causal horse-race on \$(Y, A, X)\$")
+```
+
+### B.3 CATE distribution + subgroup CATE plot (Step 7 extension)
+
+```stata
+* CATE histogram from causal forest
+histogram cate, frequency normal xtitle("CATE") xline(0)
+graph export figures/figB3_cate_hist.pdf, replace
+
+* CATE by quartile of a covariate
+xtile age_q = X1, n(4)
+collapse (mean) cate, by(age_q)
+graph bar (asis) cate, over(age_q) ytitle("Mean CATE")
+graph export figures/figB3_cate_by_age_q.pdf, replace
+```
+
+### B.4 Policy learning + off-policy evaluation
+
+```stata
+* Stata's native policy-tree support is via crforest; for honest depth-3 trees,
+* call out to R's policytree from within Stata:
+shell Rscript scripts/policy_tree.R                          // saves policy_pred.csv
+
+import delimited using policy_pred.csv, clear case(preserve)
+* DR off-policy evaluation on holdout
+keep if holdout
+gen DR_match = (policy_pred == A) * Y - (policy_pred != A) * Y
+summarize DR_match
+display "DR policy value (holdout): " r(mean)
+```
+
+### B.5 Uncertainty (conformal causal) + fairness + sensitivity
+
+```stata
+python:
+# Conformal prediction interval around CATE — distribution-free coverage guarantee
+import numpy as np
+from sfi import Data
+from sklearn.ensemble import GradientBoostingRegressor
+from mapie.regression import MapieRegressor
+df = ...   # same DataFrame as B.1
+mapie = MapieRegressor(estimator=GradientBoostingRegressor(), method="plus", cv=10)
+# fit on training CATE, predict 90% PI on holdout
+end
+
+* Fairness audit — disparate impact (compute via teffects diff across sensitive groups)
+foreach g in 0 1 {
+    quietly mean cate if sensitive_attr == `g'
+    matrix b = e(b)
+    display "Mean CATE in group `g': " b[1, 1]
+}
+```
+
+### B.6 ML-causal-specific reporting checklist
+
+Save as `replication/ml_causal_checklist.md`:
+
+```
+[ ] Nuisance learners listed (Q model, g model, hyperparameters, CV folds)
+[ ] Cross-fitting / sample-splitting documented (ddml kfolds(K) reps(R))
+[ ] Overlap / propensity diagnostics (B.0 + A.2-style overlap plot)
+[ ] CATE summary (mean, SD, quartiles) + heterogeneity p-value (crforest test)
+[ ] Policy value with confidence interval (B.4)
+[ ] Conformal coverage rate on holdout (B.5)
+[ ] Fairness gaps across sensitive attributes (B.5)
+[ ] DAG / adjustment set + sensitivity to unmeasured confounding (E-value or Manski bounds)
 ```
 
 ---

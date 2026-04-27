@@ -12,6 +12,33 @@ control, `MatchIt` / `WeightIt` / `cobalt` / `ebal` for matching,
 `kableExtra` / `gt` for publication tables, `ggplot2` / `iplot` /
 `binsreg` for figures.
 
+The skill covers **three domain modes** that share the same 8-step
+scaffolding:
+
+- **Default — Applied Econ (AER / QJE / AEJ).** The canonical 8-step
+  pipeline: import / cleaning → variable construction → Table 1 →
+  diagnostic tests → baseline modeling (`feols` HDFE / IV / DID / RD /
+  SCM / matching / DML) → robustness gauntlet → mechanism + heterogeneity
+  → publication-ready Word / Excel / LaTeX bundle.
+- **Mode A — Epidemiology / public health (§A).** Target-trial emulation,
+  IPTW + g-formula + TMLE doubly-robust triplet via `WeightIt` /
+  `gfoRmula` / `tmle` / `ltmle`, Mendelian randomization (IVW / Egger /
+  weighted median) via `MendelianRandomization` / `TwoSampleMR` /
+  `MRPRESSO`, KM / Cox / AFT / RMST survival via `survival` /
+  `survminer` / `flexsurv`, E-value sensitivity via `EValue`, principal
+  stratification — under STROBE / TRIPOD-AI reporting conventions.
+- **Mode B — ML causal inference (§B).** DML via `DoubleML`, S/T/X/R/DR
+  meta-learners via `causalweight` / `grf`, causal forest via
+  `grf::causal_forest`, BART / Bayesian causal forest via `bartCause` /
+  `bcf`, matrix completion via `MCPanel`, CATE distribution + policy
+  tree via `policytree` + off-policy evaluation, conformal causal via
+  `conformalInference` / `cfcausal`, fairness audit via `fairmodels`,
+  DAG learning via `pcalg` / `bnlearn` / LLM-assisted.
+
+All three modes reuse the same Step 1–4 (cleaning → Table 1 → diagnostics)
+and Step 8 (publication tables / figures) scaffolding — switching modes
+only changes which Step-5 estimator family you reach for.
+
 ## Philosophy
 
 This is the **R counterpart** to the four-skill family in this repo:
@@ -144,6 +171,31 @@ ready for the manuscript.
 处理 ML 因果，`mediation`/`lavaan` 处理中介，`marginaleffects` 处理
 后估计，`modelsummary`/`kableExtra`/`gt` 出版级表格，`ggplot2`/
 `iplot`/`binsreg` 出图。
+
+本 skill 覆盖**三种领域模式**，共用同一套 8 步骨架（清洗 / Table 1
+/ 诊断 / 出表）：
+
+- **默认 — 应用经济学（AER / QJE / AEJ）**。8 步流程：导入清洗 →
+  变量构造 → Table 1 → 诊断检验 → 基准建模（`feols` HDFE / IV /
+  DID / RD / SCM / 匹配 / DML）→ 稳健 gauntlet → 机制 + 异质性 →
+  论文级 Word / Excel / LaTeX 三件套。
+- **模式 A — 流行病学 / 公共健康（§A）**。target-trial emulation，
+  `WeightIt` / `gfoRmula` / `tmle` / `ltmle` 跑 IPTW + g-formula
+  + TMLE 双稳健三件套，`MendelianRandomization` / `TwoSampleMR`
+  / `MRPRESSO` 做孟德尔随机化（IVW / Egger / 加权中位数 / 异质性
+  outlier 鲁棒），`survival` / `survminer` / `flexsurv` 做 KM /
+  Cox / AFT / RMST 生存分析，`EValue` 做 E-value 敏感性，principal
+  stratification——按 STROBE / TRIPOD-AI 报告规范输出。
+- **模式 B — 因果机器学习（§B）**。`DoubleML` 跑 DML，
+  `causalweight` / `grf` 跑 S/T/X/R/DR meta-learner，
+  `grf::causal_forest` 跑因果森林，`bartCause` / `bcf` 跑 BART /
+  Bayesian causal forest，`MCPanel` 做矩阵补全，CATE 分布 +
+  `policytree` 策略树 + off-policy 评估，`conformalInference`
+  / `cfcausal` 做 conformal causal 预测区间，`fairmodels`
+  做 fairness audit，`pcalg` / `bnlearn` / LLM 辅助做 DAG 学习。
+
+三种模式共用同一套 Step 1–4（清洗 / Table 1 / 诊断）和 Step 8
+（出表 / 出图）骨架——切换模式只换 Step-5 估计器组合。
 
 ## 哲学
 

@@ -1,6 +1,6 @@
 ---
 name: Full-empirical-analysis-skill-R
-description: Classical end-to-end empirical analysis workflow in the modern tidyverse + econometrics R ecosystem — dplyr + tidyr + haven + fixest + sandwich + lmtest + clubSandwich + AER + ivreg + did + bacondecomp + HonestDiD + eventstudyr + rdrobust + rddensity + Synth + gsynth + synthdid + MatchIt + WeightIt + cobalt + ebal + grf + DoubleML + mediation + marginaleffects + modelsummary + kableExtra + gt + ggplot2 + ggpubr + cowplot + binsreg. **Defaults to economics empirical-paper style** — every run produces a publication-ready output set with a multi-column regression table (M1→M6 progressive controls/FE) as the centerpiece, plus Table 1 (descriptives), mechanism / heterogeneity / robustness tables, and event-study + coefficient + trend figures. Covers the full 8-step R pipeline an applied economist runs on every paper — (1) data import & cleaning (read_dta/read_csv, naniar, janitor, validate-merges), (2) variable construction (mutate/across/winsorize/group_by + lag/lead with dplyr), (3) descriptive statistics & Table 1 (gtsummary, modelsummary::datasummary, tableone), (4) classical diagnostic tests (shapiro/jarque.bera.test/bptest/dwtest/bgtest/vif/adf.test/kpss.test/Hausman), (5) baseline modeling (fixest::feols, ivreg, did::att_gt, eventstudyr, sun_ab, did_imputation, synthdid, rdrobust, MatchIt, WeightIt, grf::causal_forest, DoubleML, mediation), (6) robustness battery (modelsummary stack, clubSandwich CRSE, fwildclusterboot, ri2, robomit Oster, bacondecomp, HonestDiD), (7) further analysis (interactions + marginaleffects, mediation::mediate, gsem via lavaan, dose-response splines, grf CATE), (8) publication-ready tables & figures (modelsummary, kableExtra, gt, stargazer, texreg, flextable to LaTeX/Word/HTML; ggplot2 + ggpubr + cowplot + binsreg + iplot for figures). Use when the user asks for a complete R empirical analysis, wants a tidyverse-style reproducible R script / Quarto workflow, prefers fixest over reghdfe, needs the R counterpart to StatsPAI / 00.1 / 00.2, or names a specific R step in isolation ("feols with cluster", "MatchIt nearest neighbor", "bacondecomp in R", "gtsummary table 1", "modelsummary to Word").
+description: Classical end-to-end empirical analysis workflow in the modern tidyverse + econometrics R ecosystem — dplyr + tidyr + haven + fixest + sandwich + lmtest + clubSandwich + AER + ivreg + did + bacondecomp + HonestDiD + eventstudyr + rdrobust + rddensity + Synth + gsynth + synthdid + MatchIt + WeightIt + cobalt + ebal + grf + DoubleML + mediation + marginaleffects + modelsummary + kableExtra + gt + ggplot2 + ggpubr + cowplot + binsreg. **Defaults to economics empirical-paper style** (AER / QJE / AEJ) — every run produces a publication-ready output set with a multi-column regression table (M1→M6 progressive controls/FE) as the centerpiece, plus Table 1 (descriptives), mechanism / heterogeneity / robustness tables, and event-study + coefficient + trend figures. Covers the full 8-step R pipeline an applied economist runs on every paper — (1) data import & cleaning (read_dta/read_csv, naniar, janitor, validate-merges), (2) variable construction (mutate/across/winsorize/group_by + lag/lead with dplyr), (3) descriptive statistics & Table 1 (gtsummary, modelsummary::datasummary, tableone), (4) classical diagnostic tests (shapiro/jarque.bera.test/bptest/dwtest/bgtest/vif/adf.test/kpss.test/Hausman), (5) baseline modeling (fixest::feols, ivreg, did::att_gt, eventstudyr, sun_ab, did_imputation, synthdid, rdrobust, MatchIt, WeightIt, grf::causal_forest, DoubleML, mediation), (6) robustness battery (modelsummary stack, clubSandwich CRSE, fwildclusterboot, ri2, robomit Oster, bacondecomp, HonestDiD), (7) further analysis (interactions + marginaleffects, mediation::mediate, gsem via lavaan, dose-response splines, grf CATE), (8) publication-ready tables & figures (modelsummary, kableExtra, gt, stargazer, texreg, flextable to LaTeX/Word/HTML; ggplot2 + ggpubr + cowplot + binsreg + iplot for figures). **Also covers two parallel domain modes that share the same 8-step scaffolding** — **Mode A — Epidemiology / public health** (target-trial emulation, IPTW + g-formula + TMLE doubly-robust triplet via `WeightIt` / `gfoRmula` / `tmle` / `ltmle`, Mendelian randomization via `MendelianRandomization` / `TwoSampleMR` / `MRPRESSO`, KM / Cox / AFT / RMST survival via `survival` / `survminer` / `flexsurv`, E-value sensitivity via `EValue`, principal stratification — STROBE / TRIPOD reporting), and **Mode B — ML causal inference** (DML via `DoubleML`, S/T/X/R/DR meta-learners via `causalweight` / `grf`, causal forest via `grf::causal_forest`, BART/BCF via `bartCause` / `bcf`, matrix completion via `MCPanel`, CATE distribution + policy tree via `policytree`, off-policy evaluation, conformal causal via `conformalInference` / `cfcausal`, fairness audit via `fairmodels`, DAG learning via `pcalg` / `bnlearn` / LLM-assisted). Use when the user asks for a complete R empirical analysis, wants a tidyverse-style reproducible R script / Quarto workflow, prefers fixest over reghdfe, needs the R counterpart to StatsPAI / 00.1 / 00.2, or names a specific R step in isolation ("feols with cluster", "MatchIt nearest neighbor", "bacondecomp in R", "gtsummary table 1", "modelsummary to Word"). Mode A triggers on "target trial emulation R", "tmle ltmle", "MendelianRandomization", "TwoSampleMR", "MRPRESSO", "survival cox AFT", "STROBE R", "EValue R", "公共健康 R", "流行病学 R". Mode B triggers on "DoubleML R", "grf causal forest", "policytree", "bartCause bcf", "conformal causal R", "fairmodels", "pcalg NOTEARS", "因果机器学习 R".
 triggers:
   - R empirical analysis
   - tidyverse econometrics workflow
@@ -39,6 +39,43 @@ triggers:
   - haven read_dta sav
   - janitor clean_names
   - naniar missing
+  # Mode A — Epidemiology / public health
+  - epidemiology pipeline R
+  - public health causal inference R
+  - target trial emulation R
+  - g-formula R gfoRmula
+  - IPTW marginal structural model R
+  - WeightIt PSweight
+  - tmle ltmle doubly robust
+  - HAL-TMLE R
+  - Mendelian randomization R
+  - MendelianRandomization package
+  - TwoSampleMR
+  - MRPRESSO
+  - MR-Egger weighted median R
+  - STROBE TRIPOD reporting R
+  - EValue sensitivity R
+  - Kaplan-Meier AFT survival R
+  - survival survminer flexsurv
+  - 流行病学 R
+  - 公共健康 R
+  # Mode B — ML causal inference
+  - ML causal inference R
+  - DoubleML R
+  - grf causal forest R
+  - meta-learner S T X R DR R
+  - causalweight R
+  - bartCause bcf
+  - Bayesian causal forest BCF R
+  - CATE distribution R
+  - policytree R
+  - off-policy evaluation R
+  - conformalInference cfcausal
+  - conformal causal prediction R
+  - fairmodels fairness audit
+  - causal discovery PC NOTEARS R
+  - pcalg bnlearn
+  - 因果机器学习 R
 ---
 
 # Full Empirical Analysis — Classical R Workflow
@@ -54,6 +91,29 @@ This skill is the *canonical* 8-step pipeline an applied economist runs on every
 3. **8 steps, first-class.** R users historically over-invest in Step 5; this skill treats Steps 1–4 and 6–8 as core.
 4. **Rich outputs.** Every step yields at least one table or figure — tex/docx/png/pdf.
 5. **Progressive disclosure.** `SKILL.md` gives the canonical call per step; [`references/`](references/) holds variant-specific depth.
+
+---
+
+## Three domain modes (default = AER econ; alternates = epi & ML-causal)
+
+The default playbook above is **AER-style applied econometrics** — the AEA convention: written-out estimating equation, identifying assumption, design horse-race, full robustness gauntlet. The skill **also** ships two parallel sub-pipelines for the other two big causal-inference traditions, each reusing the same Steps 1–4 (cleaning / construction / Table 1 / diagnostics) and Step 8 (tables/figures) — only Step 5 (estimator) and Step 6/7 swap packages:
+
+| Mode | Reader convention | Step-5 estimator stack | Reporting stack | Jump to |
+|---|---|---|---|---|
+| **Default — Applied Econ (AER / QJE / AEJ)** | "Show the equation + identifying assumption + design horse-race; controls visible; clustered SE" | DID / IV / RD / SCM / matching / `fixest::feols` HDFE | AER house-style multi-column `modelsummary` + `kableExtra` / `gt` / `flextable` + 8-section paper layout | Steps 1 → 8 (entire playbook below) |
+| **Mode A — Epidemiology / Public Health** | "STROBE / TRIPOD-AI; target trial protocol; doubly-robust estimand; absolute & relative risk; KM survival" | Target-trial emulation · IPTW (`WeightIt` / `PSweight`) · g-formula (`gfoRmula`) · TMLE (`tmle` / `ltmle`) · Mendelian randomization (`MendelianRandomization` / `TwoSampleMR` / `MRPRESSO`) · KM / Cox / AFT (`survival` / `survminer` / `flexsurv`) | Same `modelsummary` + risk-difference / hazard-ratio / E-value rows | §A. Epidemiology pipeline |
+| **Mode B — ML Causal Inference** | "DML / meta-learners / causal forest / DR-learner; CATE distribution; policy value" | DML (`DoubleML`) · S/T/X/R/DR-Learner (`causalweight` / `grf`) · GRF causal forest (`grf::causal_forest`) · BART/BCF (`bartCause` / `bcf`) · matrix completion (`MCPanel`) | `modelsummary` ML horse-race + `grf` CATE plot + policy-value table + `conformalInference` PI | §B. ML causal pipeline |
+
+**How to invoke a non-default mode** (Claude / agent picks this up from the user's wording):
+
+| User says... | Mode the skill switches to |
+|---|---|
+| "Run a DID / IV / RD / event study", "AER table", "applied micro" | Default (AER econ) — Steps 1 → 8 |
+| "Target trial emulation", "g-formula", "IPTW", "TMLE", "Mendelian randomization", "STROBE / TRIPOD", "公共健康 / 流行病学", "epi pipeline", "RWE study", "cohort study", "case-control" | Mode A (Epi) — §A |
+| "DML", "double machine learning", "causal forest", "meta-learner", "CATE", "BCF", "policytree", "policy learning", "conformal causal", "fairness audit", "ML causal", "uplift modeling", "因果机器学习" | Mode B (ML causal) — §B |
+| "Mix" (e.g. "estimate DID + then ML CATE on the heterogeneity") | Default + Mode B in sequence — every estimator yields a coefficient + SE pair, drop them all into one `modelsummary(...)` for the horse-race column |
+
+The three modes share **the same Step 1–4 cleaning / Table 1 / diagnostics scaffolding, the same Step 8 export stack, and the same DAG-first identification logic** — switching modes only changes which Step-5 estimator family you reach for, not the surrounding paper structure. If you only want descriptive stats / Table 1 / a balance check, the AER `gtsummary::tbl_summary` / `modelsummary::datasummary_balance` calls in Step 3 work identically across all three modes.
 
 ---
 
@@ -970,6 +1030,368 @@ theme_set(theme_classic(base_size = 11) +
 [ ] tables/table3_mechanism.tex   [ ] figures/fig3_coefplot.pdf
 [ ] tables/table4_heterogeneity.tex
 [ ] tables/table5_robustness.tex  [ ] figures/fig4_sensitivity.pdf
+```
+
+---
+
+## §A — Epidemiology / Public Health Mode
+
+When the user's wording flags Mode A (target-trial emulation / IPTW / TMLE / MR / STROBE / 流行病学 / 公共健康 / RWE / cohort), the 8 steps still apply — but Step 5 swaps the OLS-and-FE stack for the doubly-robust + survival + MR triplet, and the deliverables follow STROBE / TRIPOD-AI conventions. **Steps 1–4 (cleaning, construction, Table 1, diagnostics) and Step 8 (tables/figures export) are identical to the Default mode.**
+
+**Package footprint** (install on top of the Default stack):
+
+```r
+install.packages(c(
+  "WeightIt", "PSweight", "cobalt",         # IPTW / propensity weighting + balance
+  "gfoRmula",                               # parametric g-formula (time-varying)
+  "tmle", "ltmle",                          # TMLE / longitudinal TMLE
+  "survival", "survminer", "flexsurv",      # KM / Cox / AFT / RMST
+  "MendelianRandomization", "TwoSampleMR",  # IVW, Egger, weighted-median MR
+  "MRPRESSO",                               # outlier-robust MR
+  "EValue"                                  # E-value sensitivity (VanderWeele)
+))
+```
+
+### A.0 Cohort construction + target-trial protocol
+
+Write the protocol **before** touching the data. Save it as `protocol.yml` and quote it in the paper.
+
+```r
+# protocol.yml — target-trial emulation skeleton
+# eligibility:    age 40-75, no_prior_event, ascertained_at t0
+# treatment:      A=1 statin initiation; A=0 no initiation
+# assignment:     emulated random at t0 via IPTW on baseline covariates
+# outcome:        incident MI within 5 years
+# estimand:       ITT ATE on risk difference + hazard ratio
+
+library(dplyr)
+cohort <- df |>
+  filter(age >= 40, age <= 75, prior_MI == 0) |>
+  mutate(
+    t0           = coalesce(statin_initiation_date, enrollment_date),
+    event_5y     = as.integer((MI_date - t0) <= 365 * 5 & !is.na(MI_date)),
+    time_at_risk = pmin(as.numeric(censor_date - t0), 365 * 5)
+  )
+```
+
+### A.1 Table 1 by exposure (identical to Default Step 3)
+
+Use the same `gtsummary::tbl_summary` from Step 3, just `by = A`. E-values for unmeasured confounding go in the footer.
+
+```r
+library(gtsummary)
+cohort |>
+  select(A, age, edu, smoke, bmi, ldl, sbp) |>
+  tbl_summary(by = A, missing = "ifany") |>
+  add_difference() |>
+  add_p() |>
+  bold_labels()
+```
+
+### A.2 DAG + propensity-score overlap (positivity check)
+
+```r
+library(WeightIt); library(cobalt)
+
+# Estimate PS + IPTW weights
+w_out <- weightit(A ~ age + edu + smoke + bmi + ldl + sbp,
+                  data = cohort, method = "glm", estimand = "ATE")
+
+# Overlap density (positivity)
+bal.plot(w_out, var.name = "prop.score", which = "both")
+ggsave("figures/figA2_ps_overlap.pdf")
+
+# Love plot (SMDs before vs after IPTW)
+love.plot(w_out, threshold = 0.1, abs = TRUE)
+ggsave("figures/figA2_love.pdf")
+```
+
+### A.3 IPTW + g-formula + TMLE doubly-robust triplet (Step 5 swap)
+
+The "AER Table 2" of epi: a 3-column table where each column is one of {IPTW-MSM, g-formula, TMLE}, so the reader can confirm doubly-robust agreement.
+
+```r
+# IPTW marginal structural model
+library(survey)
+des  <- svydesign(ids = ~1, data = cohort, weights = w_out$weights)
+msm  <- svyglm(event_5y ~ A, design = des, family = quasibinomial())
+RD_iptw <- coef(msm)["A"]; CI_iptw <- confint(msm)["A", ]
+
+# g-formula (parametric, time-fixed)
+library(gfoRmula)
+gf <- gformula_binary_eof(
+  obs_data = cohort,
+  id = "subject_id", time_name = "t", outcome_name = "event_5y",
+  covnames = c("age","edu","smoke","bmi","ldl","sbp"),
+  intvars = list("A"), interventions = list(list(c(static, 1)), list(c(static, 0))),
+  ref_int = 1, time_points = 1, basecovs = c("age","edu","smoke","bmi","ldl","sbp")
+)
+
+# TMLE (doubly robust)
+library(tmle)
+fit_tmle <- tmle(
+  Y = cohort$event_5y, A = cohort$A,
+  W = cohort[, c("age","edu","smoke","bmi","ldl","sbp")],
+  family = "binomial",
+  Q.SL.library = c("SL.glm","SL.glmnet","SL.ranger"),
+  g.SL.library = c("SL.glm","SL.glmnet","SL.ranger")
+)
+RD_tmle <- fit_tmle$estimates$ATE$psi
+CI_tmle <- fit_tmle$estimates$ATE$CI
+
+# Stack the triplet into one paper table
+library(modelsummary)
+tableA3 <- tibble::tribble(
+  ~Estimator,    ~RD,        ~`95% CI`,
+  "IPTW-MSM",    RD_iptw,    sprintf("[%.3f, %.3f]", CI_iptw[1], CI_iptw[2]),
+  "g-formula",   gf$result[2,"mean"] - gf$result[1,"mean"], "—",
+  "TMLE",        RD_tmle,    sprintf("[%.3f, %.3f]", CI_tmle[1], CI_tmle[2])
+)
+modelsummary::datasummary_df(tableA3, output = "tables/tableA3_dr_triplet.tex")
+```
+
+### A.4 Survival outcomes — KM / Cox / AFT / RMST
+
+```r
+library(survival); library(survminer); library(flexsurv)
+
+# KM by treatment
+fit_km <- survfit(Surv(time_at_risk, event_5y) ~ A, data = cohort)
+ggsurvplot(fit_km, conf.int = TRUE, pval = TRUE, risk.table = TRUE)
+ggsave("figures/figA4_km.pdf")
+
+# Cox HR (covariate-adjusted)
+fit_cox <- coxph(Surv(time_at_risk, event_5y) ~ A + age + edu + smoke + bmi + ldl + sbp,
+                 data = cohort, weights = w_out$weights)
+HR <- exp(coef(fit_cox)["A"]); HR_CI <- exp(confint(fit_cox)["A", ])
+
+# AFT (Weibull) for time-ratio interpretation
+fit_aft <- flexsurvreg(Surv(time_at_risk, event_5y) ~ A + age + edu + smoke + bmi + ldl + sbp,
+                       data = cohort, dist = "weibull")
+
+# RMST contrast at t = 5 years
+library(survRM2)
+rmst <- rmst2(cohort$time_at_risk, cohort$event_5y, cohort$A, tau = 365 * 5)
+```
+
+### A.5 Mendelian randomization (IVW / Egger / weighted-median triplet)
+
+```r
+library(MendelianRandomization)
+
+mri <- mr_input(bx = BX, bxse = BXSE, by = BY, byse = BYSE,
+                exposure = "Statin use", outcome = "MI")
+ivw    <- mr_ivw(mri)
+egger  <- mr_egger(mri)         # pleiotropy intercept test
+wmedian<- mr_median(mri, weighting = "weighted")
+
+# Or harmonized two-sample workflow
+# library(TwoSampleMR); harmonised <- harmonise_data(exposure_dat, outcome_dat)
+# res <- mr(harmonised, method_list = c("mr_ivw", "mr_egger_regression", "mr_weighted_median"))
+
+# Sensitivity to outliers
+library(MRPRESSO)
+mr_presso(BetaOutcome = "by", BetaExposure = "bx", SdOutcome = "byse", SdExposure = "bxse",
+          OUTLIERtest = TRUE, DISTORTIONtest = TRUE, data = data.frame(bx, by, bxse, byse), NbDistribution = 1000)
+```
+
+### A.6 Robustness — E-value / bounds / principal stratification
+
+```r
+library(EValue)
+ev <- evalue(RR(1.45), lo = 1.10, hi = 1.91)   # required strength of unmeasured confounding
+print(ev)
+```
+
+### A.7 STROBE / TRIPOD-AI reporting checklist
+
+Save as `replication/strobe_checklist.md` and tick before submission:
+
+```
+[ ] Eligibility criteria + dates                           (target-trial protocol)
+[ ] Adjustment set with DAG justification                  (A.2)
+[ ] Positivity / overlap diagnostic                        (A.2)
+[ ] Doubly-robust triplet (IPTW + g-formula + TMLE)        (A.3)
+[ ] Risk difference + hazard ratio + RMST                  (A.3, A.4)
+[ ] E-value for unmeasured confounding                     (A.6)
+[ ] Loss-to-follow-up rate + censoring assumption          (A.0)
+[ ] Pre-registered protocol or analysis plan               (A.0)
+```
+
+---
+
+## §B — ML Causal Inference Mode
+
+When the user's wording flags Mode B (DML / meta-learner / causal forest / BCF / CATE / policy learning / conformal causal / fairness / 因果机器学习), the pipeline keeps Steps 1–4 and Step 8 from the Default mode, swaps Step 5 for the ML estimator stack, and adds a CATE-distribution + policy-value layer between Step 7 and Step 8.
+
+**Package footprint** (install on top of the Default stack):
+
+```r
+install.packages(c(
+  "DoubleML", "mlr3", "mlr3learners",       # DML + ML nuisance learners
+  "grf",                                    # causal forest, GRF, instrumental forest
+  "causalweight",                           # IPW / DR / sensitivity for CATE
+  "bartCause", "bcf",                       # BART / Bayesian causal forest
+  "policytree",                             # honest policy trees
+  "conformalInference",                     # conformal prediction (general)
+  # cfcausal — install via devtools::install_github("lihualei71/cfcausal")
+  "fairmodels",                             # fairness audit
+  "pcalg", "bnlearn"                        # causal discovery (PC / GES / Bayesian net)
+))
+```
+
+### B.0 Train/holdout split + nuisance learner stack
+
+```r
+library(mlr3); library(mlr3learners); library(DoubleML)
+
+set.seed(42)
+idx <- sample(seq_len(nrow(df)), size = 0.7 * nrow(df))
+train <- df[idx, ]; holdout <- df[-idx, ]
+
+# Standard nuisance pair: outcome regression Q(X,A) and propensity g(A|X)
+ml_g <- lrn("regr.ranger",  num.trees = 500, mtry = 5)   # outcome
+ml_m <- lrn("classif.ranger", num.trees = 500, mtry = 5) # propensity
+```
+
+### B.1 DAG / estimand declaration (optionally LLM-assisted)
+
+```r
+library(pcalg)
+# PC algorithm — constraint-based DAG discovery
+suffStat <- list(C = cor(df[, c("A","Y","X1","X2","X3","X4")]), n = nrow(df))
+pc.fit <- pc(suffStat, indepTest = gaussCItest,
+             alpha = 0.01, labels = c("A","Y","X1","X2","X3","X4"))
+plot(pc.fit, main = "PC-recovered DAG")
+
+# OR: bnlearn for hill-climbing GES
+# library(bnlearn); hc.fit <- hc(df[, c("A","Y","X1","X2","X3","X4")]); plot(hc.fit)
+```
+
+### B.2 Estimator stack — DML · meta-learners · causal forest · BCF (Step 5 swap)
+
+The "AER Table 2" of ML causal: a horse-race table where each column is one estimator family on the same `(Y, A, X)` data — readers want to see DML, T-learner, causal forest, and BCF all agree (or disagree) on the ATE.
+
+```r
+# DML — partially linear or interactive regression model
+dml_data <- DoubleMLData$new(train, y_col = "Y", d_cols = "A",
+                             x_cols = c("X1","X2","X3","X4"))
+dml_plr  <- DoubleMLPLR$new(dml_data, ml_g = ml_g, ml_m = ml_m, n_folds = 5)
+dml_plr$fit()
+ate_dml <- dml_plr$coef; ci_dml <- dml_plr$confint()
+
+# Causal forest (GRF) — non-parametric CATE
+library(grf)
+cf <- causal_forest(X = as.matrix(train[, c("X1","X2","X3","X4")]),
+                    Y = train$Y, W = train$A, num.trees = 2000)
+ate_cf <- average_treatment_effect(cf, target.sample = "all")
+cate_cf <- predict(cf, newdata = as.matrix(holdout[, c("X1","X2","X3","X4")]))$predictions
+
+# T-learner / DR-learner (use causalweight or hand-rolled with grf::*)
+library(causalweight)
+dr <- treatDML(y = train$Y, d = train$A, x = as.matrix(train[, c("X1","X2","X3","X4")]),
+               MLmethod = "lasso")$effect
+ate_DR <- mean(dr)
+
+# Bayesian Causal Forest — separate prognostic + treatment functions
+library(bcf)
+bcf_fit <- bcf(y = train$Y, z = train$A,
+               x_control = as.matrix(train[, c("X1","X2","X3","X4")]),
+               x_moderate = as.matrix(train[, c("X1","X2","X3","X4")]),
+               pihat = predict(glm(A ~ ., data = train[, c("A","X1","X2","X3","X4")], family = binomial), type = "response"),
+               nburn = 1000, nsim = 1000)
+ate_bcf <- mean(bcf_fit$tau)
+
+# Stack the horse-race
+library(modelsummary)
+tableB2 <- tibble::tribble(
+  ~Estimator,           ~ATE,
+  "DML (PLR)",          ate_dml[1],
+  "Causal Forest",      ate_cf[1],
+  "DR-learner",         ate_DR,
+  "Bayesian Causal Forest", ate_bcf
+)
+modelsummary::datasummary_df(tableB2, fmt = 4, output = "tables/tableB2_ml_horserace.tex")
+```
+
+### B.3 CATE distribution + subgroup CATE plot (Step 7 extension)
+
+```r
+library(ggplot2)
+
+# CATE histogram
+data.frame(cate = cate_cf) |>
+  ggplot(aes(x = cate)) +
+  geom_histogram(bins = 30, fill = "grey70", colour = "black") +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "CATE", y = "Count")
+ggsave("figures/figB3_cate_hist.pdf")
+
+# CATE by quartile of a covariate
+holdout |>
+  mutate(cate = cate_cf, age_q = ntile(X1, 4)) |>
+  group_by(age_q) |>
+  summarise(mean_cate = mean(cate)) |>
+  ggplot(aes(age_q, mean_cate)) + geom_col() + labs(y = "Mean CATE")
+ggsave("figures/figB3_cate_by_age_q.pdf")
+```
+
+### B.4 Policy learning + off-policy evaluation
+
+```r
+library(policytree)
+
+# Honest discrete policy tree on doubly-robust scores from causal forest
+dr_scores <- double_robust_scores(cf)
+ptree     <- policy_tree(X = as.matrix(train[, c("X1","X2","X3","X4")]),
+                         Gamma = dr_scores, depth = 3)
+print(ptree)            # human-readable tree of "treat if X1<a and X2>b"
+plot(ptree)
+ggsave("figures/figB4_policy_tree.pdf")
+
+# Off-policy evaluation — DR policy value on holdout
+holdout_X <- as.matrix(holdout[, c("X1","X2","X3","X4")])
+pred_pol  <- predict(ptree, holdout_X)
+DR_holdout <- double_robust_scores(cf, newdata = holdout_X)
+policy_value_DR <- mean(DR_holdout[cbind(seq_len(nrow(DR_holdout)), pred_pol)])
+cat(sprintf("DR policy value (holdout): %.3f\n", policy_value_DR))
+```
+
+### B.5 Uncertainty (conformal causal) + fairness + sensitivity
+
+```r
+# Conformal prediction interval around CATE (split conformal via cfcausal)
+# devtools::install_github("lihualei71/cfcausal")
+library(cfcausal)
+ci90 <- conformalIte(X = as.matrix(train[, c("X1","X2","X3","X4")]),
+                     Y = train$Y, T = train$A,
+                     alpha = 0.1,
+                     algo = "nest",
+                     type = "CQR",
+                     X.test = as.matrix(holdout[, c("X1","X2","X3","X4")]))
+
+# Fairness audit — disparate impact / equalised odds
+library(fairmodels)
+fobject <- fairness_check(model_treated = predict(ptree, holdout_X),
+                          data = holdout, protected = holdout$sensitive_attr,
+                          privileged = "majority")
+plot(fobject)
+ggsave("figures/figB5_fairness.pdf")
+```
+
+### B.6 ML-causal-specific reporting checklist
+
+Save as `replication/ml_causal_checklist.md`:
+
+```
+[ ] Nuisance learners listed (Q model, g model, hyperparameters, CV folds)
+[ ] Cross-fitting / sample-splitting documented (DML K-fold)
+[ ] Overlap / propensity diagnostics (B.0 + A.2-style overlap plot)
+[ ] CATE summary (mean, SD, quartiles) + heterogeneity p-value (grf::test_calibration)
+[ ] Policy value with confidence interval (B.4)
+[ ] Conformal coverage rate on holdout (B.5)
+[ ] Fairness gaps across sensitive attributes (B.5)
+[ ] DAG / adjustment set + sensitivity to unmeasured confounding (E-value or Manski bounds)
 ```
 
 ---

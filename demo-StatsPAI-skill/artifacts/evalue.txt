@@ -1,1 +1,1 @@
-evalue failed: measure must be one of {'HR', 'RD', 'RR', 'OR', 'SMD', 'DIFF'}, got 'OLS'
+evalue failed: measure must be one of {'DIFF', 'OR', 'RD', 'SMD', 'RR', 'HR'}, got 'OLS'

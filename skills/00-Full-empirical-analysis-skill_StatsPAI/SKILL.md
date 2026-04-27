@@ -1,6 +1,6 @@
 ---
 name: StatsPAI_skill
-description: Use when the user asks to run a full empirical / causal analysis in Python in the style of an applied economics paper (AER / QJE / JPE / ReStud / AEJ), pick between DID / RD / IV / SCM / DML / matching, write down an estimating equation and identifying assumption, produce Table 1 / Table 2 / event-study figure / robustness gauntlet, or generate a paper-ready replication package. Also triggers on keywords "StatsPAI", "statspai", "AER empirical analysis", "applied micro pipeline", "Table 1 balance", "event study", "first-stage F", "Oster bound", "honest_did", "spec_curve", "callaway_santanna", "dragonnet", "text as treatment".
+description: Use when the user asks to run a full empirical / causal analysis in Python — by default in the style of an applied economics paper (AER / QJE / JPE / ReStud / AEJ) with DID / RD / IV / SCM / DML / matching, written-out estimating equation + identifying assumption, Table 1 / Table 2 / event-study figure / robustness gauntlet — OR in epidemiology / public health style (target-trial emulation, IPTW + g-formula + TMLE triplet, Mendelian randomization, KM/AFT survival, E-value sensitivity, STROBE/TRIPOD reporting) — OR in ML causal inference style (DML, S/T/X/R/DR meta-learners, causal forest, Dragonnet/TARNet/CEVAE, BCF, CATE distribution, policy learning, conformal causal, fairness audit, causal discovery). Also covers exporting multi-column regression tables to Word / Excel / LaTeX (Stata outreg2 / esttab / R modelsummary equivalent) and bundling an entire replication appendix into one .docx / .xlsx / .tex file. Triggers on keywords "StatsPAI", "statspai", "AER empirical analysis", "applied micro pipeline", "Table 1 balance", "event study", "first-stage F", "Oster bound", "honest_did", "spec_curve", "callaway_santanna", "dragonnet", "text as treatment", "outreg2 in Python", "regression table to Word/Excel", "sp.regtable", "sp.collect", "sp.paper_tables", "sp.feols", "summary_col", "modelsummary", "AER style table", "QJE style table", "epidemiology pipeline", "target trial emulation", "g-formula", "IPTW", "TMLE", "Mendelian randomization", "STROBE", "TRIPOD", "公共健康", "流行病学", "DML", "double machine learning", "causal forest", "meta-learner", "CATE", "conformal causal", "policy learning", "因果机器学习", "ML causal".
 triggers:
   - causal inference in python
   - applied microeconomics pipeline
@@ -19,8 +19,59 @@ triggers:
   - estimand-first DSL
   - LLM-assisted DAG discovery
   - text as treatment
+  - export regression table to Word
+  - export regression table to Excel
+  - regression table docx
+  - regression table xlsx
+  - outreg2 in Python
+  - summary_col equivalent
+  - modelsummary equivalent
+  - AER house style table
+  - QJE house style table
+  - journal template regression
+  - Stata collect equivalent
+  - replication bundle
+  - sp.regtable
+  - sp.collect
+  - sp.paper_tables
+  - sp.feols
+  - sp.cite
+  - high-dim fixed effects
+  - two-way clustering
   - StatsPAI
   - statspai
+  - fmt auto regression table
+  - magnitude-adaptive coefficient formatting
+  - mixed magnitude coefficients
+  - sumstats by_labels
+  - Control Treated auto labels
+  - epidemiology pipeline
+  - public health causal inference
+  - target trial emulation
+  - g-formula
+  - IPTW marginal structural model
+  - TMLE doubly robust
+  - HAL-TMLE
+  - Mendelian randomization
+  - MR-Egger weighted median
+  - STROBE TRIPOD reporting
+  - E-value sensitivity
+  - Kaplan-Meier AFT survival
+  - 流行病学
+  - 公共健康
+  - ML causal inference
+  - double machine learning DML
+  - meta-learner S T X R DR
+  - causal forest GRF
+  - Dragonnet TARNet CEVAE
+  - Bayesian causal forest BCF
+  - CATE distribution
+  - policy tree
+  - off-policy evaluation
+  - conformal causal prediction
+  - fairness audit
+  - causal discovery PC NOTEARS
+  - 因果机器学习
 ---
 
 # StatsPAI: Agent-Native Causal Inference & AER-Style Empirical Workflow
@@ -62,6 +113,27 @@ Pre-Analysis Plan           −1    sp.power.* + freeze IdentificationPlan to di
 
 > **All code blocks below share one running example (`training → wage`, with `worker_id / firm_id / year / age / edu / tenure`) purely for readability.** Column names, `population`, `estimand`, and `design` values are **illustrative** — substitute the user's actual columns and research question. Only `sp.*` function names and argument *shapes* are normative.
 
+## Three domain modes (default = AER econ; alternates = epi & ML-causal)
+
+The default playbook above is **AER-style applied econometrics** — the AEA convention: written-out estimating equation, identifying assumption table, design horse-race, full robustness gauntlet. The skill **also** ships two parallel sub-pipelines for the other two big causal-inference traditions, each reusing the same export stack (`sp.regtable / sp.collect / sp.paper_tables`) and result objects:
+
+| Mode | Reader convention | Identification stack | Reporting stack | Jump to |
+|---|---|---|---|---|
+| **Default — Applied Econ (AER / QJE / AEJ)** | "Show the equation + identifying assumption + design horse-race; controls visible; clustered SE" | DID / IV / RD / SCM / matching / `feols` HDFE | AER house-style multi-column `regtable` + 8-section paper layout | §−1 → §8 (entire playbook above) |
+| **Mode A — Epidemiology / Public Health** | "STROBE / TRIPOD-AI; target trial protocol; doubly-robust estimand; absolute & relative risk; KM survival" | Target-trial emulation · IPTW · g-formula · TMLE · Mendelian randomization · KM/AFT | Same `regtable` + `collect`, with risk-difference / hazard-ratio / E-value rows | §A. Epidemiology pipeline |
+| **Mode B — ML Causal Inference** | "DML / meta-learners / causal forest / DR-learner; CATE distribution; policy value" | DML · S/T/X/R/DR-Learner · GRF causal forest · Dragonnet/TARNet/CEVAE · BCF · matrix completion | `regtable` ML horse-race + `cate_plot` + policy-value table + `conformal_causal` PI | §B. ML causal pipeline |
+
+**How to invoke a non-default mode** (Claude / agent picks this up from the user's wording):
+
+| User says... | Mode the skill switches to |
+|---|---|
+| "Run a DID / IV / RD / event study", "AER table", "applied micro" | Default (AER econ) |
+| "Target trial emulation", "g-formula", "IPTW", "TMLE", "Mendelian randomization", "STROBE / TRIPOD", "公共健康 / 流行病学", "epi pipeline", "RWE study", "cohort study", "case-control" | Mode A (Epi) |
+| "DML", "double machine learning", "causal forest", "meta-learner", "CATE", "Dragonnet", "BCF", "policy learning", "conformal causal", "ML causal", "uplift modeling", "因果机器学习" | Mode B (ML causal) |
+| "Mix" (e.g. "estimate DID + then ML CATE on the heterogeneity") | Default + Mode B in sequence — every estimator returns the same `CausalResult`, drop them all into one `sp.regtable(...)` for the horse-race column |
+
+The three modes share **the same export stack, the same `CausalResult` interface, and the same `sp.causal_question(...).identify()` estimand-first DSL** — switching modes only changes which Step 4 estimators you reach for, not the surrounding scaffolding. If you only want descriptive stats / Table 1 / a balance check, the AER `sp.sumstats` / `sp.mean_comparison` / `sp.collect` calls work in all three modes.
+
 ## Paper-ready figure & table inventory (what to produce by section)
 
 A modern AER paper has **5–7 figures** and **3–5 main tables** + an appendix robustness table. Every step below should leave at least one numbered artifact on disk. Default file names assume parallel `.tex` / `.docx` / `.xlsx` exports (the agent should produce all three so co-authors can edit in Word / Excel and the build system can use LaTeX):
@@ -92,7 +164,7 @@ StatsPAI's export stack is the agent-native equivalent of Stata's `outreg2` / `e
 
 | Tier | Use when | API | Hot kwargs |
 |---|---|---|---|
-| **1. Single multi-column table** (the outreg2 / `summary_col` equivalent) | Exporting *one* Table 2 / Table 3 / Table A1 with progressive columns | `rt = sp.regtable(M1, M2, ..., template="aer", title=...)`<br>`rt.to_word("table2.docx")`<br>`rt.to_excel("table2.xlsx")`<br>`rt.to_latex()` · `rt.to_markdown()` | `template`, `keep`, `coef_labels`, `model_labels`, `panel_labels`, `dep_var_labels`, `stats`, `stars`, `add_rows` |
+| **1. Single multi-column table** (the outreg2 / `summary_col` equivalent) | Exporting *one* Table 2 / Table 3 / Table A1 with progressive columns | `rt = sp.regtable(M1, M2, ..., template="aer", title=...)`  *(default: all coefs incl. intercept)*<br>`rt.to_word("table2.docx")`<br>`rt.to_excel("table2.xlsx")`<br>`rt.to_latex()` · `rt.to_markdown()` | `template`, `coef_labels`, `model_labels`, `panel_labels`, `dep_var_labels`, `stats`, `stars`, `add_rows`; opt-in filters: `drop=["Intercept"]` (suppress constant), `keep=[focal]` (focal-only) |
 | **2. Multi-panel paper format** (Tables 2 + 3 + A1 + A2 in one file) | Producing the *paper-tables block* — main + heterogeneity + robustness + placebo as a single document | `pt = sp.paper_tables(main=[M1...M5], heterogeneity=[H1,H2,H3], robustness=[R1...Rn], placebo=[P1,P2], template="aer")`<br>`pt.to_docx("paper_tables.docx")`<br>`pt.to_xlsx("paper_tables.xlsx")`<br>`pt.to_latex(...)` | `main`, `heterogeneity`, `robustness`, `placebo`, `template`, `coef_labels`, `model_labels_<panel>`, `keep` |
 | **3. Full session bundle** (Stata 15 `collect` equivalent) | Replication appendix that mixes summary stats + balance + multiple regression tables + headings + prose in **one** file | `c = sp.collect("Paper title", template="aer")`<br>`c.add_heading("§1. Descriptives")`<br>`c.add_summary(df, vars=...)`<br>`c.add_balance(df, treatment=, variables=...)`<br>`c.add_regression(M1, M2, ..., title="Table 2")`<br>`c.add_text("Notes ...")`<br>`c.save("paper.docx")` (auto-detect by extension; `.xlsx`/`.tex`/`.md`/`.html`/`.txt` all work) | `add_heading(level=)`, `add_summary(stats=, labels=)`, `add_balance(weights=, test=)`, `add_regression(**regtable_kwargs)`, `add_table(result)`, `add_text(...)` |
 
@@ -102,8 +174,11 @@ StatsPAI's export stack is the agent-native equivalent of Stata's `outreg2` / `e
 sp.list_journal_templates()
 # → ('aer', 'qje', 'econometrica', 'restat', 'jf', 'aeja', 'jpe', 'restud')
 
-rt = sp.regtable(M1, M2, M3, template="qje", keep=["x"])     # QJE styling
+rt = sp.regtable(M1, M2, M3, template="qje")    # QJE styling; default = full coef list (incl. intercept)
 rt.to_word("table2_qje.docx")
+# Opt-in filters:
+#   • drop the constant only:    sp.regtable(M1, M2, M3, template="qje", drop=["Intercept"])
+#   • focal-coefficient only:    sp.regtable(M1, M2, M3, template="qje", keep=["x"])
 
 sp.get_journal_template("aer")                                 # inspect a preset
 # → {'label': 'American Economic Review', 'star_levels': [0.1, 0.05, 0.01],
@@ -233,7 +308,11 @@ The signature AER Table 1 has three column blocks plus a difference column:
 The Imbens–Rubin rule of thumb: a normalized difference `|Δ| / √((s²₁+s²₀)/2) > 0.25` flags substantive imbalance and should trigger matching / reweighting *before* you trust an OLS comparison.
 
 ```python
-# Quick text/LaTeX preview (use sumstats `output=` for a string-only render):
+# Quick text/LaTeX preview (use sumstats `output=` for a string-only render).
+# When `by=` is binary 0/1 and you don't pass `by_labels=`, sumstats auto-fills
+# the panel headers as **Control / Treated** so the academic Table 1 reads
+# correctly out of the box. For non-0/1 codings or different wording, pass
+# `by_labels={0:"Untrained", 1:"Trained"}` (or `{"A":"Control","B":"Treated"}`).
 print(sp.sumstats(df, vars=["wage","edu","exp","tenure","age"],
                   by="training", output="text"))
 
@@ -513,6 +592,15 @@ This is the densest section of an applied paper. A modern AER §4 typically cont
 - **Table 2-ter** (multi-outcome): same treatment, several outcomes side-by-side
 - **Figure 3** (coefplot): visual summary of β̂ and 95% CI across specs
 
+> **Estimator routing** (memorize this — getting it wrong silently produces nonsense):
+> - **No FE** → `sp.regress("y ~ x1 + x2", df, cluster="firm_id")`
+> - **High-dim FE** → `sp.feols("y ~ x1 + x2 | fe1 + fe2", df, vcov={"CRV1":"firm_id"})`
+> - **Two-way cluster** → `sp.feols(..., vcov={"CRV1":"firm_id+year"})`
+> - **2SLS / IV** → `sp.ivreg("y ~ (x ~ z) + controls", df, cluster=...)`
+> - **DID / event-study** → `sp.callaway_santanna(...)` / `sp.sun_abraham(...)`
+>
+> **Never** write `sp.regress("y ~ x | firm_id")` — `sp.regress` does not parse `|` and silently treats `x | firm_id` as a single variable name. Use `sp.feols` for any formula containing `|`.
+
 `sp.regtable(*models, ...)` is the workhorse. Useful kwargs:
 
 ```
@@ -536,23 +624,42 @@ Stable β̂ across columns ⇒ less concern that selection on observables is dri
 | Controls | none | age, edu | + tenure, firm_size | high-dim FE | individual FE |
 
 ```python
-M1 = sp.regress("wage ~ training",                                     df, cluster="firm_id")
-M2 = sp.regress("wage ~ training + age + edu",                         df, cluster="firm_id")
-M3 = sp.regress("wage ~ training + age + edu + tenure + firm_size",    df, cluster="firm_id")
-M4 = sp.regress("wage ~ training + age + edu + tenure + firm_size | "
-                "region + industry + year",                            df, cluster="firm_id")
-M5 = sp.regress("wage ~ training + age + edu + tenure + firm_size | "
-                "worker_id + year",                                    df, cluster="firm_id")
+# RULE: pure OLS → sp.regress; high-dim FE absorption → sp.feols
+# (sp.regress does NOT parse `|` as FE — it's a thin OLS wrapper. Use
+# `sp.feols("y ~ x | fe1 + fe2", df, vcov={"CRV1":"firm_id"})` for FE.)
+M1 = sp.regress("wage ~ training",                                  df, cluster="firm_id")
+M2 = sp.regress("wage ~ training + age + edu",                      df, cluster="firm_id")
+M3 = sp.regress("wage ~ training + age + edu + tenure + firm_size", df, cluster="firm_id")
+M4 = sp.feols  ("wage ~ training + age + edu + tenure + firm_size | region + industry + year",
+                df, vcov={"CRV1": "firm_id"})
+M5 = sp.feols  ("wage ~ training + age + edu + tenure + firm_size | worker_id + year",
+                df, vcov={"CRV1": "firm_id"})
 
-# Consolidate 5 models into ONE table (= Stata `outreg2 [M1..M5] using ..., replace`)
+# Consolidate 5 models into ONE table (= Stata `outreg2 [M1..M5] using ..., replace`).
+# **Default = show ALL coefficients verbatim — controls AND the intercept**
+# (AER convention; readers verify the full spec). Pass NO `keep=`/`drop=` and
+# `regtable` will surface every estimated parameter. Add `drop=["Intercept"]`
+# only if you want to suppress the constant for paper aesthetics; add
+# `keep=[focal]` only when a focal-coefficient-only table is intentional.
 rt = sp.regtable(M1, M2, M3, M4, M5,
                  template="aer",                  # auto-applies SE label, star levels, font
-                 keep=["training"],
                  coef_labels={"training": "Job training"},
                  model_labels=["(1) Baseline", "(2) +Demog.", "(3) +Labor-mkt",
                                "(4) Region×Ind. FE", "(5) Worker FE"],
                  stats=["N", "R2", "Cluster", "FE", "DV mean"],
                  title="Table 2. Effect of training on wages")
+# Variants (all opt-in — the default above is preferred):
+#   • drop intercept only:    sp.regtable(..., drop=["Intercept"])
+#   • focal-coefficient only: sp.regtable(..., keep=["training"])
+#   • mixed-magnitude table:  sp.regtable(..., fmt="auto")
+#       Use whenever a single table mixes dollar-magnitude coefficients
+#       (e.g. earnings ≈ 1500) with elasticity-magnitude coefficients
+#       (e.g. log-earnings ≈ 0.09). The default fmt="%.3f" pads the dollar
+#       side; a fixed fmt="%.0f" rounds the elasticity side to "0" while
+#       significance stars survive — the silent LaLonde-style precision
+#       trap. fmt="auto" picks per-value precision: thousands separator
+#       for |β|≥1000, integer for ≥100, 1 dp for ≥10, 2 dp for ≥1, 3 dp
+#       below — so neither magnitude is killed.
 
 # Export to ALL THREE in three lines — Word for co-authors, Excel for editors, LaTeX for build:
 rt.to_word ("tables/table2_main.docx")
@@ -564,8 +671,8 @@ open("tables/table2_main.tex", "w").write(rt.to_latex())
 Show the same coefficient of interest under multiple identification strategies. This is *the* AER credibility move: convergent evidence across designs each making different identifying assumptions.
 
 ```python
-ols  = sp.regress("wage ~ training + age + edu + tenure | industry + year",
-                   df, cluster="firm_id")                                                 # OLS / FE
+ols  = sp.feols  ("wage ~ training + age + edu + tenure | industry + year",
+                   df, vcov={"CRV1": "firm_id"})                                          # OLS + 2-way FE
 ivr  = sp.ivreg("wage ~ (training ~ Z1 + Z2) + age + edu + tenure",
                  df, cluster="firm_id")                                                    # 2SLS
 did  = sp.callaway_santanna(df, y="wage", g="first_treat_year",
@@ -578,7 +685,6 @@ mtch = sp.match(df, y="wage", treat="training",
 
 rt = sp.regtable(ols, ivr, did, dml, mtch,
                  template="aer",
-                 keep=["training"],
                  coef_labels={"training": "Job training (β̂)"},
                  model_labels=["(1) OLS+FE", "(2) 2SLS", "(3) CS-DID",
                                "(4) DML-PLR", "(5) PSM"],
@@ -595,13 +701,12 @@ A single treatment, several outcomes. Use `dep_var_labels` so each column carrie
 
 ```python
 ys = ["wage", "log_wage", "weeks_employed", "left_firm", "promoted"]
-multi_y = [sp.regress(f"{y} ~ training + age + edu + tenure | industry + year",
-                       df, cluster="firm_id")
+multi_y = [sp.feols(f"{y} ~ training + age + edu + tenure | industry + year",
+                     df, vcov={"CRV1": "firm_id"})
            for y in ys]
 
 rt = sp.regtable(*multi_y,
                  template="aer",
-                 keep=["training"],
                  dep_var_labels=ys,                    # column header: dep var
                  model_labels=["(1)","(2)","(3)","(4)","(5)"],
                  stats=["N","R2","DV mean","Cluster"],
@@ -615,10 +720,10 @@ open("tables/table2c_multi_outcome.tex", "w").write(rt.to_latex())
 Same model family, two horizons (short-run / long-run) or two samples (pre-2015 / post-2015) stacked vertically. Use `panel_labels`.
 
 ```python
-panelA = [sp.regress("wage_t1 ~ training + X | industry+year", df, cluster="firm_id"),
-          sp.regress("wage_t1 ~ training + X | worker_id+year", df, cluster="firm_id")]
-panelB = [sp.regress("wage_t5 ~ training + X | industry+year", df, cluster="firm_id"),
-          sp.regress("wage_t5 ~ training + X | worker_id+year", df, cluster="firm_id")]
+panelA = [sp.feols("wage_t1 ~ training + X | industry + year",  df, vcov={"CRV1":"firm_id"}),
+          sp.feols("wage_t1 ~ training + X | worker_id + year", df, vcov={"CRV1":"firm_id"})]
+panelB = [sp.feols("wage_t5 ~ training + X | industry + year",  df, vcov={"CRV1":"firm_id"}),
+          sp.feols("wage_t5 ~ training + X | worker_id + year", df, vcov={"CRV1":"firm_id"})]
 
 rt = sp.regtable(*panelA, *panelB,
                  template="aer",
@@ -626,7 +731,6 @@ rt = sp.regtable(*panelA, *panelB,
                                "Panel A. Short-run (1 year)",
                                "Panel B. Long-run (5 years)",
                                "Panel B. Long-run (5 years)"],
-                 keep=["training"],
                  model_labels=["(1) Industry FE","(2) Worker FE"]*2,
                  stats=["N","R2"],
                  title="Table 2-quater. Short- vs long-run effects")
@@ -639,14 +743,17 @@ open("tables/table2d_horizons.tex", "w").write(rt.to_latex())
 The textbook AER IV table presents the **first stage**, the **reduced form**, and the **2SLS** in three columns so the reader can verify Wald-ratio = RF / FS.
 
 ```python
-fs = sp.regress("training ~ Z + age + edu | industry+year", df, cluster="firm_id")  # 1st stage
-rf = sp.regress("wage     ~ Z + age + edu | industry+year", df, cluster="firm_id")  # reduced form
+fs = sp.feols  ("training ~ Z + age + edu | industry + year", df, vcov={"CRV1":"firm_id"})  # 1st stage
+rf = sp.feols  ("wage     ~ Z + age + edu | industry + year", df, vcov={"CRV1":"firm_id"})  # reduced form
 iv = sp.ivreg  ("wage ~ (training ~ Z) + age + edu | industry+year",
                 df, cluster="firm_id")                                              # 2SLS
 
 rt = sp.regtable(fs, rf, iv,
                  template="aer",
-                 keep=["Z", "training"],
+                 keep=["Z", "training"],               # IV triplet is intentionally focal:
+                                                       # show only Z + endog so the reader can
+                                                       # eyeball Wald-ratio = RF / FS. For the
+                                                       # full coef list, drop the kwarg entirely.
                  dep_var_labels=["training", "wage", "wage"],
                  model_labels=["(1) First stage", "(2) Reduced form", "(3) 2SLS"],
                  stats=["First-stage F", "N", "R2", "Cluster"],
@@ -684,7 +791,7 @@ sp.coefplot(M1, M2, M3, M4, M5,
 
 ### Reporting checklist for the Table 2 footnote (AER house style)
 - Standard-error cluster level (and whether it's two-way / Conley)
-- Fixed-effects absorbed
+- Fixed-effects absorbed — `regtable` auto-adds **one footer row per FE name** (e.g. `Industry FE: Yes / Year FE: Yes / Worker_id FE: No`) whenever any column comes from `sp.feols(... | fe1 + fe2 ...)`. Don't hand-roll these rows.
 - Sample size **and number of clusters**
 - Estimator (OLS / 2SLS / CS-DID / SCM / DML)
 - Stars convention `* 0.10  ** 0.05  *** 0.01`
@@ -707,12 +814,11 @@ slices = {
     "(6) Small firm": df[df["firm_size"] < 100],
     "(7) Large firm": df[df["firm_size"] >= 100],
 }
-gmodels = [sp.regress("wage ~ training + age + edu + tenure | industry+year",
-                       d, cluster="firm_id") for d in slices.values()]
+gmodels = [sp.feols("wage ~ training + age + edu + tenure | industry + year",
+                     d, vcov={"CRV1": "firm_id"}) for d in slices.values()]
 
 rt = sp.regtable(*gmodels,
                  template="aer",
-                 keep=["training"],
                  coef_labels={"training": "Training"},
                  model_labels=list(slices),
                  stats=["N","R2","DV mean"],
@@ -726,20 +832,20 @@ open("tables/table3_heterogeneity.tex", "w").write(rt.to_latex())
 Test moderation formally with interaction terms — referees often ask whether the gap between subgroups is statistically significant, which requires the interaction p-value.
 
 ```python
-H1 = sp.regress("wage ~ training*female + age + edu + tenure | industry+year",
-                df, cluster="firm_id")
-H2 = sp.regress("wage ~ training*C(skill_quartile) + age + edu + tenure | industry+year",
-                df, cluster="firm_id")
-H3 = sp.regress("wage ~ training*log_firm_size + age + edu + tenure | industry+year",
-                df, cluster="firm_id")
+H1 = sp.feols("wage ~ training*female + age + edu + tenure | industry + year",
+              df, vcov={"CRV1": "firm_id"})
+H2 = sp.feols("wage ~ training*C(skill_quartile) + age + edu + tenure | industry + year",
+              df, vcov={"CRV1": "firm_id"})
+H3 = sp.feols("wage ~ training*log_firm_size + age + edu + tenure | industry + year",
+              df, vcov={"CRV1": "firm_id"})
 
 rt = sp.regtable(H1, H2, H3,
                  template="aer",
-                 keep=["training", "training:female",
-                       "training:C(skill_quartile)[T.2]",
-                       "training:C(skill_quartile)[T.3]",
-                       "training:C(skill_quartile)[T.4]",
-                       "training:log_firm_size"],
+                 keep=["training", "training:female", # interaction-form heterogeneity
+                       "training:C(skill_quartile)[T.2]",   # is intentionally focal:
+                       "training:C(skill_quartile)[T.3]",   # only the main effect + interactions
+                       "training:C(skill_quartile)[T.4]",   # are reported. Drop this kwarg
+                       "training:log_firm_size"],           # entirely to show full controls.
                  model_labels=["(1) ×Female", "(2) ×Skill quartile", "(3) ×log(Firm size)"],
                  stats=["N","R2"],
                  title="Table 3-bis. Interaction-form heterogeneity")
@@ -841,9 +947,14 @@ sp.spec_curve(df, y="wage", x="training",
 Cluster-level choice is itself a robustness check — show the result is not driven by an over-narrow cluster.
 
 ```python
+# For statsmodels-backed sp.regress / sp.ivreg results:
 sp.twoway_cluster(M3, df, cluster1="firm_id", cluster2="year")     # two-way clustering
 sp.conley(M3, df, lat="lat", lon="lon",
           dist_cutoff=100, kernel="uniform")                        # spatial HAC (Conley 1999)
+
+# For pyfixest-backed sp.feols results, set 2-way cluster directly in `vcov`:
+sp.feols("y ~ x | firm_id + year", df,
+         vcov={"CRV1": "firm_id+year"})                              # 2-way: firm × year
 ```
 
 ### 7.5 Oster (2019) selection bound
@@ -908,7 +1019,6 @@ models = [sp.regress(f"wage ~ training + {' + '.join(c) or '1'}",
 rt = sp.regtable(*models,
                  template="aer",
                  model_labels=list(blocks),
-                 keep=["training"],
                  title="Table 7. Selection-stability across confounder blocks")
 rt.to_word ("tables/table_robust_blocks.docx")
 rt.to_excel("tables/table_robust_blocks.xlsx")
@@ -919,30 +1029,30 @@ open("tables/table_robust_blocks.tex", "w").write(rt.to_latex())
 The canonical AER appendix Table A1 stacks every robustness specification next to the baseline so reviewers see at a glance that β̂ survives. `sp.regtable` accepts any mix of `EconometricResults` / `CausalResult`, so build the list dynamically:
 
 ```python
-baseline = sp.regress("wage ~ training + age + edu + tenure | industry+year",
-                       df, cluster="firm_id")
+baseline = sp.feols("wage ~ training + age + edu + tenure | industry + year",
+                     df, vcov={"CRV1": "firm_id"})
 
 rob = {
     "(1) Baseline":            baseline,
-    "(2) Drop top 1% wage":    sp.regress("wage ~ training + age + edu + tenure | industry+year",
-                                          df.query("wage < wage.quantile(0.99)"),
-                                          cluster="firm_id"),
-    "(3) Balanced panel":      sp.regress("wage ~ training + age + edu + tenure | industry+year",
-                                          sp.balance_panel(df, entity="worker_id", time="year"),
-                                          cluster="firm_id"),
-    "(4) Drop early cohorts":  sp.regress("wage ~ training + age + edu + tenure | industry+year",
-                                          df.query("first_treat_year > 2008"),
-                                          cluster="firm_id"),
-    "(5) Worker FE":           sp.regress("wage ~ training + age + edu + tenure | worker_id+year",
-                                          df, cluster="firm_id"),
-    "(6) 2-way cluster":       sp.twoway_cluster(baseline, df,
-                                                  cluster1="firm_id", cluster2="year"),
+    "(2) Drop top 1% wage":    sp.feols("wage ~ training + age + edu + tenure | industry + year",
+                                        df.query("wage < wage.quantile(0.99)"),
+                                        vcov={"CRV1": "firm_id"}),
+    "(3) Balanced panel":      sp.feols("wage ~ training + age + edu + tenure | industry + year",
+                                        sp.balance_panel(df, entity="worker_id", time="year"),
+                                        vcov={"CRV1": "firm_id"}),
+    "(4) Drop early cohorts":  sp.feols("wage ~ training + age + edu + tenure | industry + year",
+                                        df.query("first_treat_year > 2008"),
+                                        vcov={"CRV1": "firm_id"}),
+    "(5) Worker FE":           sp.feols("wage ~ training + age + edu + tenure | worker_id + year",
+                                        df, vcov={"CRV1": "firm_id"}),
+    "(6) 2-way cluster":       sp.feols("wage ~ training + age + edu + tenure | industry + year",
+                                        df, vcov={"CRV1": "firm_id+year"}),  # 2-way: firm × year
     "(7) Conley spatial SE":   sp.conley(baseline, df,
                                           lat="lat", lon="lon", dist_cutoff=100),
-    "(8) Log outcome":         sp.regress("log_wage ~ training + age + edu + tenure | industry+year",
-                                          df, cluster="firm_id"),
-    "(9) IHS outcome":         sp.regress("ihs_wage ~ training + age + edu + tenure | industry+year",
-                                          df, cluster="firm_id"),
+    "(8) Log outcome":         sp.feols("log_wage ~ training + age + edu + tenure | industry + year",
+                                        df, vcov={"CRV1": "firm_id"}),
+    "(9) IHS outcome":         sp.feols("ihs_wage ~ training + age + edu + tenure | industry + year",
+                                        df, vcov={"CRV1": "firm_id"}),
     "(10) PSM-weighted":       sp.match(df, y="wage", treat="training",
                                          covariates=["age","edu","tenure","firm_size"],
                                          method="nearest"),
@@ -952,9 +1062,13 @@ rob = {
                                        covariates=["age","edu","tenure","firm_size"], model="plr"),
 }
 
+# Robustness master = AER Table A1 — readers MUST see every coefficient
+# across every spec to verify nothing is hiding behind `keep=`. Default to
+# the full coef table (intercept included); only switch to
+# `keep=["training"]` if a referee has explicitly asked for a focal-only
+# summary, or add `drop=["Intercept"]` if you want the constant suppressed.
 rt = sp.regtable(*rob.values(),
                  template="aer",
-                 keep=["training"],
                  coef_labels={"training": "Training (β̂)"},
                  model_labels=list(rob),
                  stats=["N", "R2", "Cluster", "FE"],
@@ -972,7 +1086,10 @@ sp.paper_tables(main=[M1, M2, M3, M4, M5],
                 coef_labels={"training": "Training"},
                 model_labels_main=["(1)","(2)","(3)","(4)","(5)"],
                 model_labels_robustness=list(rob),
-                keep=["training"]).to_docx("tables/paper_tables.docx")
+                # paper_tables only accepts `keep=`, not `drop=`. Omit both to
+                # show every coefficient (AER convention). Pass `keep=["training"]`
+                # only when a focal-only summary is desired.
+                ).to_docx("tables/paper_tables.docx")
 ```
 
 ### 7.12 Figure 5 — coefficient forest plot of all robustness specs
@@ -1075,19 +1192,18 @@ c.add_balance(df, treatment="training",
 
 c.add_heading("§4. Main results",        level=1)
 c.add_regression(M1, M2, M3, M4, M5,
-                 keep=["training"],
                  model_labels=["(1)","(2)","(3)","(4)","(5)"],
                  stats=["N","R2","Cluster","FE"],
                  title="Table 2. Effect of training on wages")
 
 c.add_heading("§5. Heterogeneity",       level=1)
 c.add_regression(*gmodels,
-                 keep=["training"], model_labels=list(slices),
+                 model_labels=list(slices),
                  title="Table 3. Heterogeneous effects")
 
 c.add_heading("§7. Robustness",          level=1)
 c.add_regression(*rob.values(),
-                 keep=["training"], model_labels=list(rob),
+                 model_labels=list(rob),
                  title="Table A1. Robustness")
 
 c.add_text(
@@ -1153,7 +1269,11 @@ Default `sp.regtable` settings for AER house style — and the export pipeline
 ```python
 rt = sp.regtable(*models,
                  template="aer",                  # journal preset: aer/qje/econometrica/restat/jf/aeja/jpe/restud
-                 keep=["training"],               # show only the coefficient of interest
+                 # AER convention: pass NEITHER `keep=` NOR `drop=` —
+                 # `regtable` will then surface every estimated parameter
+                 # (controls AND the intercept). Add `drop=["Intercept"]`
+                 # only if you want the constant suppressed; add
+                 # `keep=[focal]` only for an intentional focal-only table.
                  coef_labels={"training": "Training"},
                  model_labels=[...],              # column labels
                  stats=["N", "R2", "Cluster", "FE", "DV mean"],
@@ -1194,17 +1314,367 @@ For pyfixest-style native output, `sp.etable(*models, ...)` is the alternative; 
 
 ---
 
+## §A. Epidemiology / public health pipeline (Mode A)
+
+> **Convention**: STROBE (observational) / TRIPOD-AI (prediction) reporting. The modern epi gold standard is **target-trial emulation** (Hernán & Robins) — write the protocol of the hypothetical RCT first, then emulate it with observational data using a doubly-robust estimator. Outcomes are commonly **risk differences, risk ratios, hazard ratios, or restricted mean survival time**, not just OLS coefficients. The skill mirrors the AER 8-section flow but swaps the Step-4 estimator stack and adds survival/MR-specific reporting rows.
+
+Running example: `statin_initiation → 5-yr_MACE` in an EHR cohort (`patient_id / index_date / age / sex / ldl_baseline / comorbidity_index / followup_days / event`). The exposure is time-varying, confounders are time-varying, and competing-risk censoring matters — the canonical setting where naïve OLS / Cox-with-baseline-adjustment is biased.
+
+### A.0 Cohort construction & target-trial protocol
+
+```python
+import statspai as sp
+
+# Eligibility, treatment-strategy, time-zero, follow-up, outcome — written down BEFORE estimation
+protocol = sp.target_trial.TargetTrialProtocol(
+    eligibility           = "adults 40-75, LDL ≥ 130, no prior MI/stroke, no statin in 12mo washout",
+    treatment_strategies  = ["initiate statin within 30d of index", "no statin within 30d"],
+    assignment            = "observational; emulate randomization via IPTW + g-formula",
+    time_zero             = "index_date (first eligible cardiology visit)",
+    followup_end          = "first MACE / death / disenrollment / index_date + 5yr",
+    outcome               = "first MACE (composite: MI, stroke, cardiovascular death)",
+    causal_contrast       = "per-protocol risk difference at 5 years",
+    analysis_plan         = "IPTW-MSM + g-formula + TMLE triplet; report all three with CIs",
+    baseline_covariates   = ["age","sex","ldl_baseline","comorbidity_index","smoker"],
+    time_varying_covariates = ["ldl_current"],
+)
+cohort = sp.target_trial_emulate(df, protocol=protocol, id="patient_id", time="followup_days",
+                                  treat="statin_initiation", event="mace")
+```
+
+### A.1 Table 1 — baseline characteristics by exposure
+
+```python
+# Same sumstats stack as AER mode; binary 0/1 by= auto-renders Control/Treated.
+mc = sp.mean_comparison(cohort, ["age","sex","ldl_baseline","comorbidity_index","smoker"],
+                        group="statin_initiation", test="ttest",
+                        title="Table 1. Baseline characteristics by statin initiation")
+mc.to_word ("tables/table1_epi.docx")
+mc.to_excel("tables/table1_epi.xlsx")
+```
+
+### A.2 Identification — DAG, propensity overlap, KM curves
+
+```python
+# 2.1 DAG (manual or LLM-assisted)
+dag = sp.dag(["age","sex","ldl_baseline","comorbidity_index","statin_initiation","mace"])
+dag.add_edges([("age","ldl_baseline"),("age","statin_initiation"),
+               ("ldl_baseline","statin_initiation"),("statin_initiation","mace"),
+               ("ldl_baseline","mace"),("comorbidity_index","statin_initiation"),
+               ("comorbidity_index","mace")])
+adj = dag.adjustment_set(treatment="statin_initiation", outcome="mace")  # back-door set
+
+# 2.2 Propensity-score overlap (positivity check; epi convention before any IPW)
+# Returns a pd.Series of fitted PS — draw mirrored histograms by exposure.
+ps = sp.propensity_score(cohort, treatment="statin_initiation",
+                          covariates=["age","sex","ldl_baseline","comorbidity_index","smoker"],
+                          method="logit")
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots(figsize=(6,4))
+ax.hist(ps[cohort["statin_initiation"]==1], bins=40, alpha=0.5, label="Treated")
+ax.hist(ps[cohort["statin_initiation"]==0], bins=40, alpha=0.5, label="Control")
+ax.set_xlabel("Estimated propensity score"); ax.legend()
+fig.savefig("figures/figA1_ps_overlap.png", dpi=300)
+
+# 2.3 Crude KM curves by exposure (descriptive identification graphic)
+km = sp.kaplan_meier(cohort, duration="followup_days", event="mace", group="statin_initiation")
+km.plot().savefig("figures/figA2_km.png", dpi=300)
+```
+
+### A.3 Main estimate — IPTW · g-formula · TMLE triplet (the modern epi standard)
+
+Report **all three** in one `regtable` so the reader sees convergent doubly-robust evidence — this is the epi equivalent of the AER design horse race:
+
+```python
+# (1) IPTW marginal structural model
+iptw = sp.msm(cohort, y="mace", treat="statin_initiation",
+              id="patient_id", time="month",
+              time_varying=["ldl_current","comorbidity_index"],
+              baseline=["age","sex"])
+
+# (2) Parametric g-formula (g-computation)
+gcomp = sp.gformula(cohort, y="mace", treat="statin_initiation",
+                    covariates=["age","sex","ldl_baseline","comorbidity_index","smoker"],
+                    time_varying=["ldl_current"],
+                    intervention="always_treat", reference="never_treat")
+
+# (3) TMLE — doubly robust, the modern gold standard.
+# Pass an sklearn-style library list for nuisance learners; statspai stacks them
+# internally via SuperLearner. Keep `outcome_library` and `propensity_library`
+# explicit so the reviewer can see your nuisance choices.
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+sl_lib = [LogisticRegression(max_iter=1000),
+          GradientBoostingClassifier(),
+          RandomForestClassifier()]
+tmle = sp.tmle(cohort, y="mace", treat="statin_initiation",
+               covariates=["age","sex","ldl_baseline","comorbidity_index","smoker"],
+               outcome_library=sl_lib, propensity_library=sl_lib)
+
+# (3-bis) HAL-TMLE if you want a fully nonparametric variant
+hal = sp.hal_tmle(cohort, y="mace", treat="statin_initiation",
+                  covariates=["age","sex","ldl_baseline","comorbidity_index","smoker"],
+                  variant="ate")
+
+# Convergent-evidence table — risk difference at 5 years
+rt = sp.regtable(iptw, gcomp, tmle, hal,
+                 model_labels=["(1) IPTW-MSM","(2) g-formula","(3) TMLE","(4) HAL-TMLE"],
+                 stats=["N","Effect type","Risk diff. (RD)","Risk ratio (RR)"],
+                 title="Table 2. Effect of statin initiation on 5-yr MACE — convergent estimators")
+rt.to_word ("tables/table2_epi.docx"); rt.to_excel("tables/table2_epi.xlsx")
+```
+
+### A.4 Survival outcomes — KM / AFT / restricted mean
+
+```python
+# Restricted mean survival time (RMST) at 5 yr — preferred over hazard ratio when PH fails
+aft = sp.aft("Surv(followup_days, mace) ~ statin_initiation + age + sex + ldl_baseline",
+             cohort, family="weibull")
+
+rt_surv = sp.regtable(aft,
+                      stats=["N","Events","Median survival","RMST (5yr)","HR (PH)"],
+                      title="Table 3. Survival analysis (Weibull AFT)")
+rt_surv.to_word("tables/table3_survival.docx")
+```
+
+### A.5 Mendelian randomization (genetic IV — when relevant)
+
+```python
+# Standard MR triple: IVW → Egger → weighted median, on summary statistics
+ivw    = sp.mr_ivw   (beta_exposure, beta_outcome, se_exposure, se_outcome)
+egger  = sp.mr_egger (beta_exposure, beta_outcome, se_exposure, se_outcome)   # tests pleiotropy
+median = sp.mr_median(beta_exposure, beta_outcome, se_exposure, se_outcome, penalized=True)
+
+rt_mr = sp.regtable(ivw, egger, median,
+                    model_labels=["IVW","MR-Egger","Weighted median"],
+                    title="Table 4. Mendelian randomization — sensitivity stack")
+rt_mr.to_word("tables/table4_mr.docx")
+```
+
+### A.6 Robustness — E-value, bounds, principal stratification
+
+```python
+# E-value: minimum strength of unmeasured confounding to explain away the result
+ev = sp.evalue(estimate=tmle.point_estimate, ci=tmle.ci, measure="RR")
+# → "E-value 1.84; CI E-value 1.42" (a confounder must be ~2x associated with both
+#   exposure and outcome to nullify the effect — interpret in your domain)
+
+# Manski / Lee bounds when a covariate is missing-not-at-random
+bds = sp.bounds(cohort, y="mace", treat="statin_initiation", method="manski")
+
+# Principal stratification (e.g. always-takers / never-takers / compliers)
+ps_strat = sp.principal_strat(cohort, y="mace", treat="statin_initiation",
+                              instrument="zip_pharmacy_density",
+                              strata="compliance_type")
+```
+
+### A.7 Reporting checklist (epi-specific footer for `notes=`)
+
+When producing the Table-2 footer, include — in addition to the AER stars/SE language:
+
+- Cohort size, person-years of follow-up, event count
+- **Adjustment set** (variables in the back-door set, not just "controls")
+- **Positivity diagnostic** (PS truncation rule, % of cohort with extreme weights)
+- **E-value** for the main effect and its CI bound
+- For survival: **proportional-hazards check** (Schoenfeld residuals p-value) or "PH violated, RMST reported instead"
+- STROBE checklist completion (cite as a supplementary file)
+
+> **Output path stays identical**: every estimator above returns a `CausalResult` and slots straight into `sp.regtable(...) / sp.collect(...) / sp.paper_tables(...)`. Doubly-robust estimators (TMLE, HAL-TMLE, AIPW) are preferred over single-robust IPTW or g-formula alone — report all three for transparency, but treat TMLE as the primary.
+
+---
+
+## §B. ML causal inference pipeline (Mode B)
+
+> **Convention**: estimand-first, doubly-robust, ML-nuisance-learned, with **CATE distribution + policy value** as first-class outputs (not just a single ATE). The skill mirrors the AER skeleton but the Step-4 estimator stack is **DML + meta-learners + causal forest + neural-causal + BCF**, and Step-5 always reports a CATE distribution. Uncertainty is quantified by **conformal prediction** (`sp.conformal_causal`), not just normal-approximation SE.
+
+Running example: a marketing uplift study — `treatment = personalized_offer`, `outcome = revenue_30d`, with 80+ covariates including text features (`prior_browsing_text`).
+
+### B.0 Prep + nuisance super-learner
+
+```python
+import statspai as sp
+
+# 0.1 Train/holdout split — DML uses cross-fitting internally, but holdout is for policy eval.
+# statspai doesn't expose its own splitter; use sklearn directly.
+from sklearn.model_selection import train_test_split
+train, holdout = train_test_split(df, test_size=0.2, stratify=df["treatment"], random_state=42)
+
+# 0.2 SuperLearner library for nuisance — stacks GBM / RF / Lasso (pass sklearn estimators).
+from sklearn.linear_model import LogisticRegression, LassoCV
+from sklearn.ensemble import GradientBoostingRegressor, GradientBoostingClassifier, RandomForestRegressor, RandomForestClassifier
+sl_outcome = sp.super_learner(X=train[X_cols].values, y=train["revenue_30d"].values,
+                              library=[LassoCV(), GradientBoostingRegressor(), RandomForestRegressor()],
+                              n_folds=5, task="regression")
+sl_treat   = sp.super_learner(X=train[X_cols].values, y=train["treatment"].values,
+                              library=[LogisticRegression(max_iter=1000),
+                                       GradientBoostingClassifier(), RandomForestClassifier()],
+                              n_folds=5, task="binary")
+```
+
+### B.1 Estimand & DAG learning (Step 2 + 2.5 in ML key)
+
+```python
+q = sp.causal_question(treatment="treatment", outcome="revenue_30d",
+                       population="marketed users", estimand="ate")
+plan = q.identify(strategy="ignorability_under_X", X=X_cols)
+
+# DAG learning (when domain DAG isn't given)
+proposed = sp.llm_dag_propose(variables=X_cols + ["treatment","revenue_30d"],
+                              domain="e-commerce uplift")
+constrained = sp.pc_algorithm(train[X_cols + ["treatment","revenue_30d"]],
+                              variables=X_cols + ["treatment","revenue_30d"], alpha=0.05)
+validated = sp.llm_dag_validate(dag=proposed, data=train, alpha=0.05)
+# Alternative learners: sp.notears(...), sp.causal_discovery(..., method="ges")
+```
+
+### B.2 Estimator stack — DML / meta-learner / GRF / neural / Bayesian
+
+```python
+# (1) DML — Chernozhukov double machine learning
+dml = sp.dml(train, y="revenue_30d", d="treatment", X=X_cols,
+             model="plr",                    # plr / irm / iv / pliv
+             ml_g=sl_outcome, ml_m=sl_treat, n_folds=5)
+
+# (2) Meta-learners — S / T / X / R / DR
+ml_dr = sp.metalearner(train, y="revenue_30d", treat="treatment", covariates=X_cols,
+                       learner="dr",         # 's' / 't' / 'x' / 'r' / 'dr'
+                       outcome_model="xgb", propensity_model="xgb")
+
+# (3) Causal forest (GRF / honest splits)
+cf = sp.causal_forest("revenue_30d ~ treatment | " + " + ".join(X_cols),
+                       train, n_estimators=4000, honest=True)
+
+# (4) Neural causal — Dragonnet / TARNet / CEVAE
+dn   = sp.dragonnet(train, y="revenue_30d", treat="treatment", covariates=X_cols,
+                    repr_layers=(200,100), head_layers=(100,))
+tar  = sp.tarnet  (train, y="revenue_30d", treat="treatment", covariates=X_cols)
+
+# (5) Bayesian causal forest (full posterior over CATE)
+bcf  = sp.bcf(train, y="revenue_30d", treat="treatment", covariates=X_cols,
+              n_trees_mu=200, n_trees_tau=50)
+
+# (6) Panel matrix completion (when units × periods)
+mc   = sp.matrix_completion(panel_df, y="revenue", d="treatment", unit="user_id", time="week")
+
+# Convergent evidence table — same regtable / collect stack
+rt = sp.regtable(dml, ml_dr, cf, dn, bcf,
+                 model_labels=["(1) DML-PLR","(2) DR-Learner","(3) Causal forest",
+                               "(4) Dragonnet","(5) BCF"],
+                 stats=["N","ATE","CATE 5–95% range","Cross-fit folds","Nuisance R²"],
+                 title="Table 2. ATE — ML estimator horse race")
+rt.to_word ("tables/table2_ml.docx"); rt.to_excel("tables/table2_ml.xlsx")
+```
+
+### B.3 CATE distribution & subgroup view (the ML-causal headline)
+
+```python
+# 3.1 Per-row CATE — DR-learner / X-learner expose .cate_estimates directly
+sp.cate_plot(ml_dr, kind="hist",
+             title="Figure B1. CATE distribution — DR-Learner") \
+  .savefig("figures/figB1_cate_dist.png", dpi=300)
+
+# 3.2 CATE by group (skill quartiles, gender, channel, …)
+g = sp.cate_by_group(ml_dr, train, by="customer_value_quartile", n_groups=4)
+sp.cate_group_plot(g, title="Figure B2. CATE by customer-value quartile") \
+  .savefig("figures/figB2_cate_group.png", dpi=300)
+
+# 3.3 Causal-forest local effect surface
+cf.local_effects().plot(...).savefig("figures/figB3_local.png", dpi=300)
+```
+
+### B.4 Policy learning + off-policy evaluation
+
+```python
+# 4.1 Learn an interpretable policy tree from CATE estimates
+pol_tree = sp.policy_tree(train, y="revenue_30d", d="treatment", X=X_cols, max_depth=3)
+pol_tree.plot().savefig("figures/figB4_policy.png", dpi=300)
+
+# 4.2 Safe policy under cost constraint
+safe = sp.offline_safe_policy(holdout, state=X_cols, action="treatment",
+                              reward="revenue_30d", cost="offer_cost", cost_threshold=2.50)
+
+# 4.3 Off-policy evaluation on holdout — IPS / DR / SNIPS.
+# sp.ope exposes estimator-level entry points: ips / direct_method / doubly_robust /
+# snips / switch_dr. Each takes (X, actions, rewards, pi_b, pi_e[, reward_model]).
+import numpy as np
+X_test  = holdout[X_cols].values
+A_test  = holdout["treatment"].values
+R_test  = holdout["revenue_30d"].values
+pi_b    = sl_treat.predict_proba(X_test)[:, 1]      # behavior policy: SL on treatment
+pi_e    = pol_tree.predict(X_test)                   # evaluation policy (deterministic)
+opv = sp.ope.doubly_robust(X_test, A_test, R_test, pi_b=pi_b, pi_e=pi_e,
+                            reward_model=sl_outcome)
+print(f"Policy value (DR): {opv.value:.3f} ± {opv.se:.3f}")
+```
+
+### B.5 Uncertainty + fairness + robustness
+
+```python
+# 5.1 Conformal prediction intervals on CATE — distribution-free coverage.
+# sp.conformal_causal exposes conformal_cate / conformal_ite / conformal_continuous /
+# conformal_fair / conformal_interference and more — pick by estimand.
+cp = sp.conformal_causal.conformal_cate(train, y="revenue_30d", treat="treatment",
+                                         covariates=X_cols, alpha=0.10)   # 90% PI
+
+# 5.2 Subgroup fairness audit — DP / EO gaps across protected attributes.
+# fairness_audit takes scored predictions on the dataset (not the model directly);
+# either materialize predictions into a column or pass `predictor=`.
+holdout = holdout.assign(pred=ml_dr.predict(holdout[X_cols]))
+fair = sp.fairness.fairness_audit(holdout, predictions="pred",
+                                   protected="gender", labels="revenue_30d",
+                                   threshold=0.10)
+
+# 5.3 Sensitivity dashboard — ATE robustness to unmeasured confounding
+sd = sp.sensitivity_dashboard(dml, train,
+                              dimensions=["unmeasured_confounding","positivity","model_misspec"])
+sd.plot().savefig("figures/figB5_sensitivity.png", dpi=300)
+
+# 5.4 (Reuse AER §7 robustness) Spec curve over nuisance choices
+sc = sp.spec_curve(train, y="revenue_30d", x="treatment",
+                   controls=[["age"],["age","gender"],X_cols],
+                   se_types=["robust","cluster"])
+sc.plot().savefig("figures/figB6_spec_curve.png", dpi=300)
+```
+
+### B.6 Reporting checklist (ML-causal-specific footer)
+
+When producing the Table-2 footer, include — in addition to the AER stars/SE language:
+
+- **Nuisance learners** used (e.g., "outcome: SuperLearner[xgb, rf, lasso, nn]; treatment: same")
+- **Cross-fitting**: number of folds, sample-splitting scheme
+- **Overlap diagnostic**: PS distribution range, `% trimmed`
+- **CATE summary**: mean / 5–95% range / share with CATE > 0
+- **Policy value**: off-policy DR value vs. random / vs. always-treat baselines
+- **Conformal coverage**: empirical coverage of nominal 1−α PI on holdout
+- **Fairness audit**: subgroup CATE gaps vs. acceptable thresholds
+
+> **Doubly-robust DML / DR-Learner / TMLE are preferred over single-robust S- or T-learner alone.** Report S- or T-learner only as a baseline in the horse race. Always check overlap before reporting any IPW-flavored estimator.
+
+---
+
 ## Method Catalog
 
 ### Classical
+
+**Choose by FE structure:**
+- **No FE / single low-cardinality FE** → `sp.regress` (statsmodels OLS wrapper)
+- **High-dim FE absorption (`y ~ x | fe1 + fe2`)** → `sp.feols` (pyfixest backend, AER workhorse)
+- **Two-way panel (entity × time)** → `sp.panel(...)` (linearmodels backend, standard panel diagnostics)
+
 ```python
-sp.regress("y ~ x1 + x2", df, cluster="firm_id")                       # OLS (formula-first)
-sp.ivreg("y ~ (x1 ~ z1 + z2) + x2", df, cluster="state")               # IV/2SLS — (endog ~ instruments) + exog
-sp.panel(df, "y ~ x1 + x2", entity="firm", time="year", method="fe")   # Panel FE
+sp.regress("y ~ x1 + x2", df, cluster="firm_id")                       # OLS — `|` is NOT FE here
+sp.feols  ("y ~ x1 + x2 | firm_id + year", df, vcov={"CRV1":"firm_id"})# OLS + 2-way FE absorbed
+sp.feols  ("y ~ x1 + x2 | firm_id",        df, vcov={"CRV1":"firm_id+year"})  # 2-way cluster
+sp.fepois ("count ~ x1 + x2 | firm_id",    df, vcov={"CRV1":"firm_id"})# Poisson + FE (count outcomes)
+sp.feglm  ("y ~ x1 + x2 | firm_id", df, family="logit", vcov={"CRV1":"firm_id"})  # Logit + FE
+sp.ivreg  ("y ~ (x1 ~ z1 + z2) + x2", df, cluster="state")             # IV/2SLS — (endog ~ instruments) + exog
+sp.panel  (df, "y ~ x1 + x2", entity="firm", time="year", method="fe") # Panel FE (within / between / RE / FD)
 sp.heckman(df, y="wage", x=["age", "edu"],
            select="in_labor_force", z=["marital", "kids"])              # Heckman selection
-sp.qreg(df, formula="y ~ x1 + x2", quantile=0.5)                        # Quantile regression
+sp.qreg   (df, formula="y ~ x1 + x2", quantile=0.5)                     # Quantile regression
 ```
+
+> **`sp.regress` does NOT parse `|` as a FE separator** — it forwards the formula to statsmodels which treats `edu | firm_id` as a single garbage variable name. Use `sp.feols` (or `sp.panel`) whenever your formula has `|`. Models from `sp.regress`, `sp.feols`, `sp.ivreg`, `sp.panel`, `sp.fepois`, `sp.feglm`, `sp.qreg`, `sp.heckman` all flow through `sp.regtable / sp.coefplot / sp.collect / sp.paper_tables` — mix freely in the same table.
 
 ### Difference-in-Differences
 ```python
@@ -1340,12 +1810,18 @@ sp.interactive(fig)                                                   # WYSIWYG 
 | `sp.bjs_pretrend_joint(es)` | Real signature: `(cs_or_sa_result, data, y=, group=, time=, first_treat=, controls=)` — NOT `event_study()` output |
 | `sp.honest_did(ols_result, ...)` | Only accepts CS / SA / `did_multiplegt` / `aggte(..., 'dynamic')` results — pass a `callaway_santanna` object |
 | `sp.sumstats(df, groups={...}, ...)` | No `groups=` kwarg; loop `sp.sumstats(vars=v_panel, ...)` per panel and concat |
+| `sp.sumstats(..., by="treat")` always shows numeric "0" / "1" panel headers | Binary 0/1 `by=` auto-renders as **Control / Treated** (no kwarg needed). For non-binary or alternative wording, pass `by_labels={0:"Untrained", 1:"Trained"}` |
+| Fixing `fmt="%.0f"` (or any fixed format) on a regtable that mixes dollar-magnitude (~$1500) and elasticity-magnitude (~0.09) coefficients | Silently rounds the elasticities to `0` while stars survive — the LaLonde precision trap. Use `fmt="auto"` for magnitude-adaptive precision: thousands separator for ≥1000, integer for ≥100, 1 dp for ≥10, 2 dp for ≥1, 3 dp below |
 | `plan.population` / `plan.equation` / `plan.threats` | Not exposed on `IdentificationPlan`. Available: `assumptions / estimand / estimator / fallback_estimators / identification_story / warnings / summary()`. Use `q.population / q.treatment / q.outcome` from the `CausalQuestion` |
 | `sp.regtable(..., output="docx")` / `output="xlsx"` | Enum is `{"text","latex","tex","html","markdown","md","qmd","quarto","word","excel"}`. Either use `output="word"`/`"excel"` or — preferred — drop `output=` and call `.to_word(filename)` / `.to_excel(filename)` on the result |
 | `sp.sumstats(..., output="docx")` returns plain text | `sumstats` doesn't natively emit binary docx/xlsx. For Word/Excel use `sp.collect().add_summary(...).save("file.docx")` or convert via `sp.mean_comparison(...).to_word(...)` |
 | Hand-rolling Word from `pandas.DataFrame.to_string()` / writing LaTeX manually | `RegtableResult.to_word/.to_excel/.to_latex/.to_markdown/.to_html` already apply book-tab borders, AER stars, and the right SE label. `sp.collect()` bundles many such tables into one file |
 | Forgetting `template="aer"` (or `qje`/`econometrica`/`restat`/`jf`/`jpe`/`restud`/`aeja`) on `regtable` | Without `template=`, you lose the journal-correct SE label, star levels, and notes. List presets via `sp.list_journal_templates()` |
 | Saving each regression to its own `.tex` and stitching by hand in LaTeX | Use `sp.paper_tables(main=, heterogeneity=, robustness=, placebo=)` for a single multi-panel `.docx` / `.xlsx`, or `sp.collect()` for a full Word/Excel/Markdown bundle (Step 8.4) |
+| `sp.regtable(..., keep=[focal_var])` (or `drop=["Intercept"]`) as the *default* for every table | AER convention is to **show every estimated parameter verbatim — controls AND the intercept** so the reader can verify the full spec. `regtable()` does this when you pass NEITHER `keep=` NOR `drop=`. Reserve `drop=["Intercept"]` for when you actively want to suppress the constant; reserve `keep=[focal]` for intentionally focal-only tables (IV first-stage triplet, interaction-form heterogeneity) — each with a comment explaining why |
+| `sp.regress("y ~ x \| firm_id", df, cluster="firm_id")` for FE | **Silently produces wrong numbers** — `sp.regress` is a thin statsmodels OLS wrapper that does NOT parse `\|` as a FE separator; it interprets `x \| firm_id` as a single garbage variable name. Use `sp.feols("y ~ x \| firm_id", df, vcov={"CRV1":"firm_id"})` for any formula containing `\|`. Two-way cluster: `vcov={"CRV1":"firm_id+year"}` |
+| `sp.feols(..., cluster="firm_id")` | feols uses pyfixest convention: `vcov={"CRV1":"firm_id"}` (one-way) or `vcov={"CRV1":"firm_id+year"}` (two-way). The `cluster=` kwarg is for `sp.regress` / `sp.ivreg` (statsmodels) only |
+| `sp.twoway_cluster(feols_result, df, cluster1=, cluster2=)` | `sp.twoway_cluster` consumes statsmodels-backed results only. For feols, pass two-way directly: `sp.feols(..., vcov={"CRV1":"firm_id+year"})` |
 | Trusting SEs without checking convergence / weak-IV / overlap | Always read `result.summary()` warnings and `result.diagnostics` |
 
 ---
@@ -1374,5 +1850,7 @@ result.to_latex("tables/did_results.tex")
 | One-stop EDA → estimand → DAG → estimate → robustness pipeline | ✅ single import covers all eight AER sections | assemble pyfixest + econml + causalml + differences + ... |
 | Agent-driven analysis with self-describing API | ✅ `list_functions` / `describe_function` / `function_schema` | statsmodels / pyfixest (no agent API) |
 | Estimand-first "DID vs RD vs IV?" decision | ✅ `sp.causal_question` + `sp.causal` | manual judgement call |
-| Stata → Python migration (same API names) | ✅ `sp.regress`, `sp.estat`, `sp.sumstats`, `sp.xtreg` | linearmodels (partial) |
+| Stata → Python migration (same API names) | ✅ `sp.regress`, `sp.estat`, `sp.sumstats`, `sp.feols`, `sp.panel` (Stata `xtreg` → `sp.feols("y ~ x | id + year", df)` or `sp.panel(..., method="fe"/"re")`) | linearmodels (partial) |
 | Full AER-style robustness gauntlet from one package | ✅ Oster / honest_did / E-value / Conley / 2-way / spec_curve / placebo all in `sp.*` | manually wire 5+ packages |
+| **Epidemiology / public health** (target-trial emulation, IPTW + g-formula + TMLE triplet, MR, KM/AFT survival, E-value, STROBE/TRIPOD reporting) | ✅ `sp.target_trial.TargetTrialProtocol` + `sp.target_trial_emulate` + `sp.gformula` + `sp.msm` + `sp.tmle` + `sp.hal_tmle` + `sp.mendelian` (`sp.mr_ivw`/`sp.mr_egger`/`sp.mr_median`) + `sp.kaplan_meier` + `sp.aft` + `sp.evalue` + `sp.principal_strat` — see §A. | hand-stitched zEpid + lifelines + statsmodels + manual MR scripts |
+| **ML causal inference** (DML / S/T/X/R/DR-Learner / causal forest / Dragonnet / TARNet / CEVAE / BCF / matrix completion / policy learning / OPE / conformal CATE / fairness audit / DAG learning) | ✅ `sp.dml` + `sp.metalearner` + `sp.causal_forest` + `sp.dragonnet`/`tarnet`/`cevae` + `sp.bcf` + `sp.matrix_completion` + `sp.policy_tree` + `sp.offline_safe_policy` + `sp.ope.*` + `sp.conformal_causal.*` + `sp.fairness.fairness_audit` + `sp.causal_discovery`/`pc_algorithm`/`notears`/`llm_dag_propose`+`llm_dag_validate` — see §B. | EconML + DoWhy + CausalML + GRF + zEpid + dowhy-gcm assembled by hand |

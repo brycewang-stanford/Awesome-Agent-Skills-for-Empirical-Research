@@ -8,6 +8,38 @@ the de-facto-standard community ecosystem (`reghdfe`, `ivreg2`, `csdid`,
 `psmatch2`, `teffects`, `ebalance`, `coefplot`, `esttab`, `outreg2`,
 `boottest`, `ritest`, `rwolf`, `bacondecomp`, `honestdid`, `binscatter`).
 
+The skill covers **three domain modes** that share the same 8-step
+scaffolding:
+
+- **Default — Applied Econ (AER / QJE / AEJ).** The canonical 8-step
+  pipeline: import / cleaning → variable construction → Table 1 →
+  diagnostic tests → baseline modeling (`reghdfe` HDFE / `ivreg2` IV /
+  `csdid` DID / `rdrobust` RD / `synth` SCM / `teffects` matching) →
+  robustness gauntlet (`bacondecomp` / `honestdid` / `boottest` /
+  `ritest` / `rwolf` / `oster`) → mechanism + heterogeneity →
+  publication-ready `esttab` / `outreg2` / `coefplot` bundle.
+- **Mode A — Epidemiology / public health (§A).** Target-trial
+  emulation in `.do`, IPTW + IPWRA + AIPW + TMLE doubly-robust
+  triplet via `teffects ipw` / `teffects aipw` / `teffects ipwra` /
+  `eltmle`, Mendelian randomization (IVW / Egger / weighted median /
+  outlier-robust) via `mrrobust` / `mregger` / `mrpresso`, KM / Cox /
+  AFT / RMST survival via `sts` / `stcox` / `streg` / `strmst2`,
+  E-value sensitivity via `evalue`, `gformula` for time-varying
+  confounding — under STROBE / TRIPOD-AI reporting conventions.
+- **Mode B — ML causal inference (§B).** DML via `ddml` (with
+  `pystacked` learners) and `pdslasso` for high-dim controls, causal
+  forest via `crforest` / `cforest`, BART / BCF / Dragonnet / TARNet /
+  CEVAE / conformal causal / fairness audit via Stata 18's `python:`
+  callout to Python (`econml` / `causalml` / `mapie` / `fairlearn`),
+  CATE distribution + policy tree (R callout to `policytree` or
+  Python `econml.policy`), DAG learning via `pcalg` / Python
+  `causal-learn`.
+
+All three modes reuse the same Step 1–4 (cleaning → Table 1 → diagnostics)
+and Step 8 (publication tables / figures via `esttab` + `coefplot`)
+scaffolding — switching modes only changes which Step-5 estimator command
+family you reach for.
+
 ## Philosophy
 
 This is the **Stata counterpart** to the Python-side siblings in this repo:
@@ -145,6 +177,33 @@ ready to drop into a manuscript.
 `did_imputation`、`eventstudyinteract`、`sdid`、`rdrobust`、`synth`、
 `psmatch2`、`teffects`、`ebalance`、`coefplot`、`esttab`、`outreg2`、
 `boottest`、`ritest`、`rwolf`、`bacondecomp`、`honestdid`、`binscatter`。
+
+本 skill 覆盖**三种领域模式**，共用同一套 8 步骨架（清洗 / Table 1
+/ 诊断 / 出表）：
+
+- **默认 — 应用经济学（AER / QJE / AEJ）**。8 步流程：导入清洗 →
+  变量构造 → Table 1 → 诊断检验 → 基准建模（`reghdfe` HDFE /
+  `ivreg2` IV / `csdid` DID / `rdrobust` RD / `synth` SCM /
+  `teffects` 匹配）→ 稳健 gauntlet（`bacondecomp` / `honestdid` /
+  `boottest` / `ritest` / `rwolf` / `oster`）→ 机制 + 异质性 →
+  论文级 `esttab` / `outreg2` / `coefplot` 三件套。
+- **模式 A — 流行病学 / 公共健康（§A）**。`.do` 写 target-trial
+  协议，`teffects ipw` / `teffects aipw` / `teffects ipwra` /
+  `eltmle` 跑 IPTW + IPWRA + AIPW + TMLE 双稳健三件套，`mrrobust`
+  / `mregger` / `mrpresso` 做孟德尔随机化（IVW / Egger / 加权中位数
+  / 离群鲁棒），`sts` / `stcox` / `streg` / `strmst2` 做 KM /
+  Cox / AFT / RMST 生存分析，`evalue` 做 E-value 敏感性，
+  `gformula` 处理时变混杂——按 STROBE / TRIPOD-AI 报告规范输出。
+- **模式 B — 因果机器学习（§B）**。`ddml`（搭配 `pystacked` 学习器）
+  + `pdslasso` 处理 DML 与高维控制，`crforest` / `cforest` 跑因果森林；
+  BART / BCF / Dragonnet / TARNet / CEVAE / conformal causal /
+  fairness audit 通过 Stata 18 的 `python:` 块外挂 Python 生态
+  （`econml` / `causalml` / `mapie` / `fairlearn`）；CATE 分布
+  + policy tree 通过 R/Python 外挂（`policytree` 或 `econml.policy`）；
+  DAG 学习走 `pcalg` 或 Python `causal-learn`。
+
+三种模式共用同一套 Step 1–4（清洗 / Table 1 / 诊断）和 Step 8
+（出表 / 出图）骨架——切换模式只换 Step-5 估计器命令族。
 
 ## 哲学
 
