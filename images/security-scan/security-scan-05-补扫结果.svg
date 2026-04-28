@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1700" font-family="'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif">
+  <rect width="1080" height="1700" fill="#FFFFFF"/>
+
+  <!-- Header -->
+  <text x="540" y="90" text-anchor="middle" font-size="48" font-weight="700" fill="#111827">二轮补扫结果</text>
+  <text x="540" y="145" text-anchor="middle" font-size="28" fill="#6B7280">5 个 Skill · 38 个文件 · 800KB · 全部纯 Markdown</text>
+
+  <!-- Hero stat -->
+  <rect x="80" y="200" width="920" height="180" rx="16" fill="#059669"/>
+  <text x="540" y="270" text-anchor="middle" font-size="32" font-weight="600" fill="#A7F3D0">扫描结果</text>
+  <text x="540" y="345" text-anchor="middle" font-size="64" font-weight="700" fill="#FFFFFF">5 / 5 · 全部 CLEAN</text>
+
+  <!-- Card 00 -->
+  <rect x="80" y="430" width="920" height="180" rx="12" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <rect x="80" y="430" width="120" height="180" rx="12" fill="#10B981"/>
+  <text x="140" y="500" text-anchor="middle" font-size="34" font-weight="700" fill="#FFFFFF">00</text>
+  <text x="140" y="540" text-anchor="middle" font-size="22" fill="#FFFFFF">2 文件</text>
+  <text x="220" y="475" font-size="30" font-weight="700" fill="#111827">StatsPAI 完整实证分析</text>
+  <text x="220" y="515" font-size="24" fill="#6B7280">项目自家 Skill · 工作流文档 · 零脚本</text>
+  <text x="220" y="555" font-size="24" fill="#6B7280">README + SKILL.md 共 2 个 Markdown</text>
+  <text x="220" y="590" font-size="22" fill="#059669">✓ 13 类风险扫描全部 0 命中</text>
+
+  <!-- Card 00.1 -->
+  <rect x="80" y="630" width="920" height="180" rx="12" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <rect x="80" y="630" width="120" height="180" rx="12" fill="#10B981"/>
+  <text x="140" y="695" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">00.1</text>
+  <text x="140" y="740" text-anchor="middle" font-size="22" fill="#FFFFFF">10 文件</text>
+  <text x="220" y="675" font-size="30" font-weight="700" fill="#111827">Python 实证分析</text>
+  <text x="220" y="715" font-size="24" fill="#6B7280">pandas / statsmodels / pyfixest / econml 教学</text>
+  <text x="220" y="755" font-size="24" fill="#6B7280">URL 仅 brycewang-stanford / StatsPAI 与本仓库</text>
+  <text x="220" y="790" font-size="22" fill="#059669">✓ 纯文档 · 无可执行脚本面</text>
+
+  <!-- Card 00.2 -->
+  <rect x="80" y="830" width="920" height="180" rx="12" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <rect x="80" y="830" width="120" height="180" rx="12" fill="#10B981"/>
+  <text x="140" y="895" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">00.2</text>
+  <text x="140" y="940" text-anchor="middle" font-size="22" fill="#FFFFFF">10 文件</text>
+  <text x="220" y="875" font-size="30" font-weight="700" fill="#111827">Stata 实证分析</text>
+  <text x="220" y="915" font-size="24" fill="#6B7280">reghdfe / csdid / synth / teffects 等 .do 片段</text>
+  <text x="220" y="955" font-size="24" fill="#6B7280">UCLA stats.idre 公开 Stata 教学链接</text>
+  <text x="220" y="990" font-size="22" fill="#059669">✓ 教学文档 · 零网络调用</text>
+
+  <!-- Card 00.3 -->
+  <rect x="80" y="1030" width="920" height="180" rx="12" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <rect x="80" y="1030" width="120" height="180" rx="12" fill="#10B981"/>
+  <text x="140" y="1095" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">00.3</text>
+  <text x="140" y="1140" text-anchor="middle" font-size="22" fill="#FFFFFF">10 文件</text>
+  <text x="220" y="1075" font-size="30" font-weight="700" fill="#111827">R 实证分析</text>
+  <text x="220" y="1115" font-size="24" fill="#6B7280">fixest / did / grf / DoubleML / marginaleffects</text>
+  <text x="220" y="1155" font-size="24" fill="#6B7280">tidyverse 风格 Quarto 工作流</text>
+  <text x="220" y="1190" font-size="22" fill="#059669">✓ 纯教学文档</text>
+
+  <!-- Card 48 -->
+  <rect x="80" y="1230" width="920" height="180" rx="12" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <rect x="80" y="1230" width="120" height="180" rx="12" fill="#10B981"/>
+  <text x="140" y="1300" text-anchor="middle" font-size="34" font-weight="700" fill="#FFFFFF">48</text>
+  <text x="140" y="1345" text-anchor="middle" font-size="22" fill="#FFFFFF">6 文件</text>
+  <text x="220" y="1275" font-size="30" font-weight="700" fill="#111827">中文学术降 AIGC</text>
+  <text x="220" y="1315" font-size="24" fill="#6B7280">与 44-47 humanizer 系列同类 · 风格指南</text>
+  <text x="220" y="1355" font-size="24" fill="#6B7280">含明确学术诚信声明 · 禁止代写抄袭</text>
+  <text x="220" y="1390" font-size="22" fill="#059669">✓ 纯文档 · 边界清晰</text>
+
+  <!-- Bottom conclusion -->
+  <rect x="80" y="1460" width="920" height="160" rx="16" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <text x="540" y="1515" text-anchor="middle" font-size="32" font-weight="700" fill="#065F46">结论</text>
+  <text x="540" y="1565" text-anchor="middle" font-size="26" fill="#374151">5 个补扫 Skill 风险面最低 · 可放心使用</text>
+  <text x="540" y="1600" text-anchor="middle" font-size="24" fill="#6B7280">外链仅指向 GitHub 与 UCLA 公开教学站点</text>
+
+  <!-- Footer -->
+  <text x="540" y="1670" text-anchor="middle" font-size="22" fill="#9CA3AF">数据来源：SECURITY-SCAN-REPORT.md · 二轮补扫 2026-04-28</text>
+</svg>

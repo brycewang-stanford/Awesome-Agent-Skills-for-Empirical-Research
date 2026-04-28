@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1700" font-family="'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif">
+  <rect width="1080" height="1700" fill="#FFFFFF"/>
+
+  <!-- Header -->
+  <text x="540" y="90" text-anchor="middle" font-size="48" font-weight="700" fill="#111827">六阶段扫描方法论</text>
+  <text x="540" y="145" text-anchor="middle" font-size="28" fill="#6B7280">自动化 + 人工 + 多 Agent 并行 · 多层防御</text>
+
+  <!-- Vertical timeline backbone -->
+  <line x1="180" y1="240" x2="180" y2="1500" stroke="#A7F3D0" stroke-width="6"/>
+
+  <!-- Phase 1 -->
+  <circle cx="180" cy="280" r="40" fill="#059669"/>
+  <text x="180" y="293" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">1</text>
+  <rect x="260" y="240" width="760" height="170" rx="12" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <text x="290" y="290" font-size="34" font-weight="700" fill="#065F46">Phase 1 · 自动化模式扫描</text>
+  <text x="290" y="335" font-size="26" fill="#374151">grep 13 类风险模式 · pipe-to-shell / 反向 shell /</text>
+  <text x="290" y="370" font-size="26" fill="#374151">凭据外泄 / 解码执行 / 挖矿 RAT 签名 / Prompt 注入</text>
+
+  <!-- Phase 2 -->
+  <circle cx="180" cy="490" r="40" fill="#059669"/>
+  <text x="180" y="503" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">2</text>
+  <rect x="260" y="450" width="760" height="170" rx="12" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <text x="290" y="500" font-size="34" font-weight="700" fill="#065F46">Phase 2 · Hook 与权限矩阵审查</text>
+  <text x="290" y="545" font-size="26" fill="#374151">6 个含 hook 的 skill · 40+ hook 脚本 100% 人工核查</text>
+  <text x="290" y="580" font-size="26" fill="#374151">权限 allow list 全部为研究工具 · 无 Bash(*) 通配</text>
+
+  <!-- Phase 3-5 -->
+  <circle cx="180" cy="700" r="40" fill="#059669"/>
+  <text x="180" y="713" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">3</text>
+  <rect x="260" y="660" width="760" height="200" rx="12" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <text x="290" y="710" font-size="34" font-weight="700" fill="#065F46">Phase 3-5 · 三 Agent 并行内容审查</text>
+  <text x="290" y="755" font-size="26" fill="#374151">SKILL.md 散文 · agent 定义 · reference 文档</text>
+  <text x="290" y="790" font-size="26" fill="#374151">查 prompt injection · 后门 · 隐藏 Unicode</text>
+  <text x="290" y="825" font-size="26" fill="#374151">违背用户意图指令 · 异常大文件 · 可疑包源</text>
+
+  <!-- Phase 6 -->
+  <circle cx="180" cy="940" r="40" fill="#059669"/>
+  <text x="180" y="953" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">4</text>
+  <rect x="260" y="900" width="760" height="170" rx="12" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <text x="290" y="950" font-size="34" font-weight="700" fill="#065F46">Phase 6 · 补充完整性检查</text>
+  <text x="290" y="995" font-size="26" fill="#374151">隐藏字符 / 编码异常 / 极长行 / HTML 注入</text>
+  <text x="290" y="1030" font-size="26" fill="#374151">环境变量访问 / 网络相关 import / 高比例非 ASCII</text>
+
+  <!-- Result band -->
+  <rect x="80" y="1130" width="920" height="320" rx="16" fill="#059669"/>
+  <text x="540" y="1210" text-anchor="middle" font-size="36" font-weight="600" fill="#A7F3D0">综合结论</text>
+  <text x="540" y="1320" text-anchor="middle" font-size="84" font-weight="700" fill="#FFFFFF">All Clean</text>
+  <text x="540" y="1390" text-anchor="middle" font-size="30" fill="#D1FAE5">52 个 Skill 在所有维度均未触发威胁信号</text>
+
+  <!-- Footer -->
+  <text x="540" y="1640" text-anchor="middle" font-size="22" fill="#9CA3AF">数据来源：SECURITY-SCAN-REPORT.md Phase 1-6</text>
+</svg>

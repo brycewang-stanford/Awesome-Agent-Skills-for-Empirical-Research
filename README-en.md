@@ -17,6 +17,12 @@
       </td>
     </tr>
   </table>
+
+  <br/>
+
+  <strong>Stanford REAP × CoPaper.AI</strong> · An academic-industrial AI toolkit for empirical research<br/>
+  <sub>Crafted by Stanford's empirical methodology team — covering the full pipeline from data cleaning to top-journal submission</sub>
+
   <br/>
 </div>
 
@@ -24,22 +30,48 @@
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Maintained by CoPaper.AI from Stanford REAP](https://img.shields.io/badge/Maintained%20by-CoPaper.AI%20from%20Stanford%20REAP-blue)](https://copaper.ai)
+[![Powered by StatsPAI](https://img.shields.io/badge/Powered%20by-StatsPAI-orange)](https://github.com/brycewang-stanford/StatsPAI)
+[![Security Scanned](https://img.shields.io/badge/Security-52%2F52%20CLEAN-brightgreen)](SECURITY-SCAN-REPORT.md)
 
 **The Definitive Collection of AI Agent Skills for Empirical Research — 119 GitHub Repos / 23,000+ Skills**
 
 > A curated, opinionated list of **119 GitHub repositories** and **23,000+ AI Agent Skills** for empirical research in economics, political science, sociology, psychology, public health, education, management, finance, and public policy — organized by research workflow, from topic selection to journal submission.
 
-In 2026, the way we do empirical research is being redefined. [CoPaper.AI](https://copaper.ai) can **complete a publication-quality empirical paper in 20 minutes** — from data import, descriptive statistics, causal inference models, robustness checks to formatted result tables, all in one go. The secret isn't a more powerful model — it's **Skills**: encoding senior researchers' methodological expertise into structured workflows, so the AI knows "what a complete DID analysis should include" instead of waiting for you to remind it step by step.
+In 2026, the way we do empirical research is being redefined.
+
+[**CoPaper.AI**](https://copaper.ai) — **an empirical research AI assistant incubated by researchers at [Stanford REAP / SCCEI (Stanford Center on China's Economy and Institutions)](https://sccei.fsi.stanford.edu/reap)** — can **complete a publication-quality empirical paper in 20 minutes**: from data import, descriptive statistics, causal inference models, and robustness checks to formatted result tables, all in one go. The secret isn't a more powerful model — it's **Skills**: encoding senior researchers' methodological expertise into structured workflows, so the AI knows "what a complete DID analysis should include" instead of waiting for you to remind it step by step.
 
 This repository is the **Agent Skills landscape** we compiled while building CoPaper.AI. We organized hundreds of Skills repos and tens of thousands of Skills scattered across GitHub, communities, and academia by research workflow stages, so you can pick what you need.
 
-> **[CoPaper.AI](https://copaper.ai)** ships with **20 built-in econometric methodology Skills** (DID, IV, RDD, PSM, DML, and more), supports one-sentence triggers, multi-agent collaboration, and automatic result output. Want it out of the box? Try it: [copaper.ai](https://copaper.ai)
+**🎓 Three Layers of Trust · Why It's Us Building This**
+
+| Layer | Anchor | Lever |
+|---|---|---|
+| 🏛️ **Academic lineage** | **Stanford REAP / SCCEI** — Stanford Center on China's Economy and Institutions | A research center with a sustained publication record in empirical economics methodology and a deep tradition in applied causal inference |
+| 🔧 **Engineering delivery** | **[CoPaper.AI](https://copaper.ai)** empirical research AI assistant | Ships with **20 econometric methodology Skills** (DID/IV/RDD/PSM/DML, etc.), Supervisor + 4 sub-agent multi-agent architecture, one-sentence triggers, automatic result output |
+| 📦 **Open-source contribution** | **[StatsPAI](https://github.com/brycewang-stanford/StatsPAI)** causal inference Python package | **900+ functions · one `import statspai as sp` · JOSS in submission · MIT-licensed**. This Skills collection is itself part of the StatsPAI ecosystem |
+
+> 🔒 **Use with confidence**: every one of the 52 Skills / 2,940+ files in this repo passed our [systematic security audit](SECURITY-SCAN-REPORT.md) — **52/52 CLEAN, zero FLAGGED**, zero exfiltration, zero reverse shells, zero prompt injection.
+>
+> 💡 **Want it out of the box?** Skip the Skills assembly — try [**→ copaper.ai**](https://copaper.ai) and let the Stanford methodology team run the empirical pipeline end-to-end for you.
 
 ---
 
 ## 🆕 Changelog
 
 <details open>
+<summary><b>2026-04-28: 🛡️ Repository-wide security scan complete — all 52 Skills CLEAN, zero FLAGGED</b></summary>
+
+- **🛡️ [SECURITY-SCAN-REPORT.md](SECURITY-SCAN-REPORT.md)**: We ran a systematic security audit across **all 52 Skills / 2,940+ files** in this repository. **No malicious prompts, viruses, trojans, reverse shells, or other malicious content were found.** Bottom line: every Skill in this repo is safe to use.
+  - **🔍 Six-phase defense-in-depth methodology**: (1) automated grep across 13 risk categories (pipe-to-shell, reverse shell, credential exfil, decode-and-run, mining/RAT signatures, prompt injection, etc.) → (2) 100% manual review of all 6 hook-bearing Skills and their 40+ hook scripts → (3) three parallel agents auditing SKILL.md prose, agent definitions, and reference docs separately → (4) supplemental integrity checks (hidden Unicode, encoding anomalies, ultra-long lines, HTML injection, network-related imports).
+  - **📊 Result distribution**: every "sensitive" hit verified as one of three legitimate categories — **defensive security rules** (deny rules, bash-safety hooks, credential detectors), **legitimate academic API calls** (arXiv / CrossRef / PubMed / FRED / World Bank / OECD / BLS), or **standard Claude Code workflow hooks** (scaffolding / state save / context monitor — **all local file operations, zero network IO**).
+  - **🔑 Key insight**: **17-DAAF is actually the strongest "security-aware" reference template** in this batch (14 defensive hooks + 32 deny rules + active credential scanning). Largest size ≠ highest risk.
+  - **📈 Visual infographics**: 5 zhihu-style information graphics embedded in the report ([overview](images/security-scan/security-scan-01-总览.png) / [methodology](images/security-scan/security-scan-02-扫描方法.png) / [threat matrix](images/security-scan/security-scan-03-威胁矩阵.png) / [Top 5 size distribution](images/security-scan/security-scan-04-规模分布.png) / [supplemental scan](images/security-scan/security-scan-05-补扫结果.png)) — readable in 3 seconds.
+  - See the [**full security scan report**](SECURITY-SCAN-REPORT.md) for details.
+
+</details>
+
+<details>
 <summary><b>2026-04-24: 📗 Full Empirical Analysis Skill (R) shipped — tidyverse + fixest, 8-step Quarto-friendly loop (skills/00.3)</b></summary>
 
 - **📗 [Full Empirical Analysis Skill — R](skills/00.3-Full-empirical-analysis-skill_R/)**: Same-day fourth member of the family, vendored at [`skills/00.3-Full-empirical-analysis-skill_R/`](skills/00.3-Full-empirical-analysis-skill_R/) — **slot #0.3, the R / Quarto edition**.
@@ -149,6 +181,7 @@ This repository is the **Agent Skills landscape** we compiled while building CoP
 - [Multi-Agent Collaboration Systems](#multi-agent-collaboration-systems)
 - [Skill Aggregation Platforms & Discovery Tools](#skill-aggregation-platforms--discovery-tools)
 - [Learning Resources](#learning-resources)
+- [🛡️ Security Scan](#-security-scan)
 - [Contributing](#contributing)
 
 ---
@@ -425,6 +458,31 @@ Don't know where to find Skills? These platforms are your starting point:
 
 ---
 
+## 🛡️ Security Scan
+
+We ran a systematic security audit across **all 52 Skills / 2,940+ files** in this repository — **52/52 CLEAN, zero FLAGGED**. Every "sensitive" hit was verified as legitimate content. **No malicious prompts, viruses, trojans, or reverse shells were found.** Bottom line: every Skill in this repo is safe to use.
+
+![Skills Security Scan Overview](images/security-scan/security-scan-01-总览.png)
+
+**Six-phase defense-in-depth methodology**:
+
+1. **Automated pattern scan** — grep across 13 risk categories (pipe-to-shell, reverse shell, credential exfil, decode-and-run, mining/RAT signatures, prompt injection, etc.)
+2. **Hook & permission matrix audit** — 100% manual review of all 6 hook-bearing Skills and their 40+ hook scripts. Permission allow-lists are restricted to research tooling — **no `Bash(*)` wildcards** anywhere.
+3. **Three parallel agent content audits** — independent reviews of SKILL.md prose, agent definitions, and reference documentation for prompt injection, backdoors, hidden Unicode, suspicious package sources.
+4. **Supplemental integrity checks** — hidden characters, encoding anomalies, ultra-long lines, HTML injection, network-related imports, high non-ASCII ratios.
+
+**Result distribution**: every hit fell into one of three legitimate categories:
+
+- 🛡️ **Defensive security rules** — deny rules, bash-safety hooks, credential detectors. [17-DAAF](skills/17-DAAF-Contribution-Community-daaf/) is the strongest "security-aware" reference in this batch (14 defensive hooks + 32 deny rules + active credential scanning).
+- 📚 **Legitimate academic API calls** — arXiv / CrossRef / PubMed / Semantic Scholar / FRED / World Bank / OECD / BLS, etc.
+- 🔁 **Standard Claude Code workflow hooks** — project scaffolding, state save/restore, context monitoring, session archive, pre-commit reminders — **all local file operations, zero network IO**.
+
+> **Key insight**: largest size ≠ highest risk. The Top 5 largest Skills ([43-wentorai](skills/43-wentorai-research-plugins/) 478 files / [33-Galaxy-Dawn](skills/33-Galaxy-Dawn-claude-scholar/) 327 files / [17-DAAF](skills/17-DAAF-Contribution-Community-daaf/) 319 files / [35-bahayonghang](skills/35-bahayonghang-academic-writing-skills/) 264 files / [18-jusi-aalto](skills/18-jusi-aalto-stata-accounting-research/) 126 files) all passed full audit, with 17-DAAF actually setting the bar for security-conscious design.
+
+The full report includes Phase 1-6 methodology, a per-Skill audit table for all 52 Skills, and 5 visual infographics: [**📋 SECURITY-SCAN-REPORT.md**](SECURITY-SCAN-REPORT.md)
+
+---
+
 ## Contributing
 
 Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to submit new Skill recommendations.
@@ -452,9 +510,19 @@ If this list helps you, please give it a Star so more researchers can find it.
 
 <br/>
 
-<a href="https://copaper.ai">
-  <img src="images/copaper-logo.png" alt="CoPaper.AI" width="240" />
-</a>
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://copaper.ai"><img src="images/copaper-logo.png" alt="CoPaper.AI" width="220" /></a>
+    </td>
+    <td width="40"></td>
+    <td align="center">
+      <img src="images/stanford-reap-logo.png" alt="Stanford REAP" width="320" />
+    </td>
+  </tr>
+</table>
+
+<sub><strong>Stanford REAP × CoPaper.AI</strong> · An academic-industrial AI toolkit for empirical research</sub>
 
 <br/>
 
@@ -471,10 +539,10 @@ If this list helps you, please give it a Star so more researchers can find it.
   </tr>
 </table>
 
-20 built-in methodology Skills, complete an empirical paper in 20 minutes
+20 built-in methodology Skills · 20-minute empirical paper · Powered by <a href="https://github.com/brycewang-stanford/StatsPAI">StatsPAI</a> (900+ functions, MIT)
 
 <br/>
 
-Maintained by [CoPaper.AI](https://copaper.ai) | AI Assistant for Empirical Research
+Maintained by <a href="https://copaper.ai"><strong>CoPaper.AI</strong></a>, incubated at <a href="https://sccei.fsi.stanford.edu/reap"><strong>Stanford REAP / SCCEI</strong></a> | AI Assistant for Empirical Research
 
 </div>

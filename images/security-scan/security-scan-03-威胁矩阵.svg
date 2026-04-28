@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1700" font-family="'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif">
+  <rect width="1080" height="1700" fill="#FFFFFF"/>
+
+  <!-- Header -->
+  <text x="540" y="90" text-anchor="middle" font-size="48" font-weight="700" fill="#111827">8 类核心威胁扫描结果</text>
+  <text x="540" y="145" text-anchor="middle" font-size="26" fill="#6B7280">合计 13 类 · 此处展示最关键的 8 类</text>
+
+  <!-- Legend -->
+  <g>
+    <circle cx="200" cy="220" r="14" fill="#059669"/>
+    <text x="225" y="229" font-size="24" fill="#374151">0 命中</text>
+    <circle cx="540" cy="220" r="14" fill="#F59E0B"/>
+    <text x="565" y="229" font-size="24" fill="#374151">有命中但全部合法</text>
+  </g>
+
+  <!-- Row 1: Reverse shell -->
+  <rect x="80" y="270" width="920" height="130" rx="12" fill="#F3F4F6"/>
+  <circle cx="140" cy="335" r="22" fill="#059669"/>
+  <text x="180" y="318" font-size="30" font-weight="700" fill="#111827">反向 Shell 特征</text>
+  <text x="180" y="358" font-size="24" fill="#6B7280">/dev/tcp · nc -e · bash -i · socket 反弹</text>
+  <text x="980" y="350" text-anchor="end" font-size="56" font-weight="700" fill="#059669">0</text>
+
+  <!-- Row 2: Decode-and-run -->
+  <rect x="80" y="420" width="920" height="130" rx="12" fill="#F3F4F6"/>
+  <circle cx="140" cy="485" r="22" fill="#059669"/>
+  <text x="180" y="468" font-size="30" font-weight="700" fill="#111827">解码后运行</text>
+  <text x="180" y="508" font-size="24" fill="#6B7280">base64 -d · atob · FromBase64String</text>
+  <text x="980" y="500" text-anchor="end" font-size="56" font-weight="700" fill="#059669">0</text>
+
+  <!-- Row 3: Credential paths -->
+  <rect x="80" y="570" width="920" height="130" rx="12" fill="#F3F4F6"/>
+  <circle cx="140" cy="635" r="22" fill="#059669"/>
+  <text x="180" y="618" font-size="30" font-weight="700" fill="#111827">凭据窃取路径</text>
+  <text x="180" y="658" font-size="24" fill="#6B7280">.ssh · .aws · /etc/passwd · .env（仅保护性引用）</text>
+  <text x="980" y="650" text-anchor="end" font-size="56" font-weight="700" fill="#059669">0</text>
+
+  <!-- Row 4: Pipe-to-shell -->
+  <rect x="80" y="720" width="920" height="130" rx="12" fill="#FEF3C7"/>
+  <circle cx="140" cy="785" r="22" fill="#F59E0B"/>
+  <text x="180" y="768" font-size="30" font-weight="700" fill="#111827">Pipe-to-Shell</text>
+  <text x="180" y="808" font-size="24" fill="#6B7280">curl ... | sh · 全部为 uv / Claude Code 官方安装命令</text>
+  <text x="980" y="800" text-anchor="end" font-size="56" font-weight="700" fill="#F59E0B">5</text>
+
+  <!-- Row 5: Prompt injection -->
+  <rect x="80" y="870" width="920" height="130" rx="12" fill="#F3F4F6"/>
+  <circle cx="140" cy="935" r="22" fill="#059669"/>
+  <text x="180" y="918" font-size="30" font-weight="700" fill="#111827">Prompt 注入短语</text>
+  <text x="180" y="958" font-size="24" fill="#6B7280">ignore previous instructions · jailbreak · DAN</text>
+  <text x="980" y="950" text-anchor="end" font-size="56" font-weight="700" fill="#059669">0</text>
+
+  <!-- Row 6: Exfil endpoints -->
+  <rect x="80" y="1020" width="920" height="130" rx="12" fill="#F3F4F6"/>
+  <circle cx="140" cy="1085" r="22" fill="#059669"/>
+  <text x="180" y="1068" font-size="30" font-weight="700" fill="#111827">数据外泄端点</text>
+  <text x="180" y="1108" font-size="24" fill="#6B7280">Discord / Slack / Telegram webhook · Tor · 短链</text>
+  <text x="980" y="1100" text-anchor="end" font-size="56" font-weight="700" fill="#059669">0</text>
+
+  <!-- Row 7: Mining/RAT -->
+  <rect x="80" y="1170" width="920" height="130" rx="12" fill="#F3F4F6"/>
+  <circle cx="140" cy="1235" r="22" fill="#059669"/>
+  <text x="180" y="1218" font-size="30" font-weight="700" fill="#111827">挖矿 / RAT 签名</text>
+  <text x="180" y="1258" font-size="24" fill="#6B7280">XMRig · Cobalt Strike · mimikatz · Meterpreter</text>
+  <text x="980" y="1250" text-anchor="end" font-size="56" font-weight="700" fill="#059669">0</text>
+
+  <!-- Row 8: Destructive cmds -->
+  <rect x="80" y="1320" width="920" height="130" rx="12" fill="#FEF3C7"/>
+  <circle cx="140" cy="1385" r="22" fill="#F59E0B"/>
+  <text x="180" y="1368" font-size="30" font-weight="700" fill="#111827">破坏性命令</text>
+  <text x="180" y="1408" font-size="24" fill="#6B7280">rm -rf · 全部为防御性 deny rule 与本地清理</text>
+  <text x="980" y="1400" text-anchor="end" font-size="56" font-weight="700" fill="#F59E0B">★</text>
+
+  <!-- Conclusion bar -->
+  <rect x="80" y="1490" width="920" height="120" rx="16" fill="#059669"/>
+  <text x="540" y="1545" text-anchor="middle" font-size="32" font-weight="600" fill="#FFFFFF">所有命中经验证均为合法内容</text>
+  <text x="540" y="1585" text-anchor="middle" font-size="26" fill="#A7F3D0">无任何真实威胁信号</text>
+
+  <!-- Footer -->
+  <text x="540" y="1670" text-anchor="middle" font-size="22" fill="#9CA3AF">数据来源：SECURITY-SCAN-REPORT.md · Phase 1 自动化扫描</text>
+</svg>

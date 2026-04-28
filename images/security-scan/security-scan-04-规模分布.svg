@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1500" font-family="'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif">
+  <rect width="1080" height="1500" fill="#FFFFFF"/>
+
+  <!-- Header -->
+  <text x="540" y="90" text-anchor="middle" font-size="48" font-weight="700" fill="#111827">Top 5 大型 Skill 规模</text>
+  <text x="540" y="145" text-anchor="middle" font-size="26" fill="#6B7280">文件数最多的 5 个 Skill · 全部通过审查</text>
+
+  <!-- Bar 1: 43-wentorai (478) -->
+  <text x="80" y="265" font-size="28" font-weight="600" fill="#111827">43 · wentorai-research-plugins</text>
+  <text x="1000" y="265" text-anchor="end" font-size="44" font-weight="700" fill="#059669">478</text>
+  <rect x="80" y="285" width="900" height="80" rx="12" fill="#059669"/>
+  <text x="100" y="335" font-size="24" fill="#FFFFFF">478 个 SKILL.md = 合法研究 API 目录（NIH / NSF / GBIF）</text>
+
+  <!-- Bar 2: 33-Galaxy-Dawn (327) -->
+  <text x="80" y="430" font-size="28" font-weight="600" fill="#111827">33 · Galaxy-Dawn-claude-scholar</text>
+  <text x="1000" y="430" text-anchor="end" font-size="44" font-weight="700" fill="#10B981">327</text>
+  <rect x="80" y="450" width="615" height="80" rx="12" fill="#10B981"/>
+  <text x="100" y="500" font-size="24" fill="#FFFFFF">最大单文件是 340KB 纯文本 time-series.md</text>
+
+  <!-- Bar 3: 17-DAAF (319) -->
+  <text x="80" y="595" font-size="28" font-weight="600" fill="#111827">17 · DAAF · 安全标杆 ★</text>
+  <text x="1000" y="595" text-anchor="end" font-size="44" font-weight="700" fill="#10B981">319</text>
+  <rect x="80" y="615" width="600" height="80" rx="12" fill="#10B981"/>
+  <text x="100" y="665" font-size="24" fill="#FFFFFF">14 个防御 hook + 32 条 deny rule + 凭据扫描</text>
+
+  <!-- Bar 4: 35-bahayonghang (264) -->
+  <text x="80" y="760" font-size="28" font-weight="600" fill="#111827">35 · bahayonghang-academic-writing</text>
+  <text x="1000" y="760" text-anchor="end" font-size="44" font-weight="700" fill="#34D399">264</text>
+  <rect x="80" y="780" width="497" height="80" rx="12" fill="#34D399"/>
+  <text x="100" y="830" font-size="24" fill="#FFFFFF">75 个 Python 脚本 · 仅学术 API 调用</text>
+
+  <!-- Bar 5: 18-jusi-aalto (126) -->
+  <text x="80" y="925" font-size="28" font-weight="600" fill="#111827">18 · jusi-aalto-stata-accounting</text>
+  <text x="1000" y="925" text-anchor="end" font-size="44" font-weight="700" fill="#059669">126</text>
+  <rect x="80" y="945" width="237" height="80" rx="12" fill="#6EE7B7"/>
+  <text x="100" y="995" font-size="24" fill="#374151">126 个 JAR 公开复现 .do 文件</text>
+
+  <!-- Insight card -->
+  <rect x="80" y="1080" width="920" height="280" rx="16" fill="#ECFDF5" stroke="#10B981" stroke-width="2"/>
+  <text x="540" y="1140" text-anchor="middle" font-size="34" font-weight="700" fill="#065F46">关键洞察</text>
+  <text x="540" y="1190" text-anchor="middle" font-size="26" fill="#374151">规模最大 ≠ 风险最高</text>
+  <text x="120" y="1245" font-size="26" fill="#111827">★ 17-DAAF 反而是这批 Skill 中</text>
+  <text x="120" y="1280" font-size="26" font-weight="700" fill="#059669">"安全意识最强"的参考样板</text>
+  <text x="120" y="1325" font-size="24" fill="#6B7280">主动扫描凭据泄漏 · 防止数据外泄 · 审计每次工具调用</text>
+
+  <!-- Footer -->
+  <text x="540" y="1450" text-anchor="middle" font-size="22" fill="#9CA3AF">数据来源：SECURITY-SCAN-REPORT.md · 规模 Top 5</text>
+</svg>

@@ -17,6 +17,12 @@
       </td>
     </tr>
   </table>
+
+  <br/>
+
+  <strong>Stanford REAP × CoPaper.AI</strong> · 实证研究 AI 工具的学术工业级产品<br/>
+  <sub>由斯坦福实证研究方法论团队打造，覆盖从数据清洗到顶刊投稿的完整工作流</sub>
+
   <br/>
 </div>
 
@@ -24,22 +30,48 @@
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Maintained by CoPaper.AI from Stanford REAP](https://img.shields.io/badge/Maintained%20by-CoPaper.AI%20from%20Stanford%20REAP-blue)](https://copaper.ai)
+[![Powered by StatsPAI](https://img.shields.io/badge/Powered%20by-StatsPAI-orange)](https://github.com/brycewang-stanford/StatsPAI)
+[![Security Scanned](https://img.shields.io/badge/Security-52%2F52%20CLEAN-brightgreen)](SECURITY-SCAN-REPORT.md)
 
 **实证研究全流程 AI Agent Skills 大全 — 收录 119 个 GitHub 仓库 / 覆盖 23,000+ Skills**
 
 > A curated, opinionated list of **119 GitHub repositories** and **23,000+ AI Agent Skills** for empirical research in economics, political science, sociology, psychology, public health, education, management, finance, and public policy — organized by research workflow, from topic selection to journal submission.
 
-2026 年，实证研究的工作方式正在被重新定义。[CoPaper.AI](https://copaper.ai) 已经做到 **20 分钟完成一篇主流期刊级别的实证论文**——从数据导入、描述性统计、因果推断模型、稳健性检验到结果表格一步到位。这背后的秘密不是更强的模型，而是 **Skills**：把资深研究者的方法论经验编码成结构化工作流，让 AI 知道"一个完整的 DID 分析应该包含哪些步骤"，而不是每次都等你一步步提醒。
+2026 年，实证研究的工作方式正在被重新定义。
+
+[**CoPaper.AI**](https://copaper.ai) —— **由 [Stanford REAP（中国经济与制度研究中心）](https://sccei.fsi.stanford.edu/reap)研究者团队孵化的实证研究 AI 助手**——已经做到 **20 分钟完成一篇主流期刊级别的实证论文**：从数据导入、描述性统计、因果推断模型、稳健性检验到结果表格，一步到位。这背后的秘密不是更强的模型，而是 **Skills**：把资深研究者的方法论经验编码成结构化工作流，让 AI 知道"一个完整的 DID 分析应该包含哪些步骤"，而不是每次都等你一步步提醒。
 
 这个仓库，是我们在构建 CoPaper.AI 过程中整理的一份 **Agent Skills 全景图**。我们把散落在 GitHub、社区和学术圈的数百个 Skills 仓库和上万个 Skills 按实证研究流程梳理归类，方便你按需取用。
 
-> **[CoPaper.AI](https://copaper.ai)** 内置了 **20 个经济学方法论 Skills**（DID、IV、RDD、PSM、DML 等完整分析流程），支持一句话触发、多代理协作、结果自动输出。想要开箱即用？直接试试：[copaper.ai](https://copaper.ai)
+**🎓 三层信用锚点 · 为什么是我们做这件事**
+
+| 层级 | 锚点 | 抓手 |
+|---|---|---|
+| 🏛️ **学术血统** | **Stanford REAP / SCCEI** 中国经济与制度研究中心 | 实证经济学方法论领域的学术研究背景，研究者团队在顶刊有持续发表传统 |
+| 🔧 **工程落地** | **[CoPaper.AI](https://copaper.ai)** 实证研究 AI 助手 | 内置 **20 个经济学方法论 Skills**（DID/IV/RDD/PSM/DML 等），Supervisor + 4 子代理多智能体架构，一句话触发，结果自动输出 |
+| 📦 **开源贡献** | **[StatsPAI](https://github.com/brycewang-stanford/StatsPAI)** 因果推断 Python 包 | **900+ 函数 · 一个 `import statspai as sp` · JOSS 投稿中 · MIT 开源**。这份 Skills 大全本身就是 StatsPAI 生态的一部分 |
+
+> 🔒 **可信使用**：本仓库 52 个 Skill / 2,940+ 文件经[系统性安全扫描](SECURITY-SCAN-REPORT.md) —— **52/52 全部 CLEAN，零 FLAGGED**，零网络外泄、零反向 shell、零 prompt 注入。
+>
+> 💡 **想要开箱即用？** 不必自己拼装 Skills —— 直接试试 [**→ copaper.ai**](https://copaper.ai)，让 Stanford 研究方法论团队为你做完整的实证流水线。
 
 ---
 
 ## 🆕 更新日志
 
 <details open>
+<summary><b>2026-04-28：🛡️ 全仓 52 个 Skill 完成系统性安全扫描 —— 52/52 全部 CLEAN，零 FLAGGED</b></summary>
+
+- **🛡️ [SECURITY-SCAN-REPORT.md](SECURITY-SCAN-REPORT.md)**：对仓库内 **52 个 Skill / 2,940+ 文件**完成系统性安全审查，**未发现任何恶意 prompt、病毒、木马或其他恶意内容**。结论先行：可以放心使用本仓库内任意 Skill。
+  - **🔍 六阶段多层防御**：(1) 13 类风险模式自动化 grep（pipe-to-shell / 反向 shell / 凭据外泄 / 解码执行 / 挖矿 RAT 签名 / Prompt 注入等）→ (2) 6 个含 hook 的 skill、40+ hook 脚本 100% 人工核查 → (3) 三 Agent 并行审查 SKILL.md / agent 定义 / reference 文档 → (4) 补充完整性检查（隐藏 Unicode / 编码异常 / 极长行 / HTML 注入 / 网络相关 import）。
+  - **📊 结果分布**：所有看似敏感的命中均为三类合法内容 —— **防御性安全规则**（deny rule、bash-safety hook、凭据检测器）、**合法学术 API 调用**（arXiv / CrossRef / PubMed / FRED / World Bank 等）、**标准 Claude Code 本地 hook**（脚手架 / 状态保存 / context 监控，全部本地操作、零网络 IO）。
+  - **🔑 关键洞察**：**17-DAAF 反而是这批 Skill 中"安全意识最强"的参考样板**（14 个防御 hook + 32 条 deny rule + 主动凭据扫描）；规模最大 ≠ 风险最高。
+  - **📈 可视化信息图**：报告内嵌 5 张 zhihu 风格信息图（[总览](images/security-scan/security-scan-01-总览.png) / [六阶段方法论](images/security-scan/security-scan-02-扫描方法.png) / [威胁矩阵](images/security-scan/security-scan-03-威胁矩阵.png) / [Top 5 规模分布](images/security-scan/security-scan-04-规模分布.png) / [二轮补扫](images/security-scan/security-scan-05-补扫结果.png)），3 秒可懂。
+  - 详见 [**完整安全扫描报告**](SECURITY-SCAN-REPORT.md)。
+
+</details>
+
+<details>
 <summary><b>2026-04-24：📗 Full Empirical Analysis Skill (R) 正式收录 —— tidyverse + fixest 8 步闭环（skills/00.3）</b></summary>
 
 - **📗 [Full Empirical Analysis Skill — R](skills/00.3-Full-empirical-analysis-skill_R/)**：与 StatsPAI / 00.1 / 00.2 形成**同日四联**的 R 版本，放在 [`skills/00.3-Full-empirical-analysis-skill_R/`](skills/00.3-Full-empirical-analysis-skill_R/) —— **第 0.3 位，覆盖 R 与 Quarto 用户**。
@@ -149,6 +181,7 @@
 - [多代理协作系统](#多代理协作系统)
 - [Skill 聚合平台与发现工具](#skill-聚合平台与发现工具)
 - [学习资源](#学习资源)
+- [🛡️ 安全扫描](#-安全扫描)
 - [Contributing](#contributing)
 
 ---
@@ -425,6 +458,31 @@ Skill 就是解决这个问题的：它是给 AI 的**方法论操作手册**。
 
 ---
 
+## 🛡️ 安全扫描
+
+我们对仓库内**全部 52 个 Skill / 2,940+ 文件**做了系统性安全审查 —— **52/52 全部 CLEAN，零 FLAGGED**。所有看似敏感的命中经验证后均归入合法内容，**未发现任何恶意 prompt、病毒、木马或反向 shell**。结论先行：可以放心使用本仓库收录的任意 Skill。
+
+![Skills 安全扫描总览](images/security-scan/security-scan-01-总览.png)
+
+**六阶段多层防御审查方法**：
+
+1. **自动化模式扫描** — 13 类风险维度 grep（pipe-to-shell / 反向 shell / 凭据外泄 / 解码执行 / 挖矿 RAT 签名 / Prompt 注入等）
+2. **Hook 与权限矩阵审查** — 6 个含 hook 的 skill、40+ hook 脚本 100% 人工核查；权限 allow list 全部为研究工具，**无 `Bash(*)` 通配符**
+3. **三 Agent 并行内容审查** — SKILL.md 散文、agent 定义、reference 文档分别独立审查 prompt injection / 后门 / 隐藏 Unicode / 异常包源
+4. **补充完整性检查** — 隐藏字符 / 编码异常 / 极长行 / HTML 注入 / 网络相关 import / 高比例非 ASCII
+
+**结果分布**：所有命中均归入三类合法内容：
+
+- 🛡️ **防御性安全规则** — deny rule、bash-safety hook、凭据检测器（[17-DAAF](skills/17-DAAF-Contribution-Community-daaf/) 是这批 Skill 中"安全意识最强"的参考样板：14 个防御 hook + 32 条 deny rule + 主动凭据扫描）
+- 📚 **合法学术 API 调用** — arXiv / CrossRef / PubMed / Semantic Scholar / FRED / World Bank / OECD / BLS 等公共研究数据源
+- 🔁 **标准 Claude Code 工作流 hook** — 项目脚手架、状态保存、context 监控、会话存档、pre-commit 提醒，**全部本地文件操作、零网络 IO**
+
+> **关键洞察**：规模最大 ≠ 风险最高。Top 5 大型 Skill（[43-wentorai](skills/43-wentorai-research-plugins/) 478 文件 / [33-Galaxy-Dawn](skills/33-Galaxy-Dawn-claude-scholar/) 327 文件 / [17-DAAF](skills/17-DAAF-Contribution-Community-daaf/) 319 文件 / [35-bahayonghang](skills/35-bahayonghang-academic-writing-skills/) 264 文件 / [18-jusi-aalto](skills/18-jusi-aalto-stata-accounting-research/) 126 文件）经全量审查，反而是这批 Skill 中安全意识最高的样本。
+
+完整报告含 Phase 1-6 方法论、52 个 Skill 逐一审查表、5 张可视化信息图：[**📋 SECURITY-SCAN-REPORT.md**](SECURITY-SCAN-REPORT.md)
+
+---
+
 ## Contributing
 
 欢迎贡献！请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 了解如何提交新的 Skill 推荐。
@@ -452,9 +510,19 @@ Skill 就是解决这个问题的：它是给 AI 的**方法论操作手册**。
 
 <br/>
 
-<a href="https://copaper.ai">
-  <img src="images/copaper-logo.png" alt="CoPaper.AI" width="240" />
-</a>
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://copaper.ai"><img src="images/copaper-logo.png" alt="CoPaper.AI" width="220" /></a>
+    </td>
+    <td width="40"></td>
+    <td align="center">
+      <img src="images/stanford-reap-logo.png" alt="Stanford REAP" width="320" />
+    </td>
+  </tr>
+</table>
+
+<sub><strong>Stanford REAP × CoPaper.AI</strong> · 实证研究 AI 工具的学术工业级产品</sub>
 
 <br/>
 
@@ -471,10 +539,10 @@ Skill 就是解决这个问题的：它是给 AI 的**方法论操作手册**。
   </tr>
 </table>
 
-内置 20 个方法论 Skills，20 分钟完成实证论文
+内置 20 个方法论 Skills · 20 分钟完成实证论文 · 自研 <a href="https://github.com/brycewang-stanford/StatsPAI"><strong>StatsPAI</strong></a>（900+ 函数 / MIT 开源）
 
 <br/>
 
-由 [CoPaper.AI](https://copaper.ai) 团队维护 | 实证研究 AI 助手
+由 <a href="https://copaper.ai"><strong>CoPaper.AI</strong></a> 团队维护，孵化于 <a href="https://sccei.fsi.stanford.edu/reap"><strong>Stanford REAP / SCCEI</strong></a>（中国经济与制度研究中心） | 实证研究 AI 助手
 
 </div>
