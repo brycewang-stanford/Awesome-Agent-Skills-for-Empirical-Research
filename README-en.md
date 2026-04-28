@@ -32,6 +32,10 @@
 [![Maintained by CoPaper.AI from Stanford REAP](https://img.shields.io/badge/Maintained%20by-CoPaper.AI%20from%20Stanford%20REAP-blue)](https://copaper.ai)
 [![Powered by StatsPAI](https://img.shields.io/badge/Powered%20by-StatsPAI-orange)](https://github.com/brycewang-stanford/StatsPAI)
 [![Security Scanned](https://img.shields.io/badge/Security-52%2F52%20CLEAN-brightgreen)](SECURITY-SCAN-REPORT.md)
+[![Files Audited](https://img.shields.io/badge/files%20audited-2%2C940%2B-blue)](SECURITY-SCAN-REPORT.md)
+[![Audit Phases](https://img.shields.io/badge/audit-6%20phases%20%2F%2013%20risk%20categories-blueviolet)](SECURITY-SCAN-REPORT.md)
+[![Hooks Audited](https://img.shields.io/badge/hook%20scripts-40%2B%20audited-blue)](SECURITY-SCAN-REPORT.md)
+[![Zero Threats](https://img.shields.io/badge/threats%20found-0-brightgreen)](SECURITY-SCAN-REPORT.md)
 
 **The Definitive Collection of AI Agent Skills for Empirical Research — 119 GitHub Repos / 23,000+ Skills**
 
