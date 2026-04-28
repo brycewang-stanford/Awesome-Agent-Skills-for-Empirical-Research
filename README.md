@@ -53,7 +53,7 @@
 |---|---|---|
 | 🏛️ **学术血统** | **Stanford REAP / SCCEI** 中国经济与制度研究中心 | 实证经济学方法论领域的学术研究背景，研究者团队在顶刊有持续发表传统 |
 | 🔧 **工程落地** | **[CoPaper.AI](https://copaper.ai)** 实证研究 AI 助手 | 内置 **20 个经济学方法论 Skills**（DID/IV/RDD/PSM/DML 等），Supervisor + 4 子代理多智能体架构，一句话触发，结果自动输出 |
-| 📦 **开源贡献** | **[StatsPAI](https://github.com/brycewang-stanford/StatsPAI)** 因果推断 Python 包 | **900+ 函数 · 一个 `import statspai as sp` · JOSS 投稿中 · MIT 开源**。这份 Skills 大全本身就是 StatsPAI 生态的一部分 |
+| ⚙️ **开源引擎** | **[StatsPAI](https://github.com/brycewang-stanford/StatsPAI)** —— **CoPaper.AI 的因果推断引擎** | **900+ 函数 · 一个 `import statspai as sp` · JOSS 投稿中 · MIT 开源**。CoPaper.AI 跑出的每一个 DID/IV/RD/SCM 估计都由 StatsPAI 驱动；这份 Skills 大全本身也是 StatsPAI 生态的一部分 |
 
 > 🔒 **可信使用**：本仓库 52 个 Skill / 2,940+ 文件经[系统性安全扫描](SECURITY-SCAN-REPORT.md) —— **52/52 全部 CLEAN，零 FLAGGED**，零网络外泄、零反向 shell、零 prompt 注入。
 >

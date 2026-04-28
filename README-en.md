@@ -53,7 +53,7 @@ This repository is the **Agent Skills landscape** we compiled while building CoP
 |---|---|---|
 | 🏛️ **Academic lineage** | **Stanford REAP / SCCEI** — Stanford Center on China's Economy and Institutions | A research center with a sustained publication record in empirical economics methodology and a deep tradition in applied causal inference |
 | 🔧 **Engineering delivery** | **[CoPaper.AI](https://copaper.ai)** empirical research AI assistant | Ships with **20 econometric methodology Skills** (DID/IV/RDD/PSM/DML, etc.), Supervisor + 4 sub-agent multi-agent architecture, one-sentence triggers, automatic result output |
-| 📦 **Open-source contribution** | **[StatsPAI](https://github.com/brycewang-stanford/StatsPAI)** causal inference Python package | **900+ functions · one `import statspai as sp` · JOSS in submission · MIT-licensed**. This Skills collection is itself part of the StatsPAI ecosystem |
+| ⚙️ **Open-source engine** | **[StatsPAI](https://github.com/brycewang-stanford/StatsPAI)** — **the causal-inference engine that powers CoPaper.AI** | **900+ functions · one `import statspai as sp` · JOSS in submission · MIT-licensed**. Every DID/IV/RD/SCM estimate CoPaper.AI produces is driven by StatsPAI; this Skills collection is itself part of the StatsPAI ecosystem |
 
 > 🔒 **Use with confidence**: every one of the 52 Skills / 2,940+ files in this repo passed our [systematic security audit](SECURITY-SCAN-REPORT.md) — **52/52 CLEAN, zero FLAGGED**, zero exfiltration, zero reverse shells, zero prompt injection.
 >
