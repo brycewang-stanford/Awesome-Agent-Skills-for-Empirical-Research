@@ -1,6 +1,7 @@
 # Skills 安全扫描报告（00 系列 + 01–48）
 
 **扫描日期**：2026-04-28（首轮 01–47） / 2026-04-28（二轮：4 个 `00-*` + 48）
+**精选定位**：本仓库（Awesome-Agent-Skills-for-Empirical-Research）从 GitHub 上 **119 个仓库 / 23,000+ Agent Skills** 中精选收录 **52 个**实证研究 Skill。本扫描的对象就是这 52 个精选 Skill 的全部内容。
 **扫描范围**：`skills/00-*`、`skills/00.1-*`、`skills/00.2-*`、`skills/00.3-*`、`skills/01-*` 到 `skills/48-*`，共 **52 个 skill 目录**，约 2,940+ 文件
 **扫描人**：Claude（Opus 4.7，1M context）
 **结论先行**：**未发现恶意 prompt、病毒、木马或其他恶意内容。52/52 全部 CLEAN，零 FLAGGED。**
@@ -13,7 +14,9 @@
 
 ## 总体结论
 
-52 个 skill 在所有自动化和人工检查维度均未触发任何真实威胁信号。所有看似敏感的 hits 经验证后均为以下三类合法内容之一：
+> **关于扫描范围的层次定位**：本仓库从 GitHub 上 **119 个仓库 / 23,000+ Agent Skills** 中精选收录了 **52 个**实证研究 Skill —— 不是把 23k 全收录，而是按研究流程（选题 / 文献 / 数据 / 分析 / 写作 / 修改 / 引用 / 复现 / 审稿）严格筛选过的精选集。本次安全扫描的对象，就是这 **52 个精选 Skill 的全部内容**（共 2,940+ 文件），不是上游 23k 大池子。
+
+这 52 个精选 Skill 在所有自动化和人工检查维度均未触发任何真实威胁信号。所有看似敏感的 hits 经验证后均为以下三类合法内容之一：
 
 1. **防御性安全规则**：明文禁止危险操作的 deny rule、bash-safety hook、凭据检测器（特别是 17-DAAF 这种"安全意识极强"的框架）。
 2. **合法学术 API 调用**：arXiv、CrossRef、PubMed、Semantic Scholar、Unpaywall、ChEMBL、IPUMS、ERIC、DBLP、Hugging Face、FRED、World Bank、OECD、BLS 等公共研究数据源。

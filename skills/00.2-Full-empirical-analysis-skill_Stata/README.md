@@ -134,17 +134,24 @@ Triggers: *"run a full empirical analysis in Stata"*, *"reghdfe two-way FE"*,
 
 ## Scope
 
-**In scope** — the canonical 8-step Stata pipeline:
+**In scope** — the canonical 8-step Stata pipeline (mapped to AER paper sections, with Step −1 / Step 0 / Step 2.5 / Step 3.5 sub-stages added in v2 to mirror the StatsPAI reference skill):
 
 ```
-Step 1  Data import & cleaning   use/import/destring/misstable/merge assert/xtset
-Step 2  Variable construction    gen/egen/winsor2/xtile/L./F./D./CPI deflation
-Step 3  Descriptive statistics   tabstat/balancetable/asdoc/pwcorr/twoway
-Step 4  Diagnostic tests         sktest/hettest/xtserial/xttest3/vif/dfuller/kpss
-Step 5  Baseline modeling        reghdfe/ivreg2/csdid/rdrobust/synth/psmatch2/teffects
-Step 6  Robustness battery       bacondecomp/honestdid/boottest/ritest/rwolf/psacalc
-Step 7  Further analysis         margins/marginsplot/medsem/SEM/Stata-Python bridge
-Step 8  Tables & figures         esttab/outreg2/coefplot/marginsplot/rdplot
+Step −1 Pre-Analysis Plan          power/sampsi/clustersampsi → protocol.do
+Step 0  Sample log + data contract sample_log/assert/xtdescribe → JSON
+Step 1  Data import & cleaning     use/import/destring/misstable/merge assert/xtset
+Step 2  Variable construction      gen/egen/winsor2/xtile/L./F./D./CPI deflation
+Step 2.5 Empirical strategy        equation × ID assumption × estimator → strategy.do
+Step 3  Descriptive statistics     tabstat/balancetable/asdoc/pwcorr/twoway
+Step 3.5 Identification graphics   event-study/1st-stage F/McCrary/love/SCM trajectory
+Step 4  Diagnostic tests           sktest/hettest/xtserial/xttest3/vif/dfuller/kpss/hausman
+Step 5  Baseline modeling          reghdfe/ivreg2/csdid/rdrobust/synth/psmatch2/teffects
+        Patterns A–H               progressive ctrls / horse race / multi-Y / IV triplet / ...
+Step 6  Robustness battery         bacondecomp/honestdid/boottest/ritest/rwolf/psacalc
+        + Pattern H Master Table A1 + spec curve + sensitivity dashboard
+Step 7  Further analysis           margins/marginsplot/medsem/SEM/Stata-Python bridge
+Step 8  Tables & figures           esttab/outreg2/coefplot/marginsplot/rdplot
+        + reproducibility stamp (artifacts/result.json)
 ```
 
 **Out of scope** — Stata syntax tutorials (use the
@@ -245,17 +252,24 @@ Stata 包的安装命令见上文英文区，一次跑完即可。
 
 ## 覆盖范围
 
-**覆盖** —— Stata 经典 8 步 pipeline：
+**覆盖** —— Stata 经典 8 步 pipeline（v2 对齐 StatsPAI 参考 skill，新增 Step −1 / Step 0 / Step 2.5 / Step 3.5 子阶段）：
 
 ```
-Step 1  数据导入 / 清洗      use/import/destring/misstable/merge assert/xtset
-Step 2  变量构造             gen/egen/winsor2/xtile/L./F./D./CPI 平减
-Step 3  描述统计             tabstat/balancetable/asdoc/pwcorr/twoway
-Step 4  诊断检验             sktest/hettest/xtserial/xttest3/vif/dfuller/kpss
-Step 5  基准建模             reghdfe/ivreg2/csdid/rdrobust/synth/psmatch2/teffects
-Step 6  稳健性电池           bacondecomp/honestdid/boottest/ritest/rwolf/psacalc
-Step 7  进一步分析           margins/marginsplot/medsem/SEM/Stata-Python 桥
-Step 8  表与图               esttab/outreg2/coefplot/marginsplot/rdplot
+Step −1 预分析计划（PAP）     power/sampsi/clustersampsi → protocol.do
+Step 0  样本日志 + 数据契约  sample_log/assert/xtdescribe → JSON
+Step 1  数据导入 / 清洗       use/import/destring/misstable/merge assert/xtset
+Step 2  变量构造              gen/egen/winsor2/xtile/L./F./D./CPI 平减
+Step 2.5 实证策略            方程式 × 识别假设 × 估计器 → strategy.do
+Step 3  描述统计              tabstat/balancetable/asdoc/pwcorr/twoway
+Step 3.5 识别图              event-study / 1st-stage F / McCrary / love / SCM 轨迹
+Step 4  诊断检验              sktest/hettest/xtserial/xttest3/vif/dfuller/kpss/hausman
+Step 5  基准建模              reghdfe/ivreg2/csdid/rdrobust/synth/psmatch2/teffects
+        八种 regtable 模式 A–H  渐进控制 / 设计赛马 / 多 Y / IV 三联 / ...
+Step 6  稳健性电池            bacondecomp/honestdid/boottest/ritest/rwolf/psacalc
+        + Pattern H 稳健性主表 A1 + 规范曲线 + 敏感性面板
+Step 7  进一步分析            margins/marginsplot/medsem/SEM/Stata-Python 桥
+Step 8  表与图                esttab/outreg2/coefplot/marginsplot/rdplot
+        + 复现戳（artifacts/result.json）
 ```
 
 **不覆盖** —— Stata 语法入门（请用

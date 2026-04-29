@@ -222,13 +222,17 @@ install.packages(c(
 
 ---
 
-## The 8 Steps — Canonical Pipeline
+## The 8 Steps — Canonical Pipeline (mapped to AER paper sections)
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
+│ Step −1 Pre-Analysis Plan (PAP)  pwr / WebPower / DeclareDesign      │
+│ Step 0  Sample log + data contract sample_log/stopifnot/jsonlite     │
 │ Step 1  Data import & cleaning   read_csv/read_dta/janitor/naniar/mice│
 │ Step 2  Variable construction    mutate/across/winsorize/lag/group_by │
+│ Step 2.5 Empirical strategy      equation × ID assumption + pre-reg  │
 │ Step 3  Descriptive statistics   gtsummary/datasummary_balance/cor_pmat│
+│ Step 3.5 Identification graphics iplot/binsreg/rdplot/cobalt/Synth   │
 │ Step 4  Diagnostic tests         shapiro/bptest/dwtest/vif/adf/kpss   │
 │ Step 5  Baseline modeling        feols/ivreg/att_gt/synthdid/MatchIt  │
 │ Step 6  Robustness battery       bacondecomp/HonestDiD/fwildclusterboot│
@@ -237,9 +241,232 @@ install.packages(c(
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
+The 8 steps mirror the canonical sections of an applied AER / QJE / AEJ paper. Each step is one paper section and emits a paper-ready artifact on disk:
+
+```
+Paper section               Step  R moves
+─────────────────────────── ───── ────────────────────────────────────────────────
+Pre-Analysis Plan           −1    pwr / WebPower / DeclareDesign + freeze pap.json
+§1. Data                     0    sample_log + 5-check stopifnot → JSON via jsonlite
+§1. Data                     1    haven::read_dta · janitor::clean_names · naniar/mice
+§1. Data                     2    mutate/across/Winsorize/lag/lead/diff · CPI deflate
+§1.1 Descriptives (Table 1)  3    gtsummary::tbl_summary · datasummary_balance
+§2. Empirical Strategy       2.5  write equation + ID assumption → strategy.md
+§3. Identification graphics  3.5  fixest::iplot · binsreg · rdplot · cobalt::love.plot · Synth
+§3.5 Diagnostics             4    bptest · dwtest · car::vif · urca::ur.df · phtest
+§4. Main Results (Table 2)   5    fixest::feols progressive (m1...m6) · modelsummary
+§5. Heterogeneity (Table 3)  7    feols(... + i(.):X) · marginaleffects::avg_slopes
+§6. Mechanisms / Channels    7    mediation::mediate · lavaan · outcome ladder
+§7. Robustness gauntlet      6    bacondecomp · HonestDiD · robomit · fwildclusterboot · ri2
+§8. Replication package      8    modelsummary("...tex") · gt → docx · result.json
+```
+
 Below is the canonical call at each step. **All examples share one running narrative** — labor-econ panel where `training` (treatment) affects `log_wage` (outcome), with covariates `age`, `edu`, `tenure`, panel keys `worker_id`/`firm_id`/`year`. Variable names and parameter values are **illustrative**.
 
 > **When a step has many variants** (5 staggered-DID estimators; 4 hetero tests), SKILL.md shows the one you reach for first; deeper variants live in `references/NN-<topic>.md`.
+
+---
+
+## Paper-ready figure & table inventory (what to produce by section)
+
+A modern AER paper has **5–7 figures** and **3–5 main tables** + an appendix robustness table. Every step below leaves at least one numbered artifact on disk. Default file names assume parallel `.tex` / `.docx` / `.html` exports (the agent should produce all three so co-authors can edit in Word, the build system can use LaTeX, and the appendix can publish HTML):
+
+| § | Artifact | R primitive | Filenames |
+|---|---|---|---|
+| §1 | **Figure 1**: raw trends / treatment rollout | `df %>% group_by(year, treat) %>% summarise(mean(y)) %>% ggplot()` | `figures/fig1_trend.{pdf,png}` |
+| §1 | **Table 1**: summary stats (full / treated / control + Δ + SMD) | `gtsummary::tbl_summary` · `modelsummary::datasummary_balance` | `tables/table1_balance.{tex,docx,html}` |
+| §3 | **Figure 2**: identification graphic (event-study / first-stage / McCrary / RD scatter / SCM trajectory) | `fixest::iplot(es)` · `binsreg` · `rdrobust::rdplot` · `rddensity` · `Synth::path.plot` | `figures/fig2_event_study.{pdf,png}` |
+| §4 | **Table 2**: main results — progressive controls M1→M6 | `modelsummary(list("(1)"=m1,...,"(6)"=m6))` · `fixest::etable` | `tables/table2_main.{tex,docx,html}` |
+| §4 | **Table 2-bis**: design horse-race (OLS / IV / DID / DML) | `modelsummary(list("OLS"=ols, "2SLS"=iv, "CS-DID"=cs, "DML"=dml))` | `tables/table2b_designs.{tex,docx,html}` |
+| §4 | **Figure 3**: coefficient plot across specs | `modelplot(list(m1,...,m6), coef_map="training")` | `figures/fig3_coefplot.{pdf,png}` |
+| §5 | **Table 3**: heterogeneity by subgroup | `modelsummary(g_full, g_male, g_fem, g_q1, ..., g_q4)` | `tables/table3_heterogeneity.{tex,docx,html}` |
+| §5 | **Figure 4**: dose-response / CATE | `marginaleffects::plot_predictions` · `grf::plot.causal_forest` | `figures/fig4_cate.{pdf,png}` |
+| §6 | **Table 4**: mechanism / outcome ladder | loop `feols` over outcomes → `modelsummary` | `tables/table4_mechanism.{tex,docx,html}` |
+| §7 | **Table A1**: robustness master (one column per check) | `modelsummary(list(base, no99, balpan, dropearly, wfe, cl2way, logy, ihsy, psm, ebal))` | `tables/tableA1_robustness.{tex,docx,html}` |
+| §7 | **Figure 5**: spec curve | `specr::specr()` + `plot_specs` (or hand-rolled `purrr::pmap`) | `figures/fig5_spec_curve.{pdf,png}` |
+| §7 | **Figure 6**: sensitivity (HonestDiD / Oster / E-value) | `HonestDiD::createSensitivityPlot` · `robomit::o_test` · `EValue` | `figures/fig6_sensitivity.{pdf,png}` |
+| §8 | **Replication bundle**: all tables in one document | `modelsummary(..., output="docx")` · `gt::gtsave()` · Quarto / Rmd | `replication/paper_tables.{tex,docx,html}` |
+
+> Every R estimator above (`fixest::feols` / `AER::ivreg` / `did::att_gt` / `grf::causal_forest` / `synthdid_estimate`) returns a result object that can be passed straight into `modelsummary(...)` / `modelplot(...)` / `etable(...)`. Don't hand-roll LaTeX from `kable()`, and don't render Word via `flextable` directly — `modelsummary`, `etable`, and `gtsummary` apply book-tab borders, AER stars, and the right SE label automatically. For deeper export recipes, see [`references/08-tables-plots.md`](references/08-tables-plots.md).
+
+---
+
+## Export cookbook — LaTeX / Word / HTML in one block
+
+R has the **best** publication-table ecosystem of the three languages. Three tiers, picked by **scope**:
+
+| Tier | Use when | API | Hot args |
+|---|---|---|---|
+| **1. Single multi-column table** | Exporting *one* Table 2 / Table 3 / Table A1 with progressive columns | `modelsummary(list("(1)"=m1,...,"(N)"=mN), output="tables/tab.tex", stars=c("*"=.1,"**"=.05,"***"=.01), gof_omit="BIC|AIC|F|Log", coef_map=c(...))` — or `fixest::etable(m1,...,mN, file="tab.tex")` for `feols`-only | `coef_map=`, `gof_omit=`, `stars=`, `notes=`, `output= "latex"/"docx"/"html"/"markdown"`, `add_rows=` |
+| **2. Multi-panel paper format** (Tables 2 + 3 + A1 + A2 in one file) | Producing the *paper-tables block* — main + heterogeneity + robustness + placebo as a single document | `modelsummary` chained with `gt::gt_group()` for one document with section headers, OR Quarto `.qmd` rendering multiple `modelsummary` calls between prose | `gt_group(modelsummary(...), modelsummary(...))` · `quarto render paper.qmd` |
+| **3. Full session bundle** (the Stata `collect` / Python `Stargazer + pylatex` equivalent) | Replication appendix that mixes summary stats + balance + multiple regression tables + headings + prose in **one** file | **Quarto** is the modern R-native answer. `master.qmd` interleaves prose + chunks that emit `modelsummary` / `gtsummary` / `ggplot2` outputs; one `quarto render` produces .pdf / .docx / .html | YAML front matter sets `format: [pdf, docx, html]` for triple-target output |
+
+**Journal styling — pick the right `stars` and SE label.** The AEA convention is `c("*"=.1, "**"=.05, "***"=.01)` and `notes = "Cluster-robust standard errors in parentheses..."`. Define a wrapper once at the top of `master.R`:
+
+```r
+# Top of master.R — journal house-style wrapper
+aer_table <- function(models, output, headers = NULL, coef_map = NULL) {
+  modelsummary(
+    models,
+    output    = output,
+    stars     = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
+    gof_omit  = "BIC|AIC|F|Log|Adj",
+    coef_map  = coef_map,
+    notes     = paste("Cluster-robust standard errors in parentheses.",
+                      "* p<0.10, ** p<0.05, *** p<0.01."),
+    output_format = if (grepl("\\.tex$", output)) "latex" else
+                     if (grepl("\\.docx$", output)) "docx" else "html"
+  )
+}
+```
+
+For the multi-panel `.docx` and Quarto cookbook (single-file paper-tables bundle), see [`references/08-tables-plots.md`](references/08-tables-plots.md).
+
+---
+
+## Step −1 — Pre-Analysis Plan (pre-data; AEA RCT Registry style)
+
+Before touching the data, write down (a) the population, (b) the design, (c) the **minimum detectable effect (MDE)** under the planned sample size and α=0.05, β=0.20. Persist the result as `pap.json` so a referee can verify the design was powered before, not after, the data were seen.
+
+```r
+library(pwr)         # classical power calculations
+library(WebPower)    # cluster RCT, longitudinal, mixed designs
+library(jsonlite)
+
+# Two-sample MDE for a continuous outcome (Cohen's d framing)
+pwr.t.test(d = 0.20, power = 0.80, sig.level = 0.05,
+           type = "two.sample", alternative = "two.sided")
+# → required n per arm
+
+# Solve for MDE given fixed n
+pwr.t.test(n = 2000, power = 0.80, sig.level = 0.05,
+           type = "two.sample")$d
+# → minimum detectable Cohen's d
+
+# Cluster-randomized RCT — design effect
+# Solve via WebPower::wp.crt2arm(...) for clusters / per-cluster size / power triangle
+WebPower::wp.crt2arm(f = 0.20, J = NULL, n = 50, icc = 0.05, power = 0.80,
+                     alpha = 0.05, alternative = "two.sided")
+# → required clusters per arm
+
+# DID power (Frison-Pocock / Bloom 1995): use WebPower::wp.kanova() or simulate
+# RD power: simulate via DeclareDesign — see references/05-modeling.md §5.5
+
+# Persist the protocol — referee will ask whether design was powered ex ante
+pap <- list(
+  population        = "manufacturing workers, 2010–2020",
+  treatment         = "training (binary, staggered adoption)",
+  outcome           = "log_wage",
+  estimand          = "ATT",
+  design            = "staggered DID, Callaway-Sant'Anna",
+  alpha             = 0.05,
+  power_target      = 0.80,
+  mde_d             = 0.20,
+  n_planned         = 12000,
+  frozen_at         = "2026-01-15T09:00:00Z",
+  git_sha           = "<paste>"
+)
+write_json(pap, "artifacts/pap.json", pretty = TRUE, auto_unbox = TRUE)
+```
+
+For richer DAG-aware power analysis (write down the DAG, declare estimands, simulate the design), use **`DeclareDesign`** — it is the R-native equivalent of EGAP's pre-analysis flow.
+
+Commit `artifacts/pap.json` in the repo **before** Step 1. AEA RCT Registry / OSF preregistration tools accept it as the analysis-plan exhibit.
+
+---
+
+## Step 0 — Sample-construction log & 5-check data contract
+
+An AER §1 *Data* section has three jobs: (a) describe sources, (b) document **every** sample restriction (the "footnote 4" sample log), (c) lock the panel structure.
+
+### 0.1 Sample-construction log (footnote 4)
+
+```r
+library(tidyverse); library(jsonlite)
+
+sample_log <- tibble::tibble(step = character(), n = integer())
+
+df_raw <- read_dta("raw/panel.dta") %>% janitor::clean_names()
+sample_log <- sample_log %>% add_row(step = "0. raw",                    n = nrow(df_raw))
+
+df1 <- df_raw %>% drop_na(wage)
+sample_log <- sample_log %>% add_row(step = "1. drop missing wage",       n = nrow(df1))
+
+df2 <- df1 %>% filter(between(age, 18, 65))
+sample_log <- sample_log %>% add_row(step = "2. drop age outside 18-65",  n = nrow(df2))
+
+df3 <- df2 %>% filter(industry %in% c("manuf", "construction", "transport"))
+sample_log <- sample_log %>% add_row(step = "3. keep target industries",  n = nrow(df3))
+
+df <- df3
+print(sample_log)
+write_json(sample_log, "artifacts/sample_construction.json", pretty = TRUE)
+```
+
+Paste the printed tibble verbatim as footnote 4 of the paper.
+
+### 0.2 Five-check data contract (go / no-go gate)
+
+```r
+library(validate); library(assertr)
+
+data_contract <- function(df, y, treatment, id = NULL, time = NULL, covariates = c()) {
+  keys <- c(y, treatment, id, time, covariates)
+  contract <- list(
+    n_obs            = nrow(df),                                            # 1. shape
+    dtypes           = sapply(df[keys], function(x) class(x)[1]),           # 2. dtypes
+    n_missing        = sapply(df[keys], function(x) sum(is.na(x))),         # 3. missingness
+    n_dupes_on_keys  = if (!is.null(id) && !is.null(time))
+                         sum(duplicated(df[, c(id, time)])) else 0,          # 4. duplicates
+    panel_balanced   = NULL,
+    cohort_sizes     = NULL
+  )
+
+  if (!is.null(id) && !is.null(time)) {
+    bal <- df %>% count(.data[[id]])
+    contract$panel_balanced <- all(bal$n == max(bal$n))                      # 5. balance
+    contract$n_dropped_by_balance <- sum(bal$n != max(bal$n))
+
+    if ("first_treat" %in% names(df)) {
+      contract$cohort_sizes <- df %>% distinct(.data[[id]], .keep_all = TRUE) %>%
+                                count(first_treat) %>% deframe()
+    }
+  }
+
+  contract$y_range         <- range(df[[y]],         na.rm = TRUE)
+  contract$treatment_share <- mean(df[[treatment]],  na.rm = TRUE)
+
+  # MCAR sniff test (Rubin) — if missing(y) is associated with covariates,
+  # listwise deletion biases the estimate. Use mice / IPW instead.
+  miss_y <- is.na(df[[y]])
+  contract$mcar_hint <- "likely MCAR (listwise OK)"
+  if (any(miss_y) && any(!miss_y)) {
+    for (cov in covariates) {
+      if (is.numeric(df[[cov]])) {
+        p <- t.test(df[[cov]][miss_y], df[[cov]][!miss_y])$p.value
+        if (p < 0.05) {
+          contract$mcar_hint <- sprintf("NOT MCAR (y-miss differs on %s, p=%.3f) → use mice / IPW",
+                                         cov, p)
+          break
+        }
+      }
+    }
+  }
+  contract
+}
+
+contract <- data_contract(df, y = "wage", treatment = "training",
+                          id = "worker_id", time = "year",
+                          covariates = c("age", "edu", "tenure"))
+
+stopifnot(contract$n_dupes_on_keys == 0)
+stopifnot(all(contract$n_missing == 0))
+
+write_json(contract, "artifacts/data_contract.json",
+           pretty = TRUE, auto_unbox = TRUE)
+```
+
+If any `stopifnot` fires, **stop** and fix it in `dplyr` first. R estimators silently drop NA rows downstream — this contract is the cheapest insurance against "why did N drop from 12,000 to 9,800 between Table 1 and Table 2?" referee questions.
 
 ---
 
@@ -370,6 +597,78 @@ df <- df %>%
 
 ---
 
+### Step 2.5 — Empirical strategy (write the equation + identifying assumption)
+
+This is the heart of an AER paper. **Before any code**, write down the equation explicitly and state the identifying assumption. Vague identification language is the single most common reason a referee rejects an applied paper. Persist the strategy as `strategy.md` so it is a dated, version-controlled artifact — *not* a post-hoc rationalization written after seeing the coefficient.
+
+#### Equation × identifying assumption × R estimator (decision table)
+
+| Design | Estimating equation | Identifying assumption | R estimator |
+|---|---|---|---|
+| 2×2 DID | `Y_it = α_i + λ_t + β·D_it + X'γ + ε_it` | parallel trends conditional on X | `feols(y ~ i(treated, post, ref=0) | i + t, data, cluster = ~i)` |
+| Event-study (CS / SA) | `Y_it = α_i + λ_t + Σ_{e≠-1} β_e · 1{t-G_i = e} + ε_it` | no anticipation + group-time PT | `feols(y ~ sunab(G, t) | i + t)` · `did::att_gt` · `didimputation::did_imputation` |
+| 2SLS | `Y_i = α + β·D_i + X'γ + ε_i;  D_i = π·Z_i + X'δ + u_i` | exclusion + relevance + monotonicity | `feols(y ~ X | D ~ Z, data)` · `AER::ivreg` · `ivreg::ivreg` |
+| Sharp RD | `Y_i = α + β·1{X_i ≥ c} + f(X_i) + ε_i` (local poly) | continuity of E[Y(0)\|X] at c, no manipulation | `rdrobust::rdrobust(y, x, c=0)` (+ `rddensity`) |
+| SCM | `Ŷ_1t(0) = Σ_j ŵ_j Y_jt`, τ_t = `Y_1t − Ŷ_1t(0)` for t≥T_0 | pre-period fit + interpolation validity | `Synth::synth` · `gsynth::gsynth` · `synthdid::synthdid_estimate` · `tidysynth` |
+| Selection-on-observables (matching/IPW/DML) | `Y_i = m(X_i) + β·D_i + ε_i` (Robinson partialling-out) | unconfoundedness + overlap | `MatchIt::matchit` + `lm` · `WeightIt` · `DoubleML::DoubleMLPLR` · `grf::causal_forest` |
+
+#### Design picker (when the user is unsure)
+
+```
+                 ┌─ running var + cutoff ───────────────── RDD       (rdrobust)
+                 │
+                 ├─ exogenous instrument Z ─────────────── IV/2SLS   (feols  / AER::ivreg)
+data + question ─┤
+                 ├─ pre/post × treat/control ─┬ 2 periods  ── 2×2 DID (feols + i())
+                 │                            └ staggered  ── CS / SA / BJS  (att_gt / sunab / did_imputation)
+                 │
+                 ├─ 1 treated unit + donor pool + long pre ── SCM    (Synth / gsynth / synthdid)
+                 │
+                 ├─ high-dim X, selection-on-observables ── ML causal (DoubleML / grf — see §B)
+                 │
+                 └─ none of the above ──────────────────── matching + sensitivity (MatchIt + EValue)
+```
+
+#### Pre-registration `strategy.md` template
+
+```r
+strategy <- "\\
+# Empirical Strategy (pre-registration)
+
+**Frozen**: 2026-01-15  (Git SHA: <paste>)
+**Population**: manufacturing workers, 2010–2020, balanced panel
+**Treatment**: training (binary, staggered adoption)
+**Outcome**:   log_wage (CPI-deflated 2010 USD)
+**Estimand**:  ATT on the treated, dynamic horizon -4..+4
+
+## Estimating equation (paste from §2.5 row that matches the design)
+
+  log_wage_it = α_i + λ_t + Σ_{e≠-1} β_e · 1{t - G_i = e} + ε_it
+
+## Identifying assumption
+
+1. No anticipation:   E[Y_it(0) | t < G_i] = E[Y_it(0) | never-treated]
+2. Group-time PT:     Δ E[Y_it(0)] is the same across treatment cohorts
+
+## Auto-flagged threats (must defend in §2)
+
+- Selection of G_i on Y_i(0)              → bacondecomp + HonestDiD sensitivity
+- Spillover within firm                    → cluster at firm_id, also try firm_id × year
+- Anticipation in pre-period               → include lead in event study
+
+## Fallback estimators (Step 6 robustness)
+
+- Sun–Abraham via `feols(y ~ sunab(G, t) | i + t, data)`
+- Borusyak-Jaravel-Spiess via `didimputation::did_imputation`
+- Synthetic DID via `synthdid::synthdid_estimate`
+"
+writeLines(strategy, "artifacts/strategy.md")
+```
+
+Commit `artifacts/strategy.md` in the repo **before** running Step 5 / Step 6. The `git log` of this file *is* the analysis plan.
+
+---
+
 ### Step 3 — Descriptive statistics & Table 1
 
 Deeper patterns: [references/03-descriptive-stats.md](references/03-descriptive-stats.md) — `gtsummary::tbl_summary` (the modern Table 1 standard), `modelsummary::datasummary_balance` with SMDs, `tableone::CreateTableOne`, correlation matrices with significance via `corrplot` / `psych::corr.test`, distribution plots via `ggplot2`.
@@ -454,6 +753,135 @@ ggsave("figures/trend_did.pdf", width = 7, height = 4)
 
 ---
 
+### Step 3.5 — Identification graphics (Section "Identification, graphical evidence")
+
+**AER convention: the identification figure precedes the regression table.** The reader should see graphical evidence that PT holds / first stage is strong / RD jumps cleanly *before* you ask them to trust your point estimate.
+
+#### 3.5.1 Event-study figure + numerical pre-trends test (DID identification)
+
+Pre-period coefficients ≈ 0 (with the −1 reference period normalized to zero) is the visual evidence for parallel trends. Pair the **figure** with a **numerical** pre-trends test so reviewers don't have to eyeball it.
+
+```r
+library(fixest); library(ggplot2)
+
+# (a) Sun-Abraham via fixest::sunab — the modern primary for staggered DID
+es <- feols(log_wage ~ sunab(first_treat, year) | worker_id + year,
+            data = df, cluster = ~ worker_id)
+
+# (b) Coefficient figure
+iplot(es,
+      xlab = "Years relative to treatment",
+      ylab = "Coefficient (ATT, 95% CI)",
+      main = "Figure 2a. Event-study coefficients (95% CI; ref. e = -1)")
+ggsave("figures/fig2a_event_study.pdf", width = 7, height = 4)
+ggsave("figures/fig2a_event_study.png", width = 7, height = 4, dpi = 300)
+
+# (c) Numerical pre-trends Wald test (joint zero on the leads)
+pre_idx <- grep("year::-", names(coef(es)))[!grepl("ref", names(coef(es)))]
+W <- wald(es, names(coef(es))[pre_idx])
+cat(sprintf("Pre-trends Wald χ² = %.2f, p = %.3f\n", W$stat, W$p))
+
+# (d) Bacon decomposition (Goodman-Bacon 2021) — TWFE diagnostic
+library(bacondecomp)
+bd <- bacon(log_wage ~ training, data = df,
+            id_var = "worker_id", time_var = "year")
+ggplot(bd, aes(weight, estimate, color = type, shape = type)) +
+  geom_point(size = 2) +
+  labs(title = "Figure 2a-bis. Goodman-Bacon decomposition",
+       x = "Weight", y = "Estimate")
+ggsave("figures/fig2a_bacon.pdf", width = 7, height = 4)
+
+# (e) Callaway-Sant'Anna dynamic ATT (when att_gt is the main estimator)
+library(did)
+cs <- att_gt(yname = "log_wage", tname = "year", idname = "worker_id",
+             gname = "first_treat", data = df,
+             control_group = "nevertreated", est_method = "dr",
+             clustervars = "firm_id")
+ggdid(aggte(cs, type = "dynamic")) +
+  labs(title = "Figure 2a-ter. Dynamic ATT (Callaway-Sant'Anna)")
+ggsave("figures/fig2a_csdid.pdf", width = 7, height = 4)
+```
+
+#### 3.5.2 First-stage F-statistic + scatter (IV identification)
+
+Rule of thumb: first-stage F ≥ 10 for OLS-style inference; F ≥ 23 for AR-equivalent inference (Stock–Yogo / Lee 2022). `fixest::feols` reports F automatically; `AER::ivreg` requires `summary(..., diagnostics = TRUE)`.
+
+```r
+iv <- feols(log_wage ~ age + edu | training ~ Z1 + Z2,
+            data = df, cluster = ~ firm_id)
+summary(iv, stage = 1)
+fitstat(iv, ~ ivf + ivwald + sargan + cd)        # CD / KP / Sargan / first-stage F
+
+# Binscatter for the first-stage scatter (residualized on age + edu)
+library(binsreg)
+binsreg(y = df$training, x = df$Z1, w = df[, c("age","edu")],
+        nbins = 20, polyreg = 2, ci = c(3, 3))
+ggsave("figures/fig2b_first_stage.pdf", width = 7, height = 4)
+```
+
+#### 3.5.3 RD: McCrary density + canonical RD plot
+
+The signature RD figure is `rdplot` (CCT-style binned scatter with local-polynomial fit on each side), paired with the McCrary manipulation test.
+
+```r
+library(rdrobust); library(rddensity)
+
+# (a) Canonical RD plot — binned means + local poly on each side
+rdplot(y = df$outcome, x = df$running_var, c = 0,
+       p = 4, kernel = "triangular", binselect = "esmv",
+       title = "Figure 2c. RD plot")
+ggsave("figures/fig2c_rdplot.pdf", width = 7, height = 4)
+
+# (b) McCrary density (Cattaneo-Jansson-Ma 2018)
+rdd <- rddensity(X = df$running_var, c = 0)
+print(summary(rdd))
+rdplotdensity(rdd, X = df$running_var,
+              title = "Figure 2c-bis. McCrary density (manipulation test)")
+ggsave("figures/fig2c_mccrary.pdf", width = 7, height = 4)
+```
+
+#### 3.5.4 Matching: love plot (standardized differences pre vs post)
+
+```r
+library(MatchIt); library(cobalt)
+
+m.out <- matchit(training ~ age + edu + tenure + firm_size,
+                 data = df, method = "nearest", ratio = 1)
+love.plot(m.out, threshold = 0.10,
+          var.order = "unadjusted", abs = TRUE,
+          title = "Figure 2d. Love plot — |SMD| pre vs post matching")
+ggsave("figures/fig2d_loveplot.pdf", width = 7, height = 4)
+```
+
+#### 3.5.5 SCM: synthetic-control trajectory + gap plot
+
+For synthetic-control designs the canonical Figure 2 is the treated-vs-synthetic time series with treatment time annotated.
+
+```r
+library(tidysynth)
+sc <- df %>%
+  synthetic_control(outcome = log_wage, unit = unit_id, time = year,
+                    i_unit = "treated_unit_name", i_time = 2015) %>%
+  generate_predictor(time_window = 2010:2014,
+                     mean_age = mean(age, na.rm = TRUE),
+                     mean_edu = mean(edu, na.rm = TRUE)) %>%
+  generate_weights() %>% generate_control()
+plot_trends(sc); ggsave("figures/fig2e_synth_trajectory.pdf", width = 7, height = 4)
+plot_differences(sc); ggsave("figures/fig2e_synth_gap.pdf", width = 7, height = 4)
+
+# Synthetic DID
+library(synthdid)
+sdid_setup <- panel.matrices(df, unit = "worker_id", time = "year",
+                              outcome = "log_wage", treatment = "training")
+sdid_fit <- synthdid_estimate(sdid_setup$Y, sdid_setup$N0, sdid_setup$T0)
+plot(sdid_fit, control.name = "Synthetic DiD")
+ggsave("figures/fig2e_sdid.pdf", width = 7, height = 4)
+```
+
+> Identification-specific checks (PT for DID, weak-IV F, density for RD, common support for matching) **are also auto-run inside the Step-5 estimators** — don't duplicate the numerics here, but DO produce the figures: a referee scans the figures first.
+
+---
+
 ### Step 4 — Diagnostic statistical tests
 
 Deeper patterns: [references/04-statistical-tests.md](references/04-statistical-tests.md) — every classical test. `lmtest`/`sandwich`/`car`/`tseries`/`urca`/`plm`.
@@ -520,9 +948,23 @@ resettest(ols, power = 2:3, type = "fitted")
 
 ---
 
-### Step 5 — Baseline empirical modeling
+### Step 5 — Baseline empirical modeling (Section 4: Main Results)
 
 Deeper patterns: [references/05-modeling.md](references/05-modeling.md) — every estimator. `fixest` is the workhorse.
+
+This is the densest section of an applied paper. A modern AER §4 typically contains **2–3 multi-regression tables and one coefficient plot**:
+
+- **Table 2** (main): progressive controls, 4–6 columns — **Pattern A** below
+- **Table 2-bis** (design horse race): same coefficient under OLS / IV / DID / DML — **Pattern B**
+- **Table 2-ter** (multi-outcome): same treatment, several outcomes side-by-side — **Pattern C**
+- **Figure 3** (coefplot): visual summary of β̂ and 95% CI across specs
+
+> **Estimator routing** (memorize this — getting it wrong silently produces nonsense):
+> - **No FE / single low-card FE** → `feols(y ~ X, data, cluster = ~i)`
+> - **High-dim FE** → `feols(y ~ X | fe1 + fe2, data, cluster = ~i)`
+> - **Two-way cluster** → `feols(..., cluster = ~ firm_id + year)`
+> - **2SLS / IV** → `feols(y ~ X | D ~ Z, data, cluster = ~ firm_id)` (or `AER::ivreg` for diagnostics)
+> - **DID / event-study** → `feols(y ~ sunab(G, t) | i + t, data)` (SA) · `did::att_gt` (CS) · `didimputation::did_imputation` (BJS)
 
 **Pick by identification strategy**:
 
@@ -537,7 +979,181 @@ Binary outcome                           →  feglm or glm(family=binomial)
 Count outcome                            →  fepois
 ```
 
-Canonical calls:
+Canonical calls (the eight patterns A–H below are the AER table cookbook — `modelsummary(...)` and `fixest::etable(...)` are the two workhorses, equivalent to Stata `outreg2`/`esttab` and Python `pf.etable`/`Stargazer`).
+
+#### 5.A Pattern A — Progressive controls (the canonical Table 2)
+Stable β̂ across columns ⇒ less concern that selection on observables is driving the estimate (Oster 2019 selection-stability logic; quantified in Step 6).
+
+```r
+library(fixest); library(modelsummary)
+
+m1 <- feols(log_wage ~ training,                                                 data = df, cluster = ~ firm_id)
+m2 <- feols(log_wage ~ training + age + edu,                                     data = df, cluster = ~ firm_id)
+m3 <- feols(log_wage ~ training + age + edu + tenure + firm_size,                data = df, cluster = ~ firm_id)
+m4 <- feols(log_wage ~ training + age + edu + tenure + firm_size | industry + year,
+            data = df, cluster = ~ firm_id)
+m5 <- feols(log_wage ~ training + age + edu + tenure + firm_size | worker_id + year,
+            data = df, cluster = ~ firm_id)
+m6 <- feols(log_wage ~ training + age + edu + tenure + firm_size | worker_id + year + industry^year,
+            data = df, cluster = ~ firm_id)
+
+modelsummary(
+  list("(1) Baseline"    = m1,
+       "(2) +Demog"      = m2,
+       "(3) +Labor-mkt"  = m3,
+       "(4) Ind×Yr FE"   = m4,
+       "(5) Worker FE"   = m5,
+       "(6) Worker FE+Ind×Yr" = m6),
+  output    = "tables/table2_main.tex",
+  stars     = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
+  gof_omit  = "BIC|AIC|F|Log|Adj",
+  coef_map  = c("training" = "Job training",
+                "age" = "Age", "edu" = "Education",
+                "tenure" = "Tenure", "firm_size" = "Firm size"),
+  notes     = c("Cluster-robust SE in parentheses, clustered at firm_id.",
+                "* p<0.10, ** p<0.05, *** p<0.01.")
+)
+modelsummary(list("(1)"=m1,"(2)"=m2,"(3)"=m3,"(4)"=m4,"(5)"=m5,"(6)"=m6),
+             output = "tables/table2_main.docx")
+```
+
+> **AER convention: show ALL controls (and the intercept).** Pass NEITHER `keep =` NOR `coef_omit =` so every parameter is visible. Use `coef_map = c("training" = "Training")` (single mapping) only when a focal-coefficient-only table is intentional (interaction-form heterogeneity, IV first-stage triplet); use `coef_omit = "Intercept"` only when you want to suppress the constant for paper aesthetics.
+
+#### 5.B Pattern B — Design horse race (Table 2-bis)
+Show the same coefficient of interest under multiple identification strategies. This is *the* AER credibility move: convergent evidence across designs each making different identifying assumptions.
+
+```r
+library(fixest); library(AER); library(did); library(MatchIt); library(WeightIt)
+
+ols  <- feols(log_wage ~ training + age + edu + tenure | industry + year,
+              data = df, cluster = ~ firm_id)
+iv   <- feols(log_wage ~ age + edu + tenure | training ~ Z1 + Z2,
+              data = df, cluster = ~ firm_id)
+cs   <- att_gt(yname = "log_wage", tname = "year", idname = "worker_id",
+                gname = "first_treat", data = df,
+                control_group = "nevertreated", est_method = "dr",
+                clustervars = "firm_id")
+psm  <- matchit(training ~ age + edu + tenure, data = df,
+                method = "nearest", ratio = 1)
+psm_lm <- lm(log_wage ~ training + age + edu + tenure,
+             data = match.data(psm), weights = weights)
+ebal <- weightit(training ~ age + edu + tenure, data = df, method = "ebal")
+ebal_lm <- lm(log_wage ~ training + age + edu + tenure,
+              data = df, weights = ebal$weights)
+
+modelsummary(
+  list("(1) OLS+FE"     = ols,
+       "(2) 2SLS"       = iv,
+       "(3) CS-DID"     = aggte(cs, type = "simple"),
+       "(4) PSM"        = psm_lm,
+       "(5) Entropy bal." = ebal_lm),
+  output    = "tables/table2b_designs.tex",
+  stars     = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
+  coef_map  = c("training" = "Job training (β̂)"),
+  gof_omit  = "BIC|AIC|F|Log|Adj",
+  notes     = "Convergent evidence: same β̂ under five identification strategies."
+)
+```
+
+#### 5.C Pattern C — Multi-outcome table (same X, several Y's)
+
+```r
+ys <- c("log_wage", "weeks_employed", "left_firm", "promoted")
+multi_y <- lapply(ys, function(y)
+  feols(as.formula(paste(y, "~ training + age + edu + tenure | industry + year")),
+        data = df, cluster = ~ firm_id))
+names(multi_y) <- ys
+
+modelsummary(multi_y,
+             output = "tables/table2c_multi_outcome.tex",
+             stars  = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
+             coef_map = c("training" = "Training"),
+             notes  = "Each column is a separate regression on the labelled outcome.")
+```
+
+#### 5.D Pattern D — Stacked Panel A / Panel B table
+Same model family, two horizons (short-run / long-run) or two samples. Use `gt::gt_group()` to stack two `modelsummary` blocks with panel headers.
+
+```r
+library(gt)
+
+panelA <- list(
+  "(1) Industry FE" = feols(wage_t1 ~ training + X | industry + year,  data = df, cluster = ~ firm_id),
+  "(2) Worker FE"   = feols(wage_t1 ~ training + X | worker_id + year, data = df, cluster = ~ firm_id))
+panelB <- list(
+  "(1) Industry FE" = feols(wage_t5 ~ training + X | industry + year,  data = df, cluster = ~ firm_id),
+  "(2) Worker FE"   = feols(wage_t5 ~ training + X | worker_id + year, data = df, cluster = ~ firm_id))
+
+ms_A <- modelsummary(panelA, output = "gt") %>%
+  tab_header(title = "Panel A. Short-run (1 year)")
+ms_B <- modelsummary(panelB, output = "gt") %>%
+  tab_header(title = "Panel B. Long-run (5 years)")
+
+gt_group(ms_A, ms_B) %>%
+  gtsave("tables/table2d_horizons.tex")
+gt_group(ms_A, ms_B) %>%
+  gtsave("tables/table2d_horizons.docx")
+```
+
+#### 5.E Pattern E — IV reporting triplet (first-stage / reduced-form / 2SLS)
+The textbook AER IV table presents the **first stage**, the **reduced form**, and the **2SLS** in three columns so the reader can verify Wald-ratio = RF / FS.
+
+```r
+fs  <- feols(training ~ Z + age + edu | industry + year, data = df, cluster = ~ firm_id)
+rf  <- feols(log_wage ~ Z + age + edu | industry + year, data = df, cluster = ~ firm_id)
+iv2 <- feols(log_wage ~ age + edu | training ~ Z, data = df, cluster = ~ firm_id)
+
+modelsummary(
+  list("(1) First stage"   = fs,
+       "(2) Reduced form"  = rf,
+       "(3) 2SLS"          = iv2),
+  output     = "tables/table2e_iv_triplet.tex",
+  stars      = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
+  coef_map   = c("Z" = "Instrument Z", "training" = "Training (endog.)"),
+  gof_map    = list(list(raw = "ivf", clean = "First-stage F", fmt = 2)),
+  notes      = "Wald ratio: $\\hat\\beta_{2SLS} = \\hat\\beta_{RF} / \\hat\\pi_{FS}$."
+)
+```
+
+> **IV triplet is intentionally focal:** show only Z + endogenous regressor so the reader can eyeball the Wald ratio. Drop `coef_map=` only if a referee asks for the full coefficient list.
+
+#### 5.F Pattern F — Causal-orchestrator main via `did::att_gt` / `synthdid` / `grf::causal_forest`
+For DID / SCM / matching / forest mains, the modern R estimator returns a self-contained estimate + automatic placebos / pre-trends / overlap diagnostics. Pipe into `modelsummary` via the auto-tidiers.
+
+```r
+# CS-DID with full diagnostics
+cs <- att_gt(yname = "log_wage", tname = "year", idname = "worker_id",
+             gname = "first_treat", data = df,
+             control_group = "nevertreated", est_method = "dr",
+             clustervars = "firm_id")
+print(aggte(cs, type = "group"))                           # ATT(g) summary
+print(aggte(cs, type = "dynamic", min_e = -4, max_e = 4))  # event-study aggregation
+
+# Synthetic DID
+library(synthdid)
+sdid_setup <- panel.matrices(df, unit="worker_id", time="year",
+                              outcome="log_wage", treatment="training")
+sdid_fit <- synthdid_estimate(sdid_setup$Y, sdid_setup$N0, sdid_setup$T0)
+print(summary(sdid_fit))
+
+# Causal forest with overlap + variable importance
+library(grf)
+cf <- causal_forest(X = as.matrix(df[, c("age","edu","tenure","firm_size")]),
+                    Y = df$log_wage, W = df$training, num.trees = 4000)
+average_treatment_effect(cf, target.sample = "treated")
+test_calibration(cf)
+variable_importance(cf)
+```
+
+#### 5.G Pattern G — Subgroup `modelsummary` (Table 3, see Step 7)
+One column per subgroup. Detailed code in §Step 7 — Heterogeneity.
+
+#### 5.H Pattern H — Robustness master (Table A1, see Step 6)
+Stack every robustness specification next to the baseline. Detailed code in §Step 6.
+
+---
+
+#### Canonical estimator commands (the underlying primitives)
 
 ```r
 library(fixest)
@@ -729,6 +1345,100 @@ o_test(y = "log_wage", x = "training",
        con = "age + edu + tenure | worker_id + year",
        id = "worker_id", time = "year",
        data = df, R2max = 1.3 * fitstat(m6, "r2"), beta = 0)
+
+# ============================================================
+# 6j. Pattern H — Robustness master table (Table A1, one column per check)
+# ============================================================
+library(modelsummary); library(MatchIt); library(WeightIt)
+
+base       <- feols(log_wage ~ training + age + edu + tenure | industry + year,
+                    data = df, cluster = ~ firm_id)
+no99       <- feols(log_wage ~ training + age + edu + tenure | industry + year,
+                    data = df %>% filter(wage < quantile(wage, 0.99, na.rm = TRUE)),
+                    cluster = ~ firm_id)
+balpan     <- feols(log_wage ~ training + age + edu + tenure | industry + year,
+                    data = df %>% group_by(worker_id) %>%
+                            filter(n_distinct(year) == max(n_distinct(year))) %>% ungroup(),
+                    cluster = ~ firm_id)
+dropearly  <- feols(log_wage ~ training + age + edu + tenure | industry + year,
+                    data = df %>% filter(first_treat > 2008), cluster = ~ firm_id)
+wfe        <- feols(log_wage ~ training + age + edu + tenure | worker_id + year,
+                    data = df, cluster = ~ firm_id)
+cl2way     <- feols(log_wage ~ training + age + edu + tenure | industry + year,
+                    data = df, cluster = ~ firm_id + year)
+logy       <- feols(log(wage + 1) ~ training + age + edu + tenure | industry + year,
+                    data = df, cluster = ~ firm_id)
+ihsy       <- feols(asinh(wage) ~ training + age + edu + tenure | industry + year,
+                    data = df, cluster = ~ firm_id)
+m_psm      <- matchit(training ~ age + edu + tenure + firm_size, data = df, method = "nearest")
+psm_lm     <- lm(log_wage ~ training + age + edu + tenure, data = match.data(m_psm), weights = weights)
+ebal_w     <- weightit(training ~ age + edu + tenure + firm_size, data = df, method = "ebal")
+ebal_lm    <- lm(log_wage ~ training + age + edu + tenure, data = df, weights = ebal_w$weights)
+
+modelsummary(
+  list("(1) Baseline"        = base,
+       "(2) Drop top 1%"     = no99,
+       "(3) Balanced"        = balpan,
+       "(4) Drop early"      = dropearly,
+       "(5) Worker FE"       = wfe,
+       "(6) 2-way cluster"   = cl2way,
+       "(7) log Y"           = logy,
+       "(8) IHS Y"           = ihsy,
+       "(9) PSM"             = psm_lm,
+       "(10) Entropy bal."   = ebal_lm),
+  output    = "tables/tableA1_robustness.tex",
+  stars     = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
+  coef_map  = c("training" = "Training (β̂)"),
+  gof_omit  = "BIC|AIC|F|Log|Adj",
+  notes     = "Each column is one robustness check. β̂ on training is the focal coefficient."
+)
+
+# ============================================================
+# 6k. Specification curve (Simonsohn-Simmons-Nelson 2020) via `specr`
+# ============================================================
+library(specr); library(ggplot2)
+
+specs <- setup(data = df,
+               y = c("log_wage", "ihs_wage"),
+               x = "training",
+               model = c("feols"),
+               controls = c("age", "edu", "tenure", "firm_size"),
+               subsets = list(industry = c("manuf", "construction", "transport")))
+
+results <- specr(specs)
+plot(results, choices = c("x", "y", "controls", "subsets"))
+ggsave("figures/fig5_spec_curve.pdf", width = 10, height = 6)
+ggsave("figures/fig5_spec_curve.png", width = 10, height = 6, dpi = 300)
+
+# Hand-rolled alternative when `specr` doesn't fit (with custom FE / SE):
+# spec_grid <- expand.grid(controls = list(c("age"), c("age","edu"), c("age","edu","tenure")),
+#                           ytrans   = c("log_wage", "ihs_wage"),
+#                           sample   = c("all", "manuf", "no99"),
+#                           cluster  = c("firm_id", "firm_id+year"))
+# Loop, run feols, collect b/se, ggplot::geom_pointrange.
+
+# ============================================================
+# 6l. Sensitivity dashboard — HonestDiD + Oster + E-value
+# ============================================================
+# (a) HonestDiD — Rambachan-Roth (2023): bound on β̂ under bounded PT violation
+library(HonestDiD)
+es_pre  <- coef(es)[grep("year::-", names(coef(es)))]
+es_post <- coef(es)[grep("year::[0-9]", names(coef(es)))]
+honest_out <- createSensitivityResults(betahat = c(es_pre, es_post),
+                                       sigma   = vcov(es)[c(names(es_pre), names(es_post)),
+                                                          c(names(es_pre), names(es_post))],
+                                       numPrePeriods  = length(es_pre),
+                                       numPostPeriods = length(es_post),
+                                       Mbarvec = seq(0, 0.5, by = 0.05))
+createSensitivityPlot(honest_out, originalResults = honest_out$mainResult)
+ggsave("figures/fig6_honestdid.pdf", width = 7, height = 4)
+
+# (b) Oster δ — `robomit::o_test` (already shown in 6i)
+
+# (c) E-value (VanderWeele-Ding 2017) — for risk-ratio outcomes
+library(EValue)
+evalue(RR(1.45), lo = 1.10, hi = 1.91)
+# → reports the minimum strength of unmeasured confounding to nullify the result.
 ```
 
 ---
@@ -1030,7 +1740,45 @@ theme_set(theme_classic(base_size = 11) +
 [ ] tables/table3_mechanism.tex   [ ] figures/fig3_coefplot.pdf
 [ ] tables/table4_heterogeneity.tex
 [ ] tables/table5_robustness.tex  [ ] figures/fig4_sensitivity.pdf
+[ ] tables/tableA1_robustness.tex [ ] figures/fig5_spec_curve.pdf
+[ ] artifacts/sample_construction.json (footnote 4)
+[ ] artifacts/data_contract.json
+[ ] artifacts/result.json (reproducibility stamp — see 8m)
 ```
+
+#### 8m. Reproducibility stamp
+
+The single artifact a journal's replication office (or a future co-author) needs to reproduce the headline number. Persist R version, seed, dataset hash, baseline coefficient + CI, and pointers to the protocol/contract:
+
+```r
+library(jsonlite); library(digest)
+
+# Get baseline result (assumes `base` is the headline feols object)
+b_hat <- coef(base)["training"]
+se_b  <- se(base)["training"]
+ci    <- c(b_hat - 1.96 * se_b, b_hat + 1.96 * se_b)
+
+stamp <- list(
+  R_version          = R.version.string,
+  fixest_version     = as.character(packageVersion("fixest")),
+  modelsummary_version = as.character(packageVersion("modelsummary")),
+  seed               = 42,
+  dataset_sha256     = substr(digest::digest(df, algo = "sha256"), 1, 16),
+  n_obs              = base$nobs,
+  estimand           = "ATT",
+  estimator          = "fixest::feols",
+  estimate           = unname(b_hat),
+  se_cluster         = unname(se_b),
+  ci95               = unname(ci),
+  pre_registration   = "artifacts/strategy.md",
+  data_contract      = "artifacts/data_contract.json",
+  sample_log         = "artifacts/sample_construction.json",
+  paper_bundle       = "tables/table2_main.tex"
+)
+write_json(stamp, "artifacts/result.json", pretty = TRUE, auto_unbox = TRUE)
+```
+
+Commit `artifacts/result.json` alongside the paper PDF. A referee should be able to run `Rscript master.R` and bit-identically reproduce this JSON.
 
 ---
 
@@ -1503,6 +2251,173 @@ source("R/08_tables_figures.R")
 ```
 
 For Quarto authoring (combined narrative + code + tables/figures, render to PDF/HTML/Word), see [references/08-tables-plots.md](references/08-tables-plots.md) §12.
+
+---
+
+## Regtable (modelsummary / etable) cookbook (one-page recipe index)
+
+`modelsummary(...)` and `fixest::etable(...)` are the two primitives behind every multi-regression table. The eight patterns above map to:
+
+| Pattern | What varies across columns | Step |
+|---|---|---|
+| **A. Progressive controls** | covariate set / FE depth | 5.A — Table 2 |
+| **B. Design horse race** | identification strategy (OLS / IV / DID / DML / PSM) | 5.B — Table 2-bis |
+| **C. Multi-outcome** | dependent variable Y | 5.C — Table 2-ter |
+| **D. Stacked Panel A / B** | horizon / sample (panel rows × spec columns) | 5.D — Table 2-quater |
+| **E. IV reporting triplet** | first stage / reduced form / 2SLS | 5.E — Table 2-quinto |
+| **F. Causal-orchestrator** | 1 column, full diagnostics (`att_gt` / `synthdid` / `causal_forest`) | 5.F |
+| **G. Subgroup table** | subsample (full / female / male / Q1…Q4) | 7 — Table 3 |
+| **H. Robustness master** | every robustness check stacked | 6.j — Table A1 |
+
+Default `modelsummary` settings for AER house style:
+
+```r
+modelsummary(
+  list("(1)" = m1, ..., "(N)" = mN),
+  output    = "tables/tableN.tex",                                         # or .docx / .html
+  stars     = c("*" = 0.1, "**" = 0.05, "***" = 0.01),                     # AER stars
+  gof_omit  = "BIC|AIC|F|Log|Adj",
+  coef_map  = c("training" = "Training"),                                   # pretty names
+  notes     = c("Cluster-robust SE in parentheses.",
+                "* p<0.10, ** p<0.05, *** p<0.01.")
+)
+# For multi-panel paper bundles, use gt::gt_group(modelsummary(...), modelsummary(...))
+# or render via Quarto for a single .pdf / .docx / .html target.
+```
+
+---
+
+## Figure factory (the 12 standard AER figures in R)
+
+| # | Figure | R commands | Section |
+|---|---|---|---|
+| 1a | Raw trends (DID Figure 1) | `df %>% group_by(year, treat) %>% summarise(mean(y)) %>% ggplot()` | §1 |
+| 1b | Treatment rollout heatmap | `panelView::panelview(...)` · `ggplot + geom_tile` | §1 |
+| 2a | Event-study coefficients | `fixest::iplot(feols(y ~ sunab(G, t) | i + t))` | §3 (Step 3.5.1) |
+| 2a' | Bacon weights | `bacondecomp::bacon` + ggplot | §3 |
+| 2a'' | CS-DID dynamic effects | `did::ggdid(aggte(cs, type="dynamic"))` | §3 |
+| 2b | First-stage scatter | `binsreg::binsreg(y=D, x=Z, w=X)` | §3 (Step 3.5.2) |
+| 2c | RD canonical plot | `rdrobust::rdplot(y, x, c=0)` | §3 (Step 3.5.3) |
+| 2c' | McCrary density | `rddensity::rdplotdensity(rdd, X)` | §3 |
+| 2d | Matching love plot | `cobalt::love.plot(MatchIt::matchit(...))` | §3 (Step 3.5.4) |
+| 2e | SCM trajectory | `tidysynth::plot_trends` · `synthdid::plot` · `Synth::path.plot` | §3 (Step 3.5.5) |
+| 3 | Coefficient plot of main specs | `modelsummary::modelplot(list(m1,...,m6), coefs="training")` | §4 |
+| 4a | Dose-response | `marginaleffects::plot_predictions(model, condition="dose")` | §5 |
+| 4b | CATE distribution | `grf::causal_forest(...)` + `ggplot::geom_histogram(predict(cf)$predictions)` | §5 |
+| 5 | Specification curve | `specr::plot(specr(...))` (see 6.k) | §7 |
+| 6 | Sensitivity dashboard | `HonestDiD::createSensitivityPlot` · `EValue::evalue` | §7 (Step 6.l) |
+| 7 | Final main figure | estimator-specific (`rdplot`, `iplot`, `Synth::path.plot`) | §8 |
+
+> Every figure is exported via `ggsave()` as **both** `.pdf` (for LaTeX) and `.png ≥ 300 dpi` (for slides / web). Set `theme_set(theme_classic(base_size = 11))` once at the top of `master.R` for consistent styling.
+
+---
+
+## Method Catalog
+
+### Classical OLS / Panel
+```r
+library(fixest); library(plm); library(sandwich); library(lmtest)
+feols(y ~ X,                       data = df, cluster = ~ i)               # OLS (modern primary)
+feols(y ~ X | fe1,                 data = df, cluster = ~ i)               # OLS + 1 FE
+feols(y ~ X | fe1 + fe2,           data = df, cluster = ~ i)               # HD FE workhorse
+feols(y ~ X | fe1 + fe2,           data = df, cluster = ~ fe1 + fe2)       # 2-way cluster
+fepois(count ~ X | fe1 + fe2,      data = df, cluster = ~ i)               # Poisson + FE
+feglm (y ~ X | fe1, data = df, family = binomial(link = "logit"),
+       cluster = ~ i)                                                       # Logit + FE
+plm   (y ~ X, data = df, model = "within",  index = c("i","t"))            # panel FE
+plm   (y ~ X, data = df, model = "random",  index = c("i","t"))            # RE (Hausman: phtest)
+```
+
+### Difference-in-Differences
+```r
+library(fixest); library(did); library(didimputation); library(synthdid); library(bacondecomp); library(HonestDiD); library(DIDmultiplegtDYN)
+
+feols(y ~ i(treated, post, ref = 0) | i + t, df, cluster = ~ i)            # 2×2
+feols(y ~ sunab(first_treat, year) | i + year, df, cluster = ~ i)          # SA event study
+att_gt(yname="y", tname="t", idname="i", gname="G", data=df,
+       control_group="nevertreated", est_method="dr", clustervars="i")     # CS-DID
+did_imputation(data=df, yname="y", gname="G", tname="t", idname="i",
+               horizon=0:5, pretrends=-5:-1, cluster_var="i")               # BJS imputation
+DIDmultiplegtDYN(df, "y", "i", "t", "training", effects=5, placebo=3)      # de Chaisemartin
+synthdid_estimate(panel.matrices(df,"i","t","y","training"), ...)          # synthetic DID
+bacon(y ~ training, data=df, id_var="i", time_var="t")                     # TWFE diagnostic
+HonestDiD::createSensitivityResults(...)                                    # PT sensitivity
+```
+
+### Instrumental Variables / 2SLS
+```r
+library(fixest); library(AER); library(ivreg)
+feols(y ~ X | D ~ Z, df, cluster = ~ firm_id)                              # workhorse w/ HD FE
+fitstat(iv, ~ ivf + ivwald + sargan + cd)                                  # CD/KP/Sargan/F
+AER::ivreg(y ~ D + X | Z + X, data = df)                                   # classic API
+summary(iv, vcov. = sandwich, diagnostics = TRUE)                          # with diagnostics
+```
+
+### Regression Discontinuity
+```r
+library(rdrobust); library(rddensity); library(rdmulti)
+rdrobust(y, x, c = 0, kernel = "triangular", bwselect = "mserd")           # Sharp RD
+rdrobust(y, x, c = 0, fuzzy = D)                                           # Fuzzy RD
+rddensity(X = x, c = 0)                                                    # McCrary density
+rdplot(y, x, c = 0)
+rdmc(y, x, cutoffs = c(0, 5, 10))                                          # multi-cutoff
+```
+
+### Matching / Reweighting
+```r
+library(MatchIt); library(WeightIt); library(cobalt)
+matchit (D ~ X1 + X2, data = df, method = "nearest", ratio = 1)            # PSM
+matchit (D ~ X1 + X2, data = df, method = "cem")                           # Coarsened EM
+weightit(D ~ X1 + X2, data = df, method = "ebal")                          # entropy balancing
+weightit(D ~ X1 + X2, data = df, method = "ps", estimand = "ATE")          # IPW
+love.plot(matchit_obj, threshold = 0.10)                                   # SMD diagnostic
+```
+
+### Synthetic Control
+```r
+library(Synth); library(gsynth); library(tidysynth); library(synthdid)
+Synth::synth(...)                                                           # ADH SCM
+gsynth(y ~ training, data = df, index = c("i","t"), force = "two-way")     # generalized SC
+synthdid_estimate(panel.matrices(...))                                      # synthetic DID
+tidysynth::synthetic_control(df, ...) %>% generate_predictor(...) %>%
+  generate_weights() %>% generate_control()
+```
+
+### ML Causal (Mode B — see §B)
+```r
+library(grf); library(DoubleML); library(mlr3); library(causalDML)
+causal_forest(X, Y, W, num.trees = 4000, honesty = TRUE)                   # GRF causal forest
+DoubleML::DoubleMLPLR$new(data, ml_l = lrn("regr.ranger"),
+                           ml_m = lrn("regr.ranger"))                       # DML PLR
+DoubleML::DoubleMLIRM$new(data, ...)                                       # DML interactive
+predict(cf)$predictions                                                    # CATE per row
+average_treatment_effect(cf, target.sample = "treated")
+test_calibration(cf); variable_importance(cf)
+policytree::policy_tree(X, gamma, depth = 3)                               # policy tree
+```
+
+### Robustness, Sensitivity & Inference
+```r
+library(fwildclusterboot); library(ri2); library(multcomp); library(robomit); library(EValue)
+boottest(model, param = "training", clustid = "state", B = 9999)           # wild cluster bootstrap
+ri2::conduct_ri(...)                                                        # randomization inference
+robomit::o_test(...)                                                        # Oster δ
+EValue::evalue(RR(1.45), lo = 1.10, hi = 1.91)                             # E-value
+fwildclusterboot::boottest(..., type = "rademacher")                       # alt bootstrap dist
+```
+
+### Survival / Epi (Mode A — see §A)
+```r
+library(survival); library(survminer); library(survRM2); library(ipw); library(tmle); library(zelig)
+survfit(Surv(time, event) ~ A, data = df)                                  # KM
+coxph  (Surv(time, event) ~ A + X, data = df)                              # Cox
+survreg(Surv(time, event) ~ A + X, data = df, dist = "weibull")            # AFT
+rmst2  (time, status, arm, tau = 1825)                                     # RMST contrast
+ipw::ipwpoint(...)                                                          # IPTW
+tmle  (Y, A, W = X, ...)                                                    # TMLE
+gfoRmula::gformula_survival(...)                                            # parametric g-formula
+TwoSampleMR::mr(...)                                                        # Mendelian randomization
+```
 
 ---
 

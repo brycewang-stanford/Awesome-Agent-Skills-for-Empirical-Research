@@ -83,17 +83,24 @@ paper"*, *"build a Table 1 balance table"*, *"winsorize at 1/99%"*,
 
 ## Scope
 
-**In scope** — the canonical 8-step pipeline:
+**In scope** — the canonical 8-step pipeline (v2 adds Step −1 / Step 0 / Step 2.5 / Step 3.5 sub-stages mirroring the StatsPAI reference skill):
 
 ```
-Step 1  Data cleaning            missing / outliers / dtype / join / panel
-Step 2  Variable construction    log / winsorize / standardize / encode / lags
-Step 3  Descriptive statistics   summary / Table 1 / correlation / distributions
-Step 4  Diagnostic tests         normality / hetero / autocorr / VIF / stationarity
-Step 5  Baseline modeling        OLS / panel FE / IV / DID / RD / SC / matching / DML
-Step 6  Robustness battery       placebo / subsample / spec curve / Oster δ*
-Step 7  Further analysis         mechanism / heterogeneity / mediation / moderation
-Step 8  Tables & figures         stargazer / coefplot / event study / forest plot
+Step −1 Pre-Analysis Plan         statsmodels.stats.power → pap.json
+Step 0  Sample log + data contract sample_log + 5-check asserts → JSON
+Step 1  Data cleaning              missing / outliers / dtype / join / panel
+Step 2  Variable construction      log / winsorize / standardize / encode / lags
+Step 2.5 Empirical strategy        equation × ID assumption × estimator → strategy.md
+Step 3  Descriptive statistics     summary / Table 1 / correlation / distributions
+Step 3.5 Identification graphics   event-study / 1st-stage F / McCrary / love / SCM trajectory
+Step 4  Diagnostic tests           normality / hetero / autocorr / VIF / stationarity
+Step 5  Baseline modeling          OLS / panel FE / IV / DID / RD / SC / matching / DML
+        Patterns A–H               progressive ctrls / horse race / multi-Y / IV triplet / ...
+Step 6  Robustness battery         placebo / subsample / spec curve / Oster δ*
+        + Pattern H Master Table A1 + spec curve + sensitivity dashboard
+Step 7  Further analysis           mechanism / heterogeneity / mediation / moderation
+Step 8  Tables & figures           stargazer / coefplot / event study / forest plot
+        + reproducibility stamp (artifacts/result.json)
 ```
 
 **Out of scope** — paper drafting (LaTeX prose), DSGE / HANK numerical macro
@@ -195,17 +202,24 @@ frontmatter 中的 `triggers:`。
 
 ## 覆盖范围
 
-**覆盖** —— 经典 8 步 pipeline：
+**覆盖** —— 经典 8 步 pipeline（v2 对齐 StatsPAI 参考 skill，新增 Step −1 / Step 0 / Step 2.5 / Step 3.5 子阶段）：
 
 ```
-Step 1  数据清洗       缺失 / 异常 / dtype / 合并 / 面板
-Step 2  变量构造       log / 缩尾 / 标准化 / 编码 / 滞后
-Step 3  描述统计       summary / Table 1 / 相关 / 分布
-Step 4  诊断检验       正态 / 异方差 / 自相关 / VIF / 平稳
-Step 5  基准建模       OLS / 面板 FE / IV / DID / RD / SC / 匹配 / DML
-Step 6  稳健性检验     安慰剂 / 子样本 / 规范曲线 / Oster δ*
-Step 7  进一步分析     机制 / 异质性 / 中介 / 调节
-Step 8  表与图         stargazer / 系数图 / 事件研究图 / 森林图
+Step −1 预分析计划（PAP）  statsmodels.stats.power → pap.json
+Step 0  样本日志 + 数据契约 sample_log + 5 项 assert → JSON
+Step 1  数据清洗            缺失 / 异常 / dtype / 合并 / 面板
+Step 2  变量构造            log / 缩尾 / 标准化 / 编码 / 滞后
+Step 2.5 实证策略           方程式 × 识别假设 × 估计器 → strategy.md
+Step 3  描述统计            summary / Table 1 / 相关 / 分布
+Step 3.5 识别图            事件研究 / 一阶段 F / McCrary / love / SCM 轨迹
+Step 4  诊断检验            正态 / 异方差 / 自相关 / VIF / 平稳
+Step 5  基准建模            OLS / 面板 FE / IV / DID / RD / SC / 匹配 / DML
+        八种 regtable 模式 A–H  渐进控制 / 设计赛马 / 多 Y / IV 三联 / ...
+Step 6  稳健性检验          安慰剂 / 子样本 / 规范曲线 / Oster δ*
+        + Pattern H 稳健性主表 A1 + 规范曲线 + 敏感性面板
+Step 7  进一步分析          机制 / 异质性 / 中介 / 调节
+Step 8  表与图              stargazer / 系数图 / 事件研究图 / 森林图
+        + 复现戳（artifacts/result.json）
 ```
 
 **不覆盖** —— 正文撰写（LaTeX 文字）、DSGE / HANK 数值宏观

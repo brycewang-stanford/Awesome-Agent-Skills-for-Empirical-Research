@@ -216,13 +216,17 @@ ssc install schemepack,      replace       // modern publication themes
 
 ---
 
-## The 8 Steps — Canonical Pipeline
+## The 8 Steps — Canonical Pipeline (mapped to AER paper sections)
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
+│ Step −1 Pre-Analysis Plan (PAP)   power/sampsi/clustersampsi/MDE     │
+│ Step 0  Sample log + data contract sample_log/assert/xtdescribe/JSON │
 │ Step 1  Data import & cleaning    use/import/destring/misstable/merge│
 │ Step 2  Variable construction     gen/egen/winsor2/xtile/xtset/L.F.D.│
+│ Step 2.5 Empirical strategy       equation × ID assumption + pre-reg │
 │ Step 3  Descriptive statistics    tabstat/balancetable/asdoc/pwcorr  │
+│ Step 3.5 Identification graphics  event-study/1st-stage/McCrary/love │
 │ Step 4  Diagnostic tests          sktest/hettest/xtserial/vif/dfuller│
 │ Step 5  Baseline modeling         reghdfe/ivreg2/csdid/rdrobust/synth│
 │ Step 6  Robustness battery        bacondecomp/honestdid/rwolf/boottest│
@@ -231,9 +235,232 @@ ssc install schemepack,      replace       // modern publication themes
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
+The 8 steps mirror the canonical sections of an applied AER / QJE / AEJ paper. Each step is one paper section and emits a paper-ready artifact on disk:
+
+```
+Paper section               Step  Stata moves
+─────────────────────────── ───── ────────────────────────────────────────────────
+Pre-Analysis Plan           −1    power/sampsi + freeze protocol.do to disk
+§1. Data                     0    sample_log + 5-check data contract → JSON
+§1. Data                     1    use/import/destring/misstable/merge assert/xtset
+§1. Data                     2    gen/egen/winsor2/xtile/L./F./D./CPI deflation
+§1.1 Descriptives (Table 1)  3    tabstat · balancetable · asdoc · pwcorr · twoway
+§2. Empirical Strategy       2.5  write equation + ID assumption → strategy.do
+§3. Identification graphics  3.5  event-study · 1st-stage F · McCrary · love · SCM
+§3.5 Diagnostics             4    swilk · hettest · xtserial · vif · dfuller · hausman
+§4. Main Results (Table 2)   5    M1→M6 progressive controls + FE  (eststo + esttab)
+§5. Heterogeneity (Table 3)  7    margins/marginsplot · subgroup · medsem
+§6. Mechanisms / Channels    7    medsem/khb · outcome ladder · DDD interactions
+§7. Robustness gauntlet      6    bacondecomp · honestdid · psacalc · boottest · ritest · rwolf
+§8. Replication package      8    esttab + outreg2 + coefplot + reproducibility stamp
+```
+
 Below is the canonical command at each step. **All examples share one running narrative** — a labor-economics panel where `training` (treatment) affects `log_wage` (outcome), with covariates `age`, `edu`, `tenure`, panel keys `worker_id` / `firm_id` / `year`. Variable names and parameter values are **illustrative**; substitute the real ones from the user's dataset. Only command names and option *shapes* are normative.
 
 > **When a step has many variants** (e.g. staggered DID has 5 estimators; heteroskedasticity has 4 classic tests), SKILL.md shows the one you reach for first and links to `references/NN-<topic>.md` for the rest. **Read the reference file when the user's case doesn't fit the default.**
+
+---
+
+## Paper-ready figure & table inventory (what to produce by section)
+
+A modern AER paper has **5–7 figures** and **3–5 main tables** + an appendix robustness table. Every step below leaves at least one numbered artifact on disk. Default file names assume parallel `.tex` / `.rtf` exports (the agent should produce both so co-authors can edit in Word, and the build system can use LaTeX):
+
+| § | Artifact | Stata primitive | Filenames |
+|---|---|---|---|
+| §1 | **Figure 1**: raw trends / treatment rollout | `collapse` + `twoway line` · `heatplot` for staggered rollout | `figures/fig1_trend.{pdf,png}` |
+| §1 | **Table 1**: summary stats (full / treated / control + Δ + SMD) | `balancetable` · `asdoc sum, by()` · `tabstat` | `tables/table1_balance.{tex,rtf}` |
+| §3 | **Figure 2**: identification graphic (event-study / first-stage / McCrary / RD scatter / SCM trajectory) | `coefplot` after `eventstudyinteract`/`csdid` · `binscatter` · `rdplot` · `rddensity, plot` · `synth` | `figures/fig2_event_study.{pdf,png}` |
+| §4 | **Table 2**: main results — progressive controls M1→M6 | `eststo` 6 specs → `esttab` | `tables/table2_main.{tex,rtf}` |
+| §4 | **Table 2-bis**: design horse-race (OLS / IV / DID / matching) | `eststo` mix + `esttab` | `tables/table2b_designs.{tex,rtf}` |
+| §4 | **Figure 3**: coefficient plot across specs | `coefplot m1 m2 m3 m4 m5 m6, keep(treat)` | `figures/fig3_coefplot.{pdf,png}` |
+| §5 | **Table 3**: heterogeneity by subgroup | `eststo` per slice + `esttab` + `suest` Wald | `tables/table3_heterogeneity.{tex,rtf}` |
+| §5 | **Figure 4**: dose-response / margins-by-quartile | `xtile` + `margins` + `marginsplot` | `figures/fig4_dose.{pdf,png}` |
+| §6 | **Table 4**: mechanism / outcome ladder | loop `eststo: reghdfe` over outcomes → `esttab` | `tables/table4_mechanism.{tex,rtf}` |
+| §7 | **Table A1**: robustness master (one column per check) | `eststo` × variants → `esttab` | `tables/tableA1_robustness.{tex,rtf}` |
+| §7 | **Figure 5**: spec curve — coefficient + 95% CI across all specs | hand-rolled spec loop + `twoway rcap` | `figures/fig5_spec_curve.{pdf,png}` |
+| §7 | **Figure 6**: sensitivity (HonestDiD / Oster / E-value) | `honestdid, coefplot` · `psacalc plot` · `evalue` table | `figures/fig6_sensitivity.{pdf,png}` |
+| §8 | **Replication bundle**: all tables in one document | `esttab ..., append` to one `.tex` / `.rtf` · `texdoc` | `replication/paper_tables.{tex,rtf}` |
+
+> Every Stata estimator above stores results via `eststo` and can be passed straight into `esttab` / `coefplot` / `outreg2`. Don't hand-roll LaTeX, and don't render Word from `outsheet`/`putexcel` matrices — `esttab` and `outreg2` apply book-tab borders, AER-style stars, and the right SE label automatically. For deeper export recipes (LaTeX / Word / Markdown variants, `texdoc`, `frmttable`), see [`references/08-tables-plots.md`](references/08-tables-plots.md).
+
+---
+
+## Export cookbook — LaTeX / Word / RTF in one block
+
+Stata's export stack is more fragmented than Python's StatsPAI. Three tiers, picked by **scope**:
+
+| Tier | Use when | API | Hot options |
+|---|---|---|---|
+| **1. Single multi-column table** | Exporting *one* Table 2 / Table 3 / Table A1 with progressive columns | `eststo m1 ... m6` then `esttab m1 ... m6 using "tab.tex", replace ...` | `keep()`, `drop()`, `mtitles()`, `stats(N r2 r2_a, labels(...))`, `star(* 0.10 ** 0.05 *** 0.01)`, `label`, `booktabs`, `addnotes()` |
+| **2. Multi-panel paper format** (Tables 2 + 3 + A1 + A2 in one file) | Producing the paper-tables block — main + heterogeneity + robustness + placebo as a single document | `esttab ... using "paper.tex", replace` for first panel; subsequent `esttab ... using "paper.tex", append` for each next panel; `texdoc init "paper.tex"` for full LaTeX with prose | first panel: `replace`; subsequent: `append`; surround with `texdoc` for headings |
+| **3. Full session bundle** (the Stata 17+ `collect` equivalent) | Replication appendix that mixes summary stats + balance + multiple regression tables + headings + prose in **one** file | `collect create paper`<br>`collect get summary, ...`<br>`collect get est ...`<br>`collect layout ...`<br>`collect export "paper.docx"` (also `.html`/`.tex`/`.md`) | Stata 17+ only; for older Stata use `texdoc` / `markdoc` |
+
+**Journal styling — pick the right `star` levels and SE label.** The AEA convention is `* 0.10 ** 0.05 *** 0.01` and SE label "Standard errors in parentheses"; QJE / Econometrica / RES variants only differ in stars / notes / fonts. Define an `esttab` wrapper once at the top of the do-file:
+
+```stata
+* Top of master.do — journal house-style wrapper
+local AER_STAR  "* 0.10 ** 0.05 *** 0.01"
+local AER_NOTES "Cluster-robust standard errors in parentheses. * p<0.10, ** p<0.05, *** p<0.01."
+local AER_STATS stats(N r2_a, labels("N" "Adj. R²"))
+
+* Then every esttab call uses:
+* esttab m1 m2 m3 m4 m5 m6 using "tables/table2.tex", replace ///
+*     se star(`AER_STAR') label booktabs `AER_STATS' addnotes(`AER_NOTES')
+```
+
+For the `collect` / `texdoc` / `markdoc` cookbook (Stata 17+ multi-panel paper bundle and prose+tables PDF/Word generation), see [`references/08-tables-plots.md`](references/08-tables-plots.md).
+
+---
+
+## Step −1 — Pre-Analysis Plan (pre-data; AEA RCT Registry style)
+
+Before touching the data, write down (a) the population, (b) the design, (c) the **minimum detectable effect (MDE)** under the planned sample size and α=0.05, β=0.20. Persist the result as `protocol.do` so a referee can verify the design was powered before, not after, the data were seen.
+
+```stata
+* Two-sample MDE (continuous outcome, Cohen's d framing)
+power twomeans 0, diff(0.2) sd(1) power(0.80) alpha(0.05)
+* → required n per arm
+
+* Cluster-randomized RCT — solve for n_clusters given ICC
+power twomeans 0, diff(0.2) sd(1) power(0.80) k1(50) rho(0.05) cluster
+* → required clusters per arm under ICC=0.05, cluster size 50
+
+* DID power (Frison–Pocock / Bloom 1995): use -sampsi- + -clustersampsi-
+* (no native `power did`; for staggered DID see references/05-modeling.md §5.4)
+sampsi 0 0.15, sd(1.0) alpha(0.05) power(0.80) n1(.) n2(.)
+
+* RD power — McCrary-style: solve via Monte Carlo with -simulate-
+* (see references/05-modeling.md §5.5 RD power template)
+
+* Persist the protocol — referee will ask whether design was powered ex ante
+file open f using "protocol.do", write replace
+file write f "* Pre-analysis plan — frozen `c(current_date)' `c(current_time)'" _n
+file write f "* Population:    manufacturing workers 2010-2020" _n
+file write f "* Treatment:     training (binary)" _n
+file write f "* Outcome:       log_wage" _n
+file write f "* Design:        staggered DID, csdid (Callaway-Sant'Anna 2021)" _n
+file write f "* MDE:           0.05 log points at 80% power, α=0.05" _n
+file write f "* N planned:     ~12,000 worker-years" _n
+file close f
+```
+
+Save this `.do` file in version control **before** running Step 1. AEA RCT Registry / OSF preregistration tools accept it as the analysis-plan exhibit.
+
+---
+
+## Step 0 — Sample-construction log & 5-check data contract
+
+An AER §1 *Data* section has three jobs: (a) describe sources, (b) document **every** sample restriction (the "footnote 4" sample log), (c) lock the panel structure. Stata users typically chain `keep` / `drop` commands in a single do-file with no count log, then can't reconstruct the analysis sample for the response letter. The data contract is the cure.
+
+### 0.1 Sample-construction log (footnote 4)
+
+```stata
+use "raw.dta", clear
+matrix sample_log = J(0, 2, .)
+local row 0
+local n0 = _N
+local ++row
+matrix sample_log = (nullmat(sample_log) \ `row', `n0')
+display "Step 0. raw:                          N = " %12.0fc `n0'
+
+drop if missing(wage)
+local n1 = _N
+local ++row
+matrix sample_log = (nullmat(sample_log) \ `row', `n1')
+display "Step 1. drop missing wage:            N = " %12.0fc `n1' "  (Δ " %10.0fc `n0' - `n1' ")"
+
+drop if !inrange(age, 18, 65)
+local n2 = _N
+local ++row
+matrix sample_log = (nullmat(sample_log) \ `row', `n2')
+display "Step 2. drop age outside 18-65:       N = " %12.0fc `n2' "  (Δ " %10.0fc `n1' - `n2' ")"
+
+keep if inlist(industry, "manuf", "construction", "transport")
+local n3 = _N
+local ++row
+matrix sample_log = (nullmat(sample_log) \ `row', `n3')
+display "Step 3. keep target industries:       N = " %12.0fc `n3' "  (Δ " %10.0fc `n2' - `n3' ")"
+
+* Persist to JSON (for paste into footnote 4)
+file open f using "artifacts/sample_construction.json", write replace
+file write f "{" _n
+file write f `"  "step_0_raw":     `=sample_log[1,2]',"' _n
+file write f `"  "step_1_wage":    `=sample_log[2,2]',"' _n
+file write f `"  "step_2_age":     `=sample_log[3,2]',"' _n
+file write f `"  "step_3_indust":  `=sample_log[4,2]'"' _n
+file write f "}" _n
+file close f
+```
+
+Paste the `display` lines verbatim as footnote 4 of the paper.
+
+### 0.2 Five-check data contract (go / no-go gate)
+
+```stata
+* (1) Shape
+display "Check 1. n_obs = " _N
+
+* (2) Dtypes on key vars — assert types are numeric where required
+foreach v in wage training worker_id year age edu tenure {
+    capture confirm numeric variable `v'
+    if _rc {
+        display as error "Check 2 FAILED: `v' is not numeric — fix before any panel command"
+        exit 198
+    }
+}
+display "Check 2. dtypes OK on all key vars"
+
+* (3) Missingness pattern on key vars
+mdesc wage training worker_id year age edu tenure                 // ssc install mdesc
+foreach v in wage training worker_id year {
+    qui count if missing(`v')
+    if r(N) > 0 {
+        display as error "Check 3 FAILED: `v' has " r(N) " missing — fix before estimation"
+        exit 198
+    }
+}
+
+* (4) Duplicate (id, time) — fatal for panel methods
+duplicates report worker_id year
+duplicates tag worker_id year, gen(dup)
+qui count if dup > 0
+if r(N) > 0 {
+    display as error "Check 4 FAILED: " r(N) " duplicate (worker_id, year) rows"
+    exit 198
+}
+drop dup
+
+* (5) Panel balance
+xtset worker_id year
+xtdescribe
+qui xtdes
+local n_balanced = r(N)
+display "Check 5. panel n=" _N " (balanced cells if `n_balanced' equals expected unit×period)"
+
+* MCAR sniff test (Rubin) — if missing(y) is associated with covariates,
+* listwise deletion biases the estimate. Use `mi` / IPW instead.
+gen byte miss_y = missing(wage)
+foreach cov in age edu tenure {
+    qui ttest `cov', by(miss_y)
+    if r(p) < 0.05 {
+        display as error "WARNING: y-missingness associates with `cov' (p=" %5.3f r(p) ")."
+        display as error "         -> NOT MCAR, use -mi impute- or IPW, NOT listwise drop."
+    }
+}
+drop miss_y
+
+* Persist contract
+file open f using "artifacts/data_contract.json", write replace
+file write f "{" _n
+file write f `"  "n_obs": `=_N',"' _n
+file write f `"  "panel": "worker_id × year","' _n
+file write f `"  "treatment": "training","' _n
+file write f `"  "outcome":   "log_wage""' _n
+file write f "}" _n
+file close f
+```
+
+If any assertion fires, **stop** and fix it. Stata estimators silently drop NaN rows, the most common source of "mysterious sample-size shrinkage" bugs in the response letter.
 
 ---
 
@@ -334,6 +561,70 @@ gen wage_real = wage * r(mean) / cpi
 
 ---
 
+### Step 2.5 — Empirical strategy (write the equation + identifying assumption)
+
+This is the heart of an AER paper. **Before any code**, write down the equation explicitly and state the identifying assumption. Vague identification language is the single most common reason a referee rejects an applied paper. Persist the strategy as `strategy.do` (or `.md`) so it is a dated, version-controlled artifact — *not* a post-hoc rationalization written after seeing the coefficient.
+
+#### Equation × identifying assumption × Stata estimator (decision table)
+
+| Design | Estimating equation | Identifying assumption | Stata estimator |
+|---|---|---|---|
+| 2×2 DID | `Y_it = α_i + λ_t + β·D_it + X'γ + ε_it` | parallel trends conditional on X | `reghdfe Y c.D#c.post X, absorb(i t) vce(cluster i)` |
+| Event-study (CS / SA) | `Y_it = α_i + λ_t + Σ_{e≠-1} β_e · 1{t-G_i = e} + ε_it` | no anticipation + group-time PT | `csdid` / `eventstudyinteract` / `did_imputation` |
+| 2SLS | `Y_i = α + β·D_i + X'γ + ε_i;  D_i = π·Z_i + X'δ + u_i` | exclusion + relevance + monotonicity | `ivreg2` / `ivreghdfe` |
+| Sharp RD | `Y_i = α + β·1{X_i ≥ c} + f(X_i) + ε_i` (local poly) | continuity of E[Y(0)\|X] at c, no manipulation | `rdrobust` (+ `rddensity`) |
+| SCM | `Ŷ_1t(0) = Σ_j ŵ_j Y_jt`, τ_t = `Y_1t − Ŷ_1t(0)` for t≥T_0 | pre-period fit + interpolation validity | `synth` / `synth_runner` / `sdid` |
+| Selection-on-observables (matching/IPW) | `E[Y_i(d) \| X_i] = E[Y_i \| D=d, X_i]` | unconfoundedness + overlap | `teffects psmatch / ipw / aipw / ipwra`, `ebalance` |
+
+#### Design picker (when the user is unsure)
+
+```
+                 ┌─ running var + cutoff ───────────────── RDD       (rdrobust)
+                 │
+                 ├─ exogenous instrument Z ─────────────── IV/2SLS   (ivreg2 / ivreghdfe)
+data + question ─┤
+                 ├─ pre/post × treat/control ─┬ 2 periods  ── 2×2 DID (reghdfe / xtreg)
+                 │                            └ staggered  ── CS / SA / BJS  (csdid / eventstudyinteract / did_imputation)
+                 │
+                 ├─ 1 treated unit + donor pool + long pre ── SCM    (synth / synth_runner / sdid)
+                 │
+                 ├─ high-dim X, selection-on-observables ── ML causal (ddml / crforest — see §B)
+                 │
+                 └─ none of the above ──────────────────── matching + sensitivity (teffects + evalue)
+```
+
+#### Pre-registration `strategy.do` template
+
+```stata
+*--- strategy.do — empirical-strategy pre-registration ---
+* Frozen `c(current_date)' `c(current_time)'  (Git SHA: <paste>)
+* Population:    manufacturing workers, 2010–2020, balanced panel
+* Treatment:     training (binary, staggered adoption)
+* Outcome:       log_wage (CPI-deflated 2010 USD)
+* Estimand:      ATT on the treated, dynamic horizon -4..+4
+*
+* Estimating equation (paste from the §2.5 row that matches the design):
+*   log_wage_it = α_i + λ_t + Σ_{e≠-1} β_e · 1{t - G_i = e} + ε_it
+*
+* Identifying assumption:
+*   1. No anticipation:    E[Y_it(0) | t < G_i] = E[Y_it(0) | never-treated]
+*   2. Group-time PT:      Δ E[Y_it(0)] is the same across treatment cohorts
+*
+* Auto-flagged threats (must defend in §2):
+*   - Selection of G_i on Y_i(0)            -> bacondecomp + honestdid sensitivity
+*   - Spillover across worker_id within firm -> cluster at firm_id, also try firm_id × year
+*   - Anticipation in the year before adoption -> include lead in event study
+*
+* Fallback estimators (Step 6 robustness):
+*   - eventstudyinteract  (Sun-Abraham 2021)
+*   - did_imputation      (Borusyak-Jaravel-Spiess 2024)
+*   - sdid                (Synthetic DID)
+```
+
+Commit `strategy.do` **before** running Step 5 / Step 6. The `git log` of this file *is* the analysis plan.
+
+---
+
 ### Step 3 — Descriptive statistics & Table 1
 
 Deeper patterns: [references/03-descriptive-stats.md](references/03-descriptive-stats.md) — stratified Table 1 with SMDs, `asdoc` / `tabstat` / `balancetable`, correlation matrix with significance stars (`pwcorr, sig star(.05)`), histograms / kdensity by group, `xtline` for DID motivation, panel-coverage `xtdescribe`.
@@ -390,6 +681,136 @@ restore
 * 3f. Panel coverage
 xtdescribe
 ```
+
+---
+
+### Step 3.5 — Identification graphics (Section "Identification, graphical evidence")
+
+**AER convention: the identification figure precedes the regression table.** The reader should see graphical evidence that PT holds / first stage is strong / RD jumps cleanly *before* you ask them to trust your point estimate. This block is one or two figures saved to `figures/` — most of the heavy lifting is one Stata command + one `coefplot`.
+
+#### 3.5.1 Event-study figure + numerical pre-trends test (DID identification)
+
+Pre-period coefficients ≈ 0 (with the −1 reference period normalized to zero) is the visual evidence for parallel trends. Pair the **figure** with a **numerical** pre-trends test so reviewers don't have to eyeball it.
+
+```stata
+* Build relative-time factor variable, base at e = -1
+gen rel = year - first_treat
+replace rel = . if missing(first_treat)        // never-treated dropped from event study
+keep if inrange(rel, -4, 4) | missing(first_treat)
+gen rel_p = rel + 5                             // shift -4..4 → 1..9; ib4 means "base = -1"
+
+* (a) Sun-Abraham via -eventstudyinteract- (preferred for staggered adoption)
+forvalues k = 1/9 {
+    gen rel_d`k' = (rel_p == `k')
+}
+eventstudyinteract log_wage rel_d1 rel_d2 rel_d3 rel_d5 rel_d6 rel_d7 rel_d8 rel_d9, ///
+    cohort(first_treat) control_cohort(never_treated) ///
+    absorb(worker_id year) vce(cluster worker_id)
+
+* (b) Coefficient figure with shaded CI + reference line at e=-1
+coefplot, keep(rel_d*) vertical omitted ///
+    yline(0, lpattern(dash) lcolor(gs10)) xline(4.5, lpattern(dash)) ///
+    rename(rel_d1="-4" rel_d2="-3" rel_d3="-2" rel_d5="0" ///
+           rel_d6="1" rel_d7="2" rel_d8="3" rel_d9="4") ///
+    ciopts(recast(rcap)) levels(95) ///
+    xtitle("Years relative to treatment") ///
+    ytitle("Coefficient (ATT, 95% CI)") ///
+    title("Figure 2a. Event-study coefficients (95% CI; ref. e = -1)") ///
+    scheme(s2color)
+graph export "figures/fig2a_event_study.pdf", replace
+graph export "figures/fig2a_event_study.png", replace width(2400)
+
+* (c) Numerical pre-trends F-test (joint zero on the leads e = -4..-2)
+test rel_d1 rel_d2 rel_d3
+display "Pre-trends F = " %5.2f r(F) "  p = " %5.3f r(p)
+
+* (d) Bacon decomposition figure (Goodman-Bacon 2021) — TWFE diagnostic
+bacondecomp log_wage training, ddetail
+* The -bacondecomp- output names the contaminated 2×2 weights.
+* Save the auto-generated figure as figures/fig2a_bacon.pdf.
+
+* (e) Callaway-Sant'Anna dynamic ATT (when -csdid- is the main estimator)
+csdid log_wage age edu, ivar(worker_id) time(year) gvar(first_treat) ///
+    method(dripw) agg(event)
+estat event, window(-4 4)
+csdid_plot, title("Figure 2a-bis. Dynamic ATT (Callaway-Sant'Anna)")
+graph export "figures/fig2a_csdid.pdf", replace
+```
+
+#### 3.5.2 First-stage F-statistic + scatter (IV identification)
+
+Rule of thumb: first-stage F ≥ 10 for OLS-style inference; F ≥ 23 for AR-equivalent inference (Stock–Yogo / Lee 2022). `ivreg2` reports CD / KP / weak-IV statistics by default — far more useful than `ivregress`'s minimal output.
+
+```stata
+ivreg2 log_wage age edu (training = Z1 Z2), cluster(firm_id) first endog(training)
+* Look for the line "Cragg-Donald Wald F" and "Kleibergen-Paap rk Wald F" —
+* and "Anderson-Rubin Wald test" for weak-IV-robust CIs.
+
+* First-stage scatter (binscatter — residualizes age + edu)
+binscatter training Z1, controls(age edu) nquantiles(20) ///
+    xtitle("Excluded instrument Z1") ytitle("Pr(training)") ///
+    title("Figure 2b. First-stage relationship (residualized)") ///
+    savegraph("figures/fig2b_first_stage.pdf") replace
+```
+
+#### 3.5.3 RD: McCrary density + canonical RD plot
+
+The signature RD figure is `rdplot` (CCT-style binned scatter with local-polynomial fit on each side), paired with the McCrary manipulation test. Together they answer: (a) is there a visual jump? (b) is the density continuous at the cutoff?
+
+```stata
+* (a) Canonical RD plot
+rdplot outcome running_var, c(0) p(4) kernel(triangular) binselect(esmv) ///
+    graph_options(title("Figure 2c. RD plot") ///
+                  ytitle("Outcome") xtitle("Running variable") ///
+                  scheme(s2color))
+graph export "figures/fig2c_rdplot.pdf", replace
+
+* (b) McCrary density (manipulation test) — Cattaneo–Jansson–Ma 2018
+rddensity running_var, c(0) plot ///
+    plot_options(title("Figure 2c-bis. McCrary density (manipulation test)"))
+graph export "figures/fig2c_mccrary.pdf", replace
+
+* (c) Covariate-adjusted continuity test (continuity of *covariates* at c)
+foreach v of varlist age edu tenure {
+    rdrobust `v' running_var, c(0)
+}
+```
+
+#### 3.5.4 Matching: love plot (standardized differences pre vs post)
+
+```stata
+teffects psmatch (log_wage) (training age edu tenure), atet
+tebalance summarize           // table of pre/post SMDs
+tebalance density ps          // density overlap plot — save as figures/fig2d_overlap.pdf
+graph export "figures/fig2d_overlap.pdf", replace
+
+* Or use -psmatch2- + -pstest- for the canonical love plot
+psmatch2 training age edu tenure, out(log_wage) n(1) common
+pstest age edu tenure, both graph                 // pre/post |std diff| with target |Δ|<10%
+graph export "figures/fig2d_loveplot.pdf", replace
+```
+
+#### 3.5.5 SCM: synthetic-control trajectory + gap plot
+
+For synthetic-control designs the canonical Figure 2 is the treated-vs-synthetic time series with treatment time annotated.
+
+```stata
+synth log_wage age edu tenure, ///
+    trunit(1) trperiod(2015) fig keep("synth_results.dta", replace)
+graph export "figures/fig2e_synth_trajectory.pdf", replace
+
+* Synthetic DID variant
+sdid log_wage worker_id year training, vce(bootstrap) graph g1on
+graph export "figures/fig2e_sdid.pdf", replace
+
+* Placebo gap distribution
+synth_runner log_wage age edu tenure, ///
+    trunit(1) trperiod(2015) gen_vars
+effect_graphs, trlinediff(0)
+graph export "figures/fig2e_placebo_gaps.pdf", replace
+```
+
+> Identification-specific checks (PT for DID, weak-IV F, density for RD, common support for matching) **are also auto-run inside the Step-5 estimators** — don't duplicate the numerics here, but DO produce the figures: a referee scans the figures first.
 
 ---
 
@@ -460,9 +881,23 @@ hausman fe re, sigmamore
 
 ---
 
-### Step 5 — Baseline empirical modeling
+### Step 5 — Baseline empirical modeling (Section 4: Main Results)
 
 Deeper patterns: [references/05-modeling.md](references/05-modeling.md) — every classical estimator with syntax: `reg`, `areg`, `xtreg`, `reghdfe`, `ivreg2` / `ivregress` / `ivreghdfe`, `logit` / `probit` / `ppmlhdfe`, `csdid` / `did_imputation` / `eventstudyinteract` / `sdid` / `did_multiplegt_dyn`, `rdrobust` / `rddensity` / `rdmc`, `synth` / `synth_runner`, `psmatch2` / `teffects psmatch|ipw|ipwra|aipw`, `ebalance`, `heckman`, `qreg`.
+
+This is the densest section of an applied paper. A modern AER §4 typically contains **2–3 multi-regression tables and one coefficient plot**:
+
+- **Table 2** (main): progressive controls, 4–6 columns — **Pattern A** below
+- **Table 2-bis** (design horse race): same coefficient under OLS / IV / DID / matching — **Pattern B**
+- **Table 2-ter** (multi-outcome): same treatment, several outcomes side-by-side — **Pattern C**
+- **Figure 3** (coefplot): visual summary of β̂ and 95% CI across specs
+
+> **Estimator routing** (memorize this — getting it wrong silently produces nonsense):
+> - **No FE / single low-card FE** → `reg y x1 x2, vce(cluster id)`
+> - **High-dim FE** → `reghdfe y x1 x2, absorb(fe1 fe2) vce(cluster id)`
+> - **Two-way cluster** → `reghdfe ..., vce(cluster fe1 fe2)`
+> - **2SLS / IV** → `ivreg2 y x (D = Z), cluster(id) first endog(D)` (or `ivreghdfe` for HD FE + IV)
+> - **DID / event-study** → `csdid` / `eventstudyinteract` / `did_imputation`
 
 **Pick the estimator by identification strategy**:
 
@@ -477,7 +912,160 @@ Binary outcome                                 →  logit / probit + margins
 Count outcome                                  →  poisson / nbreg / ppmlhdfe
 ```
 
-Canonical commands:
+Canonical commands (a Stata equivalent of `outreg2` / `esttab` is the workhorse — `eststo` 5–6 specs, then `esttab` consolidates them into one table). Key options:
+
+```
+keep(...)        : list of coefficients to display (e.g. keep(training))
+drop(...)        : list of coefficients to suppress (controls / intercept)
+mtitles("(1)" "(2)" ...) : column labels for the regression table
+stats(N r2 r2_a, labels(...))      : footer rows
+star(* 0.10 ** 0.05 *** 0.01)      : AER stars
+addnotes("...")  : table footer (cluster level, FE absorbed, sample restrictions)
+label  booktabs  : pretty-print + LaTeX booktabs borders
+```
+
+#### 5.A Pattern A — Progressive controls (the canonical Table 2)
+Stable β̂ across columns ⇒ less concern that selection on observables is driving the estimate (Oster 2019 selection-stability logic; quantified in Step 6.j). **`eststo m1...m6` + `esttab` is the Stata equivalent of `outreg2` and R's `modelsummary`.**
+
+```stata
+eststo clear
+eststo m1: qui reg     log_wage training,                                                  vce(cluster firm_id)
+eststo m2: qui reg     log_wage training age edu,                                          vce(cluster firm_id)
+eststo m3: qui reg     log_wage training age edu tenure firm_size,                         vce(cluster firm_id)
+eststo m4: qui reghdfe log_wage training age edu tenure firm_size,  absorb(industry year)  vce(cluster firm_id)
+eststo m5: qui reghdfe log_wage training age edu tenure firm_size,  absorb(worker_id year) vce(cluster firm_id)
+eststo m6: qui reghdfe log_wage training age edu tenure firm_size,  absorb(worker_id year i.industry#i.year) vce(cluster firm_id)
+
+esttab m1 m2 m3 m4 m5 m6 using "tables/table2_main.tex", ///
+    replace se star(* 0.10 ** 0.05 *** 0.01) ///
+    label booktabs ///
+    mtitles("(1) Baseline" "(2) +Demog" "(3) +Labor-mkt" "(4) Ind×Yr FE" "(5) Worker FE" "(6) Ind×Yr × Worker FE") ///
+    stats(N r2 r2_a, labels("N" "R²" "Adj. R²")) ///
+    addnotes("Cluster-robust SE at firm_id in parentheses." ///
+             "* p<0.10, ** p<0.05, *** p<0.01.")
+* Word version: same call with .rtf extension.
+```
+
+> **AER convention: show all controls — pass NEITHER `keep()` NOR `drop()`** so every parameter is visible. Use `keep(training)` only when a focal-coefficient-only table is intentional (e.g. interaction-form heterogeneity, IV first-stage triplet); use `drop(_cons)` only when you want to suppress the constant for paper aesthetics.
+
+#### 5.B Pattern B — Design horse race (Table 2-bis)
+Show the same coefficient of interest under multiple identification strategies. This is *the* AER credibility move: convergent evidence across designs each making different identifying assumptions.
+
+```stata
+eststo clear
+eststo ols:  qui reghdfe log_wage training age edu tenure, absorb(industry year) vce(cluster firm_id)
+eststo iv:   qui ivreg2  log_wage age edu tenure (training = Z1 Z2), cluster(firm_id)
+eststo did:  qui csdid   log_wage age edu tenure, ivar(worker_id) time(year) gvar(first_treat) method(dripw) agg(group)
+eststo psm:  qui teffects psmatch (log_wage) (training age edu tenure), atet
+eststo ebal: qui ebalance training age edu tenure
+              qui reg     log_wage training age edu tenure [pw=_webal], vce(cluster firm_id)
+              eststo ebal_main
+
+esttab ols iv did psm ebal_main using "tables/table2b_designs.tex", ///
+    replace se star(* 0.10 ** 0.05 *** 0.01) label booktabs ///
+    keep(training) ///
+    mtitles("(1) OLS+FE" "(2) 2SLS" "(3) CS-DID" "(4) PSM" "(5) Entropy bal.") ///
+    stats(N, labels("N")) ///
+    addnotes("Convergent evidence: same β̂ under five identification strategies.")
+```
+
+#### 5.C Pattern C — Multi-outcome table (same X, several Y's)
+A single treatment, several outcomes. Use `mtitles` so each column carries the Y name.
+
+```stata
+eststo clear
+foreach y of varlist log_wage weeks_employed left_firm promoted {
+    eststo `y': qui reghdfe `y' training age edu tenure, ///
+        absorb(industry year) vce(cluster firm_id)
+}
+esttab log_wage weeks_employed left_firm promoted using "tables/table2c_multi_outcome.tex", ///
+    replace se star(* 0.10 ** 0.05 *** 0.01) label booktabs ///
+    keep(training) ///
+    mtitles("Log wage" "Weeks empl." "Left firm" "Promoted") ///
+    stats(N r2, labels("N" "R²")) ///
+    addnotes("Each column is a separate regression on the labelled outcome.")
+```
+
+#### 5.D Pattern D — Stacked Panel A / Panel B table
+Same model family, two horizons (short-run / long-run) or two samples (pre-2015 / post-2015). Stack vertically with two `esttab` calls + `texdoc` glue, OR use `esttab ..., refcat()` to inject panel headers.
+
+```stata
+* Panel A — short-run (1 year horizon)
+eststo clear
+eststo a1: qui reghdfe log_wage_t1 training X, absorb(industry year)  vce(cluster firm_id)
+eststo a2: qui reghdfe log_wage_t1 training X, absorb(worker_id year) vce(cluster firm_id)
+
+* Panel B — long-run (5 year horizon)
+eststo b1: qui reghdfe log_wage_t5 training X, absorb(industry year)  vce(cluster firm_id)
+eststo b2: qui reghdfe log_wage_t5 training X, absorb(worker_id year) vce(cluster firm_id)
+
+* First panel — write
+esttab a1 a2 using "tables/table2d_horizons.tex", replace ///
+    se star(* 0.10 ** 0.05 *** 0.01) label booktabs ///
+    keep(training) mtitles("(1) Industry FE" "(2) Worker FE") ///
+    refcat(training "\textbf{Panel A. Short-run (1 year)}", nolabel) ///
+    stats(N r2, labels("N" "R²"))
+* Second panel — append
+esttab b1 b2 using "tables/table2d_horizons.tex", append ///
+    se star(* 0.10 ** 0.05 *** 0.01) label booktabs ///
+    keep(training) mtitles("(1) Industry FE" "(2) Worker FE") ///
+    refcat(training "\textbf{Panel B. Long-run (5 years)}", nolabel) ///
+    stats(N r2, labels("N" "R²"))
+```
+
+#### 5.E Pattern E — IV reporting triplet (first-stage / reduced-form / 2SLS)
+The textbook AER IV table presents the **first stage**, the **reduced form**, and the **2SLS** in three columns so the reader can verify Wald-ratio = RF / FS.
+
+```stata
+eststo clear
+eststo fs: qui reghdfe training Z age edu, absorb(industry year) vce(cluster firm_id)  // first stage
+eststo rf: qui reghdfe log_wage Z age edu, absorb(industry year) vce(cluster firm_id)  // reduced form
+eststo iv: qui ivreghdfe log_wage age edu (training = Z), absorb(industry year) cluster(firm_id) first
+
+esttab fs rf iv using "tables/table2e_iv_triplet.tex", ///
+    replace se star(* 0.10 ** 0.05 *** 0.01) label booktabs ///
+    keep(Z training) ///
+    mtitles("(1) First stage" "(2) Reduced form" "(3) 2SLS") ///
+    stats(N r2 widstat, labels("N" "R²" "First-stage F (KP)")) ///
+    addnotes("Wald ratio: $\hat\beta_{2SLS} = \hat\beta_{RF} / \hat\pi_{FS}$.")
+```
+
+> **IV triplet is intentionally focal:** show only Z + endogenous regressor so the reader can eyeball the Wald ratio. Drop `keep(Z training)` only if a referee asks for the full coefficient list.
+
+#### 5.F Pattern F — Causal-orchestrator main via `csdid` / `synth_runner` / `teffects`
+For DID / SCM / matching mains, the modern Stata estimator returns a self-contained estimate + automatic placebos / pre-trends / overlap diagnostics. Use the estimator's own report, then pipe into `eststo` + `esttab`.
+
+```stata
+* CS-DID with pre-trends test
+csdid log_wage age edu tenure, ivar(worker_id) time(year) gvar(first_treat) ///
+    method(dripw) agg(group) saverif(csdid_rif.dta)
+estat pretrend                                                       // joint zero on pre-period leads
+estat simple                                                          // ATT(g) summary
+estat event, window(-4 4)                                            // dynamic ATT
+csdid_estat aggte, type(group) saverif(att_g.dta)
+eststo m_csdid
+
+* Synth-runner with 50 placebo treated units → exact p-value on β̂_treated
+synth_runner log_wage age edu tenure, trunit(1) trperiod(2015) gen_vars
+single_treatment_graphs, do_color(red)
+effect_graphs, trlinediff(0)
+* Reports exact p-value from the placebo distribution.
+
+* Teffects AIPW with overlap + balance check
+teffects aipw (log_wage age edu tenure) (training age edu tenure)
+tebalance summarize
+eststo m_aipw
+```
+
+#### 5.G Pattern G — Subgroup `esttab` (Table 3, see Step 7)
+One column per subgroup. Detailed code in §Step 7 — Heterogeneity.
+
+#### 5.H Pattern H — Robustness master (Table A1, see Step 6)
+Stack every robustness specification next to the baseline. Detailed code in §Step 6 — Robustness master.
+
+---
+
+#### Canonical estimator commands (the underlying primitives)
 
 ```stata
 * 5a. OLS with cluster-robust SE
@@ -637,6 +1225,140 @@ scalar bs = _b[training]; scalar r2s = e(r2)
 qui reghdfe log_wage training age edu tenure, absorb(worker_id year)
 scalar bl = _b[training]; scalar r2l = e(r2)
 psacalc delta training, mcontrol(age edu tenure) rmax(1.3*r2l)
+```
+
+#### 6.k Pattern H — Robustness master table (Table A1, one column per check)
+
+The canonical AER appendix Table A1 stacks every robustness specification next to the baseline so reviewers see at a glance that β̂ survives. Build the list of `eststo` results dynamically:
+
+```stata
+eststo clear
+
+* (1) Baseline
+eststo base: qui reghdfe log_wage training age edu tenure, ///
+    absorb(industry year) vce(cluster firm_id)
+
+* (2) Drop top 1% of wage
+qui sum wage, detail
+eststo no99: qui reghdfe log_wage training age edu tenure if wage < r(p99), ///
+    absorb(industry year) vce(cluster firm_id)
+
+* (3) Balanced panel only
+preserve
+    keep if e(sample)                                      // start from baseline sample
+    bysort worker_id: egen n_obs = count(year)
+    qui sum n_obs, detail
+    keep if n_obs == r(max)
+    eststo balpan: qui reghdfe log_wage training age edu tenure, ///
+        absorb(industry year) vce(cluster firm_id)
+restore
+
+* (4) Drop early adopting cohorts
+eststo dropearly: qui reghdfe log_wage training age edu tenure if first_treat > 2008, ///
+    absorb(industry year) vce(cluster firm_id)
+
+* (5) Worker FE absorbed (selection on FE-removable unobservables)
+eststo wfe: qui reghdfe log_wage training age edu tenure, ///
+    absorb(worker_id year) vce(cluster firm_id)
+
+* (6) Two-way cluster (firm × year)
+eststo cl2way: qui reghdfe log_wage training age edu tenure, ///
+    absorb(industry year) vce(cluster firm_id year)
+
+* (7) Wild cluster bootstrap (after running the baseline)
+qui reghdfe log_wage training age edu tenure, absorb(industry year) vce(cluster firm_id)
+boottest training, cluster(firm_id) reps(9999) seed(42) nograph                  // returns CI
+* Note bootstrapped p-value in the row footer of the master table.
+
+* (8) Log outcome
+eststo logy: qui reghdfe log_log_wage training age edu tenure, ///
+    absorb(industry year) vce(cluster firm_id)
+
+* (9) IHS outcome (handles zeros)
+gen ihs_wage = asinh(wage)
+eststo ihsy: qui reghdfe ihs_wage training age edu tenure, ///
+    absorb(industry year) vce(cluster firm_id)
+
+* (10) PSM-weighted outcome
+qui psmatch2 training age edu tenure, out(log_wage) n(1) common
+eststo psm: qui reg log_wage training age edu tenure if _support == 1, vce(cluster firm_id)
+
+* (11) Entropy balance
+ebalance training age edu tenure
+eststo ebal: qui reg log_wage training age edu tenure [pw=_webal], vce(cluster firm_id)
+
+esttab base no99 balpan dropearly wfe cl2way logy ihsy psm ebal ///
+    using "tables/tableA1_robustness.tex", ///
+    replace se star(* 0.10 ** 0.05 *** 0.01) label booktabs ///
+    keep(training) ///
+    mtitles("(1) Baseline" "(2) Drop top 1%" "(3) Balanced" "(4) Drop early" ///
+            "(5) Worker FE" "(6) 2-way cluster" "(7) log Y" "(8) IHS Y" ///
+            "(9) PSM" "(10) Entropy bal.") ///
+    stats(N r2, labels("N" "R²")) ///
+    addnotes("Each column is one robustness check. β̂ on training is the focal coefficient.")
+```
+
+#### 6.l Specification curve (Simonsohn–Simmons–Nelson 2020) in Stata
+
+`esttab` doesn't have a native spec-curve; loop over {controls × samples × outcome transforms × SE types}, store each β̂ + 95% CI in a frame, then plot.
+
+```stata
+capture frame drop spec
+frame create spec spec_id b se lo hi label
+local id 0
+foreach controls in "age" "age edu" "age edu tenure" "age edu tenure firm_size" {
+    foreach trans in "log_wage" "ihs_wage" {                         // outcome transforms
+        foreach mask in "1" "industry==\"manuf\"" "wage < r(p99)" {  // subsamples
+            foreach cl in "firm_id" "firm_id year" {                  // SE types
+                qui reghdfe `trans' training `controls' if `mask', ///
+                    absorb(industry year) vce(cluster `cl')
+                local ++id
+                local b = _b[training]
+                local se = _se[training]
+                local lo = `b' - 1.96*`se'
+                local hi = `b' + 1.96*`se'
+                frame post spec (`id') (`b') (`se') (`lo') (`hi') ("c=`controls'/y=`trans'/s=`mask'/cl=`cl'")
+            }
+        }
+    }
+}
+frame change spec
+sort b
+gen rank = _n
+twoway (rcap lo hi rank) (scatter b rank), ///
+    yline(0, lpattern(dash) lcolor(gs10)) ///
+    xtitle("Specification (sorted by β̂)") ytitle("Coefficient on training") ///
+    title("Figure 5. Specification curve") ///
+    legend(off) scheme(s2color)
+graph export "figures/fig5_spec_curve.pdf", replace
+graph export "figures/fig5_spec_curve.png", replace width(2400)
+frame change default
+```
+
+A modern AER referee letter often asks "what about specification X?" — the spec curve answers all such asks at once.
+
+#### 6.m Sensitivity dashboard (HonestDiD + Oster + E-value, one block)
+
+For DID main results, produce one figure (`HonestDiD` partial-identification bound) + one row of sensitivity stats (Oster δ + E-value).
+
+```stata
+* (a) HonestDiD — Rambachan-Roth (2023) bound on β̂ under bounded PT violation
+* Re-run the event study and store b/V:
+qui eventstudyinteract log_wage rel_d1-rel_d9, ///
+    cohort(first_treat) control_cohort(never_treated) ///
+    absorb(worker_id year) vce(cluster worker_id)
+honestdid, pre(rel_d1 rel_d2 rel_d3) post(rel_d5 rel_d6 rel_d7 rel_d8 rel_d9) ///
+    mvec(0(0.1)0.5) coefplot
+graph export "figures/fig6_honestdid.pdf", replace
+
+* (b) Oster δ (Pattern: how big would selection on unobservables have to be?)
+qui psacalc delta training, mcontrol(age edu tenure firm_size) rmax(1.3)
+display "Oster δ for β=0: " r(delta)
+
+* (c) E-value (Linden-Mathur 2020) — for binary / risk-ratio outcomes
+* Convert OLS coefficient to risk-ratio scale first if applicable.
+evalue rr, est(1.45) lcl(1.10) ucl(1.91)
+* → reports the minimum strength of unmeasured confounding to nullify the result.
 ```
 
 ---
@@ -903,7 +1625,46 @@ set scheme s2color
 [ ] tables/table3_mechanism.tex   [ ] figures/fig3_coefplot.pdf
 [ ] tables/table4_heterogeneity.tex
 [ ] tables/table5_robustness.tex  [ ] figures/fig4_sensitivity.pdf
+[ ] tables/tableA1_robustness.tex [ ] figures/fig5_spec_curve.pdf
+[ ] artifacts/sample_construction.json (footnote 4)
+[ ] artifacts/data_contract.json
+[ ] artifacts/result.json (reproducibility stamp — see 8l)
 ```
+
+#### 8l. Reproducibility stamp
+
+The single artifact a journal's replication office (or a future co-author) needs to reproduce the headline number. Persist Stata version, seed, dataset hash, baseline coefficient + CI, and pointers to the protocol/contract:
+
+```stata
+* After the headline regression has run as `eststo base`:
+qui estimates restore base
+matrix b = e(b); matrix V = e(V)
+local b_hat = b[1, "training"]
+local se    = sqrt(V["training","training"])
+local lo    = `b_hat' - 1.96 * `se'
+local hi    = `b_hat' + 1.96 * `se'
+
+file open f using "artifacts/result.json", write replace
+file write f "{" _n
+file write f `"  "stata_version":   "`c(stata_version)'","' _n
+file write f `"  "current_date":    "`c(current_date)' `c(current_time)'","' _n
+file write f `"  "seed":            42,"' _n
+file write f `"  "n_obs":           `=e(N)',"' _n
+file write f `"  "estimand":        "ATT","' _n
+file write f `"  "estimator":       "`e(cmd)'","' _n
+file write f `"  "estimate":        `b_hat',"' _n
+file write f `"  "se_cluster":      `se',"' _n
+file write f `"  "ci95_lo":         `lo',"' _n
+file write f `"  "ci95_hi":         `hi',"' _n
+file write f `"  "pre_registration": "strategy.do","' _n
+file write f `"  "data_contract":    "artifacts/data_contract.json","' _n
+file write f `"  "sample_log":       "artifacts/sample_construction.json","' _n
+file write f `"  "paper_bundle":     "tables/table2_main.tex"' _n
+file write f "}" _n
+file close f
+```
+
+Commit `artifacts/result.json` alongside the paper PDF. A referee should be able to run `make clean && do main.do` and bit-identically reproduce this JSON.
 
 ---
 
@@ -1081,14 +1842,25 @@ ssc install lassopack        // covariate selection helpers
 * (Stata 18 ships first-class Python integration)
 ```
 
-### B.0 Train/holdout split + nuisance learner stack
+### B.0 Train/holdout split + nuisance super-learner
+
+DML / TMLE / Causal Forest are doubly-robust *if* the nuisance learners (outcome regression `Q(X,A) = E[Y|X,A]` and propensity `g(A|X) = Pr(A=1|X)`) converge faster than `n^(-1/4)`. Use `pystacked` (Stata 18 + Python callout) to stack GBM / RF / Lasso / NN under cross-validation — that is the Stata equivalent of StatsPAI's SuperLearner.
 
 ```stata
 set seed 42
 gen u = runiform()
 gen byte holdout = u > 0.7
-* Standard nuisance pair: outcome regression Q(X,A) and propensity g(A|X)
-* Use ddml's CV-fitted learners (no manual split needed for DML cross-fitting)
+
+* pystacked — installed via `python: import pystacked` (requires Stata 18 + Python ≥ 3.8)
+ssc install pystacked, replace
+
+* The standard nuisance pair (will be reused inside ddml below):
+*   ml_g  = outcome model         pystacked Y X*, type(reg)   methods(ols rf gradboost lassocv)
+*   ml_m  = propensity model      pystacked D X*, type(class) methods(logit rf gradboost)
+
+* For TMLE-style binary-outcome workflows, use -eltmle- which already wraps SL.
+* Standalone holdout is needed for the OFF-policy evaluation in B.4 — DML / GRF
+* handle their own cross-fitting internally and don't need a manual split.
 ```
 
 ### B.1 DAG / estimand declaration (optionally LLM-assisted)
@@ -1133,11 +1905,36 @@ crforest Y A X1 X2 X3 X4, ntrees(2000) honesty
 predict cate, te
 eststo m_cf
 
-*--- 4. Stack the horse-race ---
+*--- 4. (Optional) Neural causal (Dragonnet / TARNet) — Python callout ---
+* Stata has no native neural-causal estimator; shell out to econml / causalml:
+python:
+import numpy as np, pandas as pd
+from sfi import Data
+from econml.dr import DRLearner
+from econml.metalearners import XLearner
+from sklearn.ensemble import GradientBoostingRegressor, GradientBoostingClassifier
+df = pd.DataFrame({v: Data.get(v) for v in ["Y","A","X1","X2","X3","X4"]})
+X = df[["X1","X2","X3","X4"]].values; T = df["A"].values; Y = df["Y"].values
+dr = DRLearner(model_propensity=GradientBoostingClassifier(),
+               model_regression=GradientBoostingRegressor(),
+               model_final=GradientBoostingRegressor()).fit(Y, T, X=X)
+ate, lo, hi = dr.ate(X), *dr.ate_interval(X)
+Data.addVarFloat("cate_dr"); Data.store("cate_dr", range(len(df)), dr.effect(X))
+end
+
+*--- 5. (Optional) Bayesian Causal Forest (BCF) — R callout ---
+* Use the bcf R package via -shell Rscript- to fit the full posterior over CATE.
+* The R script writes posterior_summary.csv; we import it back as a frame:
+* shell Rscript scripts/bcf.R
+* import delimited posterior_summary.csv, clear case(preserve)
+
+*--- 6. Stack the horse-race ---
 esttab m_dml_plr m_dml_atet m_cf using tables/tableB2_ml_horserace.tex, ///
     replace b(4) se(4) star(* 0.10 ** 0.05 *** 0.01) ///
     mtitles("DML (PLR)" "DML (ATET)" "Causal forest") ///
-    title("ML causal horse-race on \$(Y, A, X)\$")
+    stats(N, labels("N")) ///
+    title("ML causal horse-race on \$(Y, A, X)\$") ///
+    addnotes("DR-Learner / Dragonnet / BCF columns added via Python/R callouts when relevant.")
 ```
 
 ### B.3 CATE distribution + subgroup CATE plot (Step 7 extension)
@@ -1320,6 +2117,168 @@ log close
 ```
 
 Every `.do` file loads `data/analysis.dta`, writes its outputs to `tables/` or `figures/`, and saves a log. A clean `make clean && do main.do` regenerates the entire paper from raw data.
+
+---
+
+## Regtable (esttab) cookbook (one-page recipe index)
+
+`eststo` + `esttab` is the single primitive behind every multi-regression table in an AER paper. The eight patterns above map to:
+
+| Pattern | What varies across columns | Step |
+|---|---|---|
+| **A. Progressive controls** | covariate set / FE depth | 5.A — Table 2 |
+| **B. Design horse race** | identification strategy (OLS / IV / DID / PSM / EB) | 5.B — Table 2-bis |
+| **C. Multi-outcome** | dependent variable Y | 5.C — Table 2-ter |
+| **D. Stacked Panel A / B** | horizon / sample (panel rows × spec columns) | 5.D — Table 2-quater |
+| **E. IV reporting triplet** | first stage / reduced form / 2SLS | 5.E — Table 2-quinto |
+| **F. Causal-orchestrator** | 1 column, full diagnostics (`csdid`/`synth_runner`/`teffects`) | 5.F |
+| **G. Subgroup table** | subsample (full / female / male / Q1…Q4) | 7.b — Table 3 |
+| **H. Robustness master** | every robustness check stacked | 6.k — Table A1 |
+
+Default `esttab` settings for AER house style:
+
+```stata
+esttab m1 ... mN using "tables/tableN.tex", ///
+    replace ///
+    se star(* 0.10 ** 0.05 *** 0.01) ///       AER stars convention
+    label booktabs ///
+    mtitles("(1)" "(2)" ...) ///                column labels
+    stats(N r2 r2_a, labels("N" "R²" "Adj. R²")) ///
+    addnotes("Cluster-robust SE in parentheses." ///
+             "* p<0.10, ** p<0.05, *** p<0.01.")
+* Word version: same call with .rtf extension.
+* For multi-panel paper bundles, chain esttab with `, append` (see 5.D / 8.5.4).
+```
+
+---
+
+## Figure factory (the 12 standard AER figures in Stata)
+
+| # | Figure | Stata commands | Section |
+|---|---|---|---|
+| 1a | Raw trends (DID Figure 1) | `collapse (mean) y, by(year treat)` → `twoway line` | §1 (Step 3.e) |
+| 1b | Treatment rollout heatmap | `heatplot first_treat unit, color(...)` | §1 |
+| 2a | Event-study coefficients | `eventstudyinteract` → `coefplot, keep(rel_d*)` | §3 (Step 3.5.1) |
+| 2a' | Bacon weights | `bacondecomp y treat, ddetail` → built-in graph | §3 |
+| 2a'' | CS-DID dynamic effects | `csdid` → `csdid_plot` | §3 |
+| 2b | First-stage scatter | `binscatter D Z, controls(X)` | §3 (Step 3.5.2) |
+| 2c | RD canonical plot | `rdplot Y X, c(0)` | §3 (Step 3.5.3) |
+| 2c' | McCrary density | `rddensity X, c(0) plot` | §3 |
+| 2d | Matching love plot | `pstest X, both graph` (after `psmatch2`) | §3 (Step 3.5.4) |
+| 2e | SCM trajectory | `synth y X, trunit() trperiod() fig` · `sdid` graph | §3 (Step 3.5.5) |
+| 3 | Coefficient plot of main specs | `coefplot m1...m6, keep(D)` | §4 (Step 8.f) |
+| 4a | Dose-response | `xtile dose10 = D, nq(10)` → `margins i.dose10` → `marginsplot` | §5 (Step 7.g) |
+| 4b | Margins-by-subgroup | `margins, dydx(D) at(group=(0 1))` → `marginsplot` | §5 |
+| 5 | Specification curve | hand-rolled spec loop → `twoway rcap` (see 6.l) | §7 |
+| 6 | Sensitivity dashboard | `honestdid, coefplot` · `psacalc plot` · `evalue` | §7 (Step 6.m) |
+| 7 | Final main figure | estimator-specific (`csdid_plot`, `synth` fig, `rdplot`) | §8 |
+
+> Every Stata figure is exported as **both** `.pdf` (for LaTeX) and `.png ≥ 300 dpi` (for slides / web). Use `set scheme s2color` (or `white_tableau` from `schemepack`) once at the top of `master.do` for consistent styling.
+
+---
+
+## Method Catalog
+
+### Classical OLS / Panel
+```stata
+reg log_wage training age edu,                        vce(cluster firm_id)            // OLS
+areg log_wage training age edu, absorb(industry)      vce(cluster firm_id)            // OLS + 1 FE
+xtreg log_wage training age edu, fe                                                   // panel FE
+xtreg log_wage training age edu, re                                                   // panel RE (Hausman)
+reghdfe log_wage training age edu, absorb(worker_id year) vce(cluster firm_id)        // HD FE workhorse
+reghdfe log_wage training,        absorb(worker_id year) vce(cluster firm_id year)    // 2-way cluster
+ppmlhdfe count training,          absorb(firm_id year) cluster(firm_id)               // Poisson + FE
+heckman log_wage training, select(in_lf = age edu marital kids)                       // Heckman selection
+qreg    log_wage training age,    quantile(0.5)                                       // quantile reg
+sqreg   log_wage training age,    quantile(0.1 0.25 0.5 0.75 0.9) reps(500)
+```
+
+### Difference-in-Differences
+```stata
+* 2×2
+reghdfe log_wage c.treat#c.post, absorb(worker_id year) vce(cluster worker_id)
+* Staggered — modern stack
+csdid                log_wage age edu, ivar(worker_id) time(year) gvar(first_treat) method(dripw) agg(group)
+eventstudyinteract   log_wage rel_d*, cohort(first_treat) control_cohort(never_treated) absorb(worker_id year) vce(cluster worker_id)
+did_imputation       log_wage worker_id year first_treat, allhorizons pretrend(5)
+did_multiplegt_dyn   log_wage worker_id year training, effects(5) placebo(3)
+sdid                 log_wage worker_id year training, vce(bootstrap) graph
+* Diagnostics + sensitivity
+bacondecomp log_wage training, ddetail                                                // TWFE diagnostic
+honestdid, pre(rel_d1-rel_d3) post(rel_d5-rel_d9) mvec(0(0.1)0.5)                     // PT sensitivity
+```
+
+### Instrumental Variables / 2SLS
+```stata
+ivregress 2sls   log_wage age edu (training = Z), vce(cluster firm_id)                // baseline
+ivreg2           log_wage age edu (training = Z), cluster(firm_id) first endog(training) // workhorse: full diagnostics
+ivreghdfe        log_wage age (training = Z), absorb(industry year) cluster(firm_id) first
+* Weak-IV diagnostics
+estat firststage                                                                      // (after ivregress)
+* ivreg2 reports CD / KP / AR automatically.
+```
+
+### Regression Discontinuity
+```stata
+rdrobust  outcome running_var, c(0) kernel(triangular) bwselect(mserd)                // Sharp RD (CCT)
+rdrobust  outcome running_var, c(0) fuzzy(treatment)                                  // Fuzzy RD
+rddensity running_var, c(0) plot                                                      // McCrary density
+rdmc      outcome running_var, cutoffs(0 5 10)                                        // multi-cutoff
+rdplot    outcome running_var, c(0)
+```
+
+### Matching / Reweighting
+```stata
+psmatch2  training age edu tenure, out(log_wage) n(1) common                          // PSM (canonical)
+teffects  psmatch (log_wage) (training age edu tenure), atet                          // PSM (modern)
+teffects  ipw     (log_wage) (training age edu tenure), atet                          // IPW
+teffects  ipwra   (log_wage age edu tenure) (training age edu tenure)                 // IPWRA
+teffects  aipw    (log_wage age edu tenure) (training age edu tenure)                 // AIPW (DR)
+ebalance  training age edu tenure                                                     // entropy balancing
+```
+
+### Synthetic Control
+```stata
+synth         log_wage age edu, trunit(1) trperiod(2015) fig keep(synth.dta, replace)
+synth_runner  log_wage age edu, trunit(1) trperiod(2015) gen_vars                      // + 50 placebos
+sdid          log_wage worker_id year training, vce(bootstrap) graph
+```
+
+### ML Causal (Mode B — see §B for the full pipeline)
+```stata
+ddml init partial, kfolds(5) reps(5)                                                  // DML setup
+ddml E[Y|X]: pystacked Y X*, type(reg) methods(rf gradboost lassocv)
+ddml E[D|X]: pystacked D X*, type(reg) methods(rf gradboost lassocv)
+ddml crossfit
+ddml estimate, robust
+crforest log_wage training age edu, ntrees(2000) honesty                              // causal forest
+predict cate, te
+pdslasso log_wage training (X1-X100), cluster(firm_id) partial                        // post-double-selection
+```
+
+### Robustness, Sensitivity & Inference
+```stata
+boottest         training, cluster(state) reps(9999) seed(42)                         // wild cluster bootstrap
+ritest           training _b[training], reps(1000) seed(0): reghdfe ...               // randomization inf.
+rwolf            y1 y2 y3, indepvar(training) controls(X) reps(500) ...               // Romano-Wolf MTC
+psacalc delta    training, mcontrol(X) rmax(1.3)                                      // Oster δ
+honestdid, pre(...) post(...) mvec(0(0.1)0.5)                                         // RR PT sensitivity
+evalue rr,       est(1.45) lcl(1.10) ucl(1.91)                                        // E-value
+xtcsd, pesaran abs                                                                    // cross-sec dependence
+```
+
+### Survival / Epi (Mode A — see §A)
+```stata
+stset time, failure(event)
+sts graph, by(A) ci risktable                                                         // Kaplan-Meier
+stcox A age edu                                                                       // Cox
+streg A age edu, distribution(weibull) time                                           // AFT
+strmst2 A, tau(1825) covariates(age edu)                                              // RMST contrast
+gformula ...                                                                          // parametric g-formula
+eltmle event A age edu, tmle                                                          // TMLE for binary outcome
+mrrobust, beta_outcome(by) se_outcome(byse) beta_exposure(bx) se_exposure(bxse)       // MR-IVW
+mregger by bx [aw=1/byse^2], gxse(bxse)                                                // MR-Egger
+```
 
 ---
 

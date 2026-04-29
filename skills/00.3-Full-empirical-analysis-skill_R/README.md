@@ -125,17 +125,24 @@ to LaTeX"*, *"plot_slopes for marginal effects"*, *"gtsummary Table 1"*,
 
 ## Scope
 
-**In scope** — the canonical 8-step R pipeline:
+**In scope** — the canonical 8-step R pipeline (v2 adds Step −1 / Step 0 / Step 2.5 / Step 3.5 sub-stages mirroring the StatsPAI reference skill):
 
 ```
+Step −1 Pre-Analysis Plan         pwr / WebPower / DeclareDesign → pap.json
+Step 0  Sample log + data contract sample_log + 5 stopifnot asserts → JSON
 Step 1  Data import & cleaning   read_dta/read_csv/janitor/naniar/validate/assertr
 Step 2  Variable construction    dplyr mutate/across/Winsorize/scale/lag/lead
+Step 2.5 Empirical strategy       equation × ID assumption × estimator → strategy.md
 Step 3  Descriptive statistics   gtsummary/datasummary_balance/cor_pmat/ggdist
+Step 3.5 Identification graphics  iplot/binsreg/rdplot/cobalt::love.plot/Synth
 Step 4  Diagnostic tests         shapiro/bptest/dwtest/vif/adf/kpss/Hausman
 Step 5  Baseline modeling        feols/ivreg/att_gt/sunab/synthdid/MatchIt/grf
+        Patterns A–H              progressive ctrls / horse race / multi-Y / IV triplet / ...
 Step 6  Robustness battery       fwildclusterboot/ri2/bacondecomp/HonestDiD/robomit
+        + Pattern H Master Table A1 + spec curve (specr) + sensitivity dashboard
 Step 7  Further analysis         marginaleffects/mediation/lavaan/grf
 Step 8  Tables & figures         modelsummary/iplot/ggplot2/cowplot/Quarto
+        + reproducibility stamp (artifacts/result.json)
 ```
 
 **Out of scope** — Bayesian R workflows (`brms`/`rstan` — see
@@ -230,17 +237,24 @@ LaTeX"*、*"plot_slopes 边际效应图"*、*"gtsummary Table 1"*、
 
 ## 覆盖范围
 
-**覆盖** —— R 经典 8 步 pipeline：
+**覆盖** —— R 经典 8 步 pipeline（v2 对齐 StatsPAI 参考 skill，新增 Step −1 / Step 0 / Step 2.5 / Step 3.5 子阶段）：
 
 ```
+Step −1 预分析计划（PAP）   pwr / WebPower / DeclareDesign → pap.json
+Step 0  样本日志 + 数据契约 sample_log + 5 项 stopifnot → JSON
 Step 1  数据导入 / 清洗     read_dta/read_csv/janitor/naniar/validate/assertr
 Step 2  变量构造           dplyr mutate/across/Winsorize/scale/lag/lead
+Step 2.5 实证策略           方程式 × 识别假设 × 估计器 → strategy.md
 Step 3  描述统计           gtsummary/datasummary_balance/cor_pmat/ggdist
+Step 3.5 识别图            iplot / binsreg / rdplot / cobalt::love.plot / Synth
 Step 4  诊断检验           shapiro/bptest/dwtest/vif/adf/kpss/Hausman
 Step 5  基准建模           feols/ivreg/att_gt/sunab/synthdid/MatchIt/grf
+        八种 regtable 模式 A–H  渐进控制 / 设计赛马 / 多 Y / IV 三联 / ...
 Step 6  稳健性电池         fwildclusterboot/ri2/bacondecomp/HonestDiD/robomit
+        + Pattern H 稳健性主表 A1 + 规范曲线（specr）+ 敏感性面板
 Step 7  进一步分析         marginaleffects/mediation/lavaan/grf
 Step 8  表与图             modelsummary/iplot/ggplot2/cowplot/Quarto
+        + 复现戳（artifacts/result.json）
 ```
 
 **不覆盖** —— Bayesian R 工作流（`brms`/`rstan`，见
