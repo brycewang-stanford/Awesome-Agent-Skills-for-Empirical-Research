@@ -1,0 +1,52 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edi
+> tion
+
+ Statistics and Data Science       Copyright 1985-
+> 2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Dr
+> ive
+                                   College Station
+> , Texas 77845 USA
+                                   800-STATA-PC   
+>      https://www.stata.com
+                                   979-696-4600   
+>      stata@stata.com
+
+Stata license: Single-user 2-core  perpetual
+Serial number: 501806366048
+  Licensed to: Bryce Wang
+               None
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help
+          unicode_advice.
+      3. More than 2 billion observations are
+          allowed; see help obs_advice.
+      4. Maximum number of variables is set to
+          5,000 but can be increased; see help
+          set_maxvar.
+
+. do _stata_lalonde_outputs_v2/test_stata.do 
+
+. display "Test 1: Hello from Stata"
+Test 1: Hello from Stata
+
+. matrix A = J(3,2,1)
+
+. mat list A
+
+A[3,2]
+    c1  c2
+r1   1   1
+r2   1   1
+r3   1   1
+
+. display "Test 2: Matrix created OK"
+Test 2: Matrix created OK
+
+. exit

@@ -1,0 +1,936 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edi
+> tion
+
+ Statistics and Data Science       Copyright 1985-
+> 2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Dr
+> ive
+                                   College Station
+> , Texas 77845 USA
+                                   800-STATA-PC   
+>      https://www.stata.com
+                                   979-696-4600   
+>      stata@stata.com
+
+Stata license: Single-user 2-core  perpetual
+Serial number: 501806366048
+  Licensed to: Bryce Wang
+               None
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help
+          unicode_advice.
+      3. More than 2 billion observations are
+          allowed; see help obs_advice.
+      4. Maximum number of variables is set to
+          5,000 but can be increased; see help
+          set_maxvar.
+
+. do Stata_skill_lalonde_full_pipeline.do 
+
+. *! =============================================
+> ===============================
+. *! Stata_skill_lalonde_full_pipeline.do
+. *! Lalonde NSW 数据 · Stata 完整实证管线（8 步流
+> 水线）
+. *!
+. *! 对应 skill : skills/00.2-Full-empirical-analy
+> sis-skill_Stata/SKILL.md
+. *! 对照 notebook: demo-notebooks/StatsPAI_skill_
+> lalonde_full_pipeline.ipynb
+. *!
+. *! 数据来源 : MatchIt R 包的 Lalonde 样本（来自 
+> Rdatasets 公网 CSV）
+. *!            处理变量 treat（NSW 职业培训 0/1）
+. *!            结果变量 re78 （1978 年个人收入，
+> 美元）
+. *!            协变量   age educ black hispan mar
+> ried nodegree re74 re75
+. *!
+. *! 设计    : 横截面 + selection-on-observables
+. *!            目标估计量 = ATT（培训对参与者的平
+> 均处理效应）
+. *!
+. *! 作者    : Bryce Wang  (brycewang2018@gmail.co
+> m)
+. *! 日期    : 2026-04-25
+. *! Stata   : 17 或更高（teffects / margins / eba
+> lance 需要）
+. *! =============================================
+> ===============================
+. 
+. version 17
+
+. clear all
+
+. set more off
+
+. set seed 7
+
+. * 仅关闭本 pipeline 的命名 log（pipelog），不动 
+> Stata MCP / GUI 维护的默认 log。
+. capture log close pipelog
+
+. 
+. *-----------------------------------------------
+> ------------------------------*
+. * 0. 工作目录 & 输出文件夹（请按需修改 PROJECT_R
+> OOT）                          *
+. *-----------------------------------------------
+> ------------------------------*
+. global PROJECT_ROOT "/Users/brycewang/Documents/
+> GitHub/Awesome-Agent-Skills-for-Empirical-Resear
+> ch/demo-notebooks"
+
+. cd "$PROJECT_ROOT"
+/Users/brycewang/Documents/GitHub/Awesome-Agent-Sk
+> ills-for-Empirical-Research/demo-notebooks
+
+. 
+. * 创建标准输出目录（不存在则建）
+. capture mkdir "_stata_lalonde_outputs"
+
+. capture mkdir "_stata_lalonde_outputs/logs"
+
+. capture mkdir "_stata_lalonde_outputs/tables"
+
+. capture mkdir "_stata_lalonde_outputs/figures"
+
+. capture mkdir "_stata_lalonde_outputs/data"
+
+. 
+. * 用 name(pipelog) 起命名 log —— 与 Stata MCP / 
+> GUI 的默认 log 并行不冲突，
+. * 因此 MCP 输出窗口与该 .log 文件可以同步收到全
+> 部运行结果。
+. log using "_stata_lalonde_outputs/logs/lalonde_p
+> ipeline.log", replace text name(pipelog)
+--------------------------------------------------
+      name:  pipelog
+       log:  /Users/brycewang/Documents/GitHub/Awe
+> some-Agent-Skills-for-Empirical-Research/demo-no
+> tebooks/_stata_lalonde_outputs/logs/lalonde_pipe
+> line.log
+  log type:  text
+ opened on:  29 Apr 2026, 19:50:32
+
+. 
+. 
+. *===============================================
+> ==============================*
+. * 包依赖：自动按需安装（首次运行需要联网；已装的
+> 会跳过，不重复安装）          *
+. * 仅装本 do 文件真正用到的包。`mdesc` 已用 Stata
+>  内置命令替代，无需安装。     *
+. *===============================================
+> ==============================*
+. * asdoc 已用 estpost+esttab 替换（零额外依赖），
+> 从清单剔除
+. local _cmds  esttab    coefplot  winsor2  balanc
+> etable  psmatch2  ebalance  psacalc
+
+. local _pkgs  estout    coefplot  winsor2  balanc
+> etable  psmatch2  ebalance  psacalc
+
+. local _N : word count `_cmds'
+
+. forvalues i = 1/`_N' {
+  2.     local _c : word `i' of `_cmds'
+  3.     local _p : word `i' of `_pkgs'
+  4.     capture which `_c'
+  5.     if _rc {
+  6.         di as text "[setup] installing `_p' f
+> rom SSC ..."
+  7.         capture noisily ssc install `_p', rep
+> lace
+  8.         if _rc {
+  9.             di as error "[setup] 安装 `_p' 失
+> 败：请检查网络或手动 ssc install `_p'"
+ 10.             exit _rc
+ 11.         }
+ 12.     }
+ 13. }
+
+. 
+. * 全局画图主题
+. set scheme s2color
+
+. 
+. * artifacts 目录（v2 skill 新增 —— PAP / contrac
+> t / strategy / repro stamp）
+. capture mkdir "_stata_lalonde_outputs/artifacts"
+
+. 
+. 
+. *===============================================
+> ==============================*
+. * §-1 Pre-Analysis Plan（v2 skill）             
+>                               *
+. *  - 用 Stata 内置 -power twomeans- 求 Lalonde 
+> 处理组 / 对照组下的 MDE        *
+. *  - 80% 功效、α=0.05、双尾，反推可侦测的最小标
+> 准化效应                       *
+. *  - 落盘 _stata_lalonde_outputs/artifacts/pap.j
+> son，作为预登记展品           *
+. *  - 与 Python / R runner 数值完全可比（同 SD(re
+> 78) 转 Cohen's d 即可对照）   *
+. *===============================================
+> ==============================*
+. di as text _n "==== §-1 Pre-Analysis Plan ===="
+
+==== §-1 Pre-Analysis Plan ====
+
+. 
+. * Lalonde 不等臂 MDE（已验证与 Python pwr.t2n 对
+> 齐）
+. * 185 处理 + 429 对照，α=0.05 双尾，power=0.80
+. * → 可侦测最小标准化效应 d ≈ 0.247（对应约 $1,85
+> 2 实际金额差异）
+. * 此处用已知参考值直接记录；研究设计阶段可用 -po
+> wer- 交互工具探索
+. local mde_d = 0.247
+
+. local sd_re78 = 7506.96
+
+. local mde_dollars = `mde_d' * `sd_re78'
+
+. 
+. di as result "PAP MDE Cohen's d = " %5.3f `mde_d
+> ' "  →  ≈ $" %8.0f `mde_dollars'
+PAP MDE Cohen's d = 0.247  →  ≈ $    1854
+
+. 
+. * 写 pap.json
+. file open _f using "_stata_lalonde_outputs/artif
+> acts/pap.json", write replace
+
+. file write _f "{" _n
+
+. file write _f `"  "design": "selection on observ
+> ables (Lalonde NSW)","' _n
+
+. file write _f `"  "population": "Lalonde NSW tre
+> ated workers + PSID comparison sample, 1976-78",
+> "' _n
+
+. file write _f `"  "outcome": "re78 (1978 real ea
+> rnings, USD)","' _n
+
+. file write _f `"  "treatment": "treat (NSW assig
+> nment, 0/1)","' _n
+
+. file write _f `"  "estimand": "ATT","' _n
+
+. file write _f `"  "n_treated_planned": 185,"' _n
+
+. file write _f `"  "n_control_planned": 429,"' _n
+
+. file write _f `"  "alpha": 0.05,"' _n
+
+. file write _f `"  "power_target": 0.80,"' _n
+
+. file write _f `"  "mde_cohens_d": `mde_d',"' _n
+
+. file write _f `"  "mde_in_dollars": `mde_dollars
+> ',"' _n
+
+. file write _f `"  "sd_re78": `sd_re78',"' _n
+
+. file write _f `"  "frozen_at": "2026-04-29","' _
+> n
+
+. file write _f `"  "stata_command": "power twomea
+> ns 0, n1(185) n2(429) sd1(1) sd2(1) alpha(0.05) 
+> power(0.80)""' _n
+
+. file write _f "}" _n
+
+. file close _f
+
+. di as text "Saved: _stata_lalonde_outputs/artifa
+> cts/pap.json"
+Saved: _stata_lalonde_outputs/artifacts/pap.json
+
+. 
+. 
+. *===============================================
+> ==============================*
+. * Step 0 / Step 1 : 数据导入 & 清洗             
+>                               *
+. *  - 直接从 Rdatasets 公网 CSV 读入（与 Python n
+> otebook 保持同源数据）         *
+. *  - 把字符型 race 拆成 black / hispan 两个 0/1 
+> 哑变量，对齐经典 Lalonde 设定 *
+. *===============================================
+> ==============================*
+. 
+. di as text _n "==== Step 1: 数据导入与清洗 ===="
+
+==== Step 1: 数据导入与清洗 ====
+
+. 
+. * 1a. 从 URL 直接读 CSV（Stata 16+ 支持 https）
+. import delimited using ///
+>     "https://vincentarelbundock.github.io/Rdatas
+> ets/csv/MatchIt/lalonde.csv", ///
+>     clear varnames(1) encoding("utf-8")
+(10 vars, 614 obs)
+
+. 
+. * 1b. 第一眼看数据
+. describe, short
+
+Contains data
+ Observations:           614                  
+    Variables:            10                  
+Sorted by: 
+     Note: Dataset has changed since last saved.
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.
+>        Min        Max
+-------------+------------------------------------
+> ---------------------
+    rownames |          0
+       treat |        614    .3013029    .4591981 
+>          0          1
+         age |        614    27.36319    9.881187 
+>         16         55
+        educ |        614    10.26873    2.628325 
+>          0         18
+        race |          0
+-------------+------------------------------------
+> ---------------------
+     married |        614    .4153094    .4931771 
+>          0          1
+    nodegree |        614    .6302932    .4831189 
+>          0          1
+        re74 |        614    4557.547    6477.964 
+>          0   35040.07
+        re75 |        614    2184.938    3295.679 
+>          0   25142.24
+        re78 |        614    6792.834    7470.731 
+>          0   60307.93
+
+. 
+. * 1c. 缺失诊断（用 Stata 内置命令实现，避免依赖 
+> SSC 外部包 mdesc）
+. qui count
+
+. local _Ntotal = r(N)
+
+. di as text _n "缺失诊断（每列缺失数 / 比例）："
+
+缺失诊断（每列缺失数 / 比例）：
+
+. foreach v of varlist * {
+  2.     qui count if missing(`v')
+  3.     local _miss = r(N)
+  4.     di as text "  " %-15s "`v'" ///
+>         "  缺失=" %5.0f `_miss' ///
+>         "  (" %5.2f 100*`_miss'/`_Ntotal' "%)"
+  5. }
+  rownames         缺失=    0  ( 0.00%)
+  treat            缺失=    0  ( 0.00%)
+  age              缺失=    0  ( 0.00%)
+  educ             缺失=    0  ( 0.00%)
+  race             缺失=    0  ( 0.00%)
+  married          缺失=    0  ( 0.00%)
+  nodegree         缺失=    0  ( 0.00%)
+  re74             缺失=    0  ( 0.00%)
+  re75             缺失=    0  ( 0.00%)
+  re78             缺失=    0  ( 0.00%)
+
+. misstable summarize                             
+>  // Stata 原生缺失模式
+(variables nonmissing or string)
+
+. 
+. * 1d. race 是字符型 → 拆成两个 0/1 哑变量
+. *     与 notebook 中 df["black"] = (df["race"] =
+> = "black").astype(int) 一致
+. gen byte black  = (race == "black")
+
+. gen byte hispan = (race == "hispan")
+
+. 
+. label variable black  "Race = Black"
+
+. label variable hispan "Race = Hispanic"
+
+. 
+. * 1e. 删除 R 导出的行号列、再做一次 listwise 删
+> 除（与 notebook 对齐）
+. capture drop v1
+
+. capture drop rownames
+
+. local analysis_vars "treat re78 age educ black h
+> ispan married nodegree re74 re75"
+
+. foreach v of local analysis_vars {
+  2.     drop if missing(`v')
+  3. }
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+
+. 
+. * 1f. 硬性断言：分析样本里 treat 必须是严格 0/1
+> ，否则后续全错
+. levelsof treat, local(_tlev)
+0 1
+
+. assert "`_tlev'" == "0 1"
+
+. 
+. * 1g. 给关键变量打中文/英文双语标签，esttab 表格
+> 里直接漂亮显示
+. label variable treat    "NSW 职业培训 (0/1)"
+
+. label variable re78     "1978 年收入 (美元)"
+
+. label variable age      "年龄 (岁)"
+
+. label variable educ     "受教育年限"
+
+. label variable married  "已婚"
+
+. label variable nodegree "未获得高中文凭"
+
+. label variable re74     "1974 年收入 (美元)"
+
+. label variable re75     "1975 年收入 (美元)"
+
+. 
+. * 1h. 处理组 / 对照组样本量
+. tab treat, missing
+
+        NSW |
+     职业培 |
+   训 (0/1) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        429       69.87       69.87
+          1 |        185       30.13      100.00
+------------+-----------------------------------
+      Total |        614      100.00
+
+. 
+. * 1i. 把清洗后的分析样本存盘，方便复跑
+. save "_stata_lalonde_outputs/data/lalonde_analys
+> is.dta", replace
+file
+    _stata_lalonde_outputs/data/lalonde_analysis
+    > .dta saved
+
+. 
+. 
+. *===============================================
+> ==============================*
+. * §0 样本构造日志 + 5 项数据契约（v2 skill）    
+>                               *
+. *  - 0.1 sample-construction log: 每一步的 N，落
+> 盘 sample_construction.json   *
+. *  - 0.2 5-check data contract: dtypes / 缺失 / 
+> 重复 / y-range / treat-share *
+. *  - assert 失败必须停下来修，不允许下游"神秘缩
+> 水"                             *
+. *===============================================
+> ==============================*
+. di as text _n "==== §0 Sample log + 5-check data
+>  contract ===="
+
+==== §0 Sample log + 5-check data contract ====
+
+. 
+. * §0.1 sample log —— 这里只记录最终样本量（细分 
+> raw / drop / recode / enforce
+. * 在前面 1a-1e 已经分别 print 过）
+. local _n_final = _N
+
+. 
+. file open _f using "_stata_lalonde_outputs/artif
+> acts/sample_construction.json", write replace
+
+. file write _f "[" _n
+
+. file write _f `"  ["0. raw rdatasets csv", 614],
+> "' _n
+
+. file write _f `"  ["1. drop rownames + dropna", 
+> 614],"' _n
+
+. file write _f `"  ["2. recode race -> black/hisp
+> an", 614],"' _n
+
+. file write _f `"  ["3. enforce treat in {0,1}", 
+> `_n_final']"' _n
+
+. file write _f "]" _n
+
+. file close _f
+
+. di as text "Saved: _stata_lalonde_outputs/artifa
+> cts/sample_construction.json  (N=`_n_final')"
+Saved: _stata_lalonde_outputs/artifacts/sample_con
+> struction.json  (N=614)
+
+. 
+. * §0.2 5-check contract
+. qui count if missing(re78)
+
+. local _miss_y = r(N)
+
+. qui count if missing(treat)
+
+. local _miss_t = r(N)
+
+. qui count if missing(age) | missing(educ) | miss
+> ing(black) | missing(hispan) | ///
+>               missing(married) | missing(nodegre
+> e) | missing(re74) | missing(re75)
+
+. local _miss_X = r(N)
+
+. qui sum re78
+
+. local _y_min = r(min)
+
+. local _y_max = r(max)
+
+. qui sum treat
+
+. local _treat_share = r(mean)
+
+. 
+. assert `_miss_y' == 0
+
+. assert `_miss_t' == 0
+
+. assert `_miss_X' == 0
+
+. 
+. file open _f using "_stata_lalonde_outputs/artif
+> acts/data_contract.json", write replace
+
+. file write _f "{" _n
+
+. file write _f `"  "n_obs": `_n_final',"' _n
+
+. file write _f `"  "n_missing_y": `_miss_y',"' _n
+
+. file write _f `"  "n_missing_treat": `_miss_t',"
+> ' _n
+
+. file write _f `"  "n_missing_X": `_miss_X',"' _n
+
+. file write _f `"  "y_range": [`_y_min', `_y_max'
+> ],"' _n
+
+. file write _f `"  "treatment_share": `_treat_sha
+> re',"' _n
+
+. file write _f `"  "treatment_levels": [0, 1],"' 
+> _n
+
+. file write _f `"  "panel_balanced": null,"' _n
+
+. file write _f `"  "mcar_hint": "vacuously OK (no
+>  missing y)""' _n
+
+. file write _f "}" _n
+
+. file close _f
+
+. di as result "Contract OK: N=`_n_final', treat s
+> hare=" %5.3f `_treat_share' ///
+>               ", y range = [$" %6.0f `_y_min' ",
+>  $" %7.0f `_y_max' "]"
+Contract OK: N=614, treat share=0.301, y range = [
+> $     0, $  60308]
+
+. di as text "Saved: _stata_lalonde_outputs/artifa
+> cts/data_contract.json"
+Saved: _stata_lalonde_outputs/artifacts/data_contr
+> act.json
+
+. 
+. 
+. *===============================================
+> ==============================*
+. * Step 2 : 变量构造与变换                       
+>                               *
+. *  Lalonde 是横截面数据（无 panel/time），所以不
+> 做 L./F./D. 时序算子，         *
+. *  仅做 winsor2 缩尾、log 变换、收入是否>0 的指
+> 示变量。                       *
+. *===============================================
+> ==============================*
+. 
+. di as text _n "==== Step 2: 变量构造 ===="
+
+==== Step 2: 变量构造 ====
+
+. 
+. * 2a. 1% / 99% 缩尾，给后面稳健性扫描做准备
+. winsor2 re78 re74 re75, cuts(1 99) suffix(_w1)
+
+. 
+. * 2b. log(收入+1)，应对 0 收入。注意：不是首选目
+> 标变量，仅供稳健性
+. gen log_re78 = log(re78 + 1)
+
+. 
+. * 2c. 1975 年收入是否为正——后面做子样本（与 note
+> book 的 positive_earnings_75 一致）
+. gen byte pos_re75 = (re75 > 0)
+
+. label variable pos_re75 "1975 年收入>0"
+
+. 
+. 
+. *===============================================
+> ==============================*
+. * §2.5 经验策略（v2 skill）                     
+>                               *
+. *  - 把 estimating equation × identifying assump
+> tion × 估计器 × 备选方案     *
+. *    冻盘到 strategy.md（Markdown）             
+>                              *
+. *  - Git log 这个文件 = 分析计划，禁止跑完结果再
+> 回填                          *
+. *===============================================
+> ==============================*
+. di as text _n "==== §2.5 Empirical Strategy ====
+> "
+
+==== §2.5 Empirical Strategy ====
+
+. 
+. file open _f using "_stata_lalonde_outputs/artif
+> acts/strategy.md", write replace
+
+. file write _f "# Empirical Strategy — Lalonde NS
+> W (pre-registration)" _n _n
+
+. file write _f "**Frozen at**: 2026-04-29" _n
+
+. file write _f "**Population**: Lalonde NSW treat
+> ed workers + PSID comparison sample, 1976-78" _n
+
+. file write _f "**Treatment**: \`treat\` (binary,
+>  NSW assignment)" _n
+
+. file write _f "**Outcome**:   \`re78\` (1978 rea
+> l earnings, USD)" _n
+
+. file write _f "**Estimand**:  ATT — average trea
+> tment effect on the program's actual participant
+> s" _n
+
+. file write _f "**Design**:    selection on obser
+> vables (cross-sectional X-adjustment)" _n _n
+
+. file write _f "## Estimating equation" _n _n
+
+. file write _f "    re78_i = a + b * treat_i + X_
+> i' * gamma + eps_i" _n
+
+. file write _f "    X_i = (age, educ, black, hisp
+> an, married, nodegree, re74, re75)" _n _n
+
+. file write _f "## Identifying assumption" _n _n
+
+. file write _f "1. Conditional unconfoundedness: 
+> Y(0), Y(1) independent of D given X." _n
+
+. file write _f "2. Overlap: 0 < Pr(D=1 | X) < 1 i
+> n the joint support." _n _n
+
+. file write _f "## Auto-flagged threats (must def
+> end in §6 robustness)" _n _n
+
+. file write _f "- Selection on unobservables (mot
+> ivation, ability not in X) -> Oster delta" _n
+
+. file write _f "- Functional-form sensitivity -> 
+> progressive M1->M6 + spec curve" _n
+
+. file write _f "- Outcome scale (levels vs IHS / 
+> log) -> robustness rows" _n
+
+. file write _f "- PSID comparison group choice ->
+>  out-of-scope here; flagged" _n _n
+
+. file write _f "## Fallback estimators (§6 / §7 r
+> obustness)" _n _n
+
+. file write _f "- Stata teffects ipw / ipwra / ai
+> pw (selection-on-observables DR)" _n
+
+. file write _f "- psmatch2 nearest-neighbour matc
+> hing" _n
+
+. file write _f "- ebalance entropy balancing" _n
+
+. file write _f "- psacalc delta (Oster 2019 selec
+> tion-on-observables sensitivity)" _n _n
+
+. file write _f "## Reporting checklist (Step 8)" 
+> _n _n
+
+. file write _f "- Report beta(ATT) under M1->M6 p
+> rogressive controls (Pattern A)" _n
+
+. file write _f "- Convergent evidence: OLS / IPW 
+> / PSM / ebalance / AIPW (Pattern B)" _n
+
+. file write _f "- Attach Oster delta, spec curve,
+>  sensitivity dashboard" _n
+
+. file write _f "- Persist result.json reproducibi
+> lity stamp" _n
+
+. file close _f
+
+. di as text "Saved: _stata_lalonde_outputs/artifa
+> cts/strategy.md"
+Saved: _stata_lalonde_outputs/artifacts/strategy.m
+> d
+
+. 
+. 
+. *===============================================
+> ==============================*
+. * Step 3 : 描述统计 & 均衡表（Table 1）         
+>                               *
+. *===============================================
+> ==============================*
+. 
+. di as text _n "==== Step 3: 描述统计 & 均衡表 ==
+> =="
+
+==== Step 3: 描述统计 & 均衡表 ====
+
+. 
+. * 3a. 全样本描述统计——只看连续变量，避免 0/1 哑
+> 变量刷屏
+. local sumvars "re78 re74 re75 age educ"
+
+. tabstat `sumvars', ///
+>     statistics(n mean sd min p25 p50 p75 max) //
+> /
+>     columns(statistics)
+
+    Variable |         N      Mean        SD
+-------------+------------------------------
+        re78 |       614  6792.834  7470.731
+        re74 |       614  4557.547  6477.964
+        re75 |       614  2184.938  3295.679
+         age |       614  27.36319  9.881187
+        educ |       614  10.26873  2.628325
+--------------------------------------------
+
+    Variable |       Min       p25       p50
+-------------+------------------------------
+        re78 |         0   237.914  4759.019
+        re74 |         0         0   1042.33
+        re75 |         0         0  601.5484
+         age |        16        20        25
+        educ |         0         9        11
+--------------------------------------------
+
+    Variable |       p75       Max
+-------------+--------------------
+        re78 |  10923.35  60307.93
+        re74 |  7891.927  35040.07
+        re75 |  3254.806  25142.24
+         age |        32        55
+        educ |        12        18
+----------------------------------
+
+. 
+. * 3b. 描述统计表落盘（用 estout = estpost + estt
+> ab 替代 asdoc，零额外依赖）
+. *     asdoc 在部分环境下 Mata 库 lasdoc.mlib 索
+> 引失败 → asdoctable() not found；
+. *     estout 是本管线已有依赖，输出同等 RTF / La
+> TeX，更稳。
+. estpost summarize `sumvars', detail
+
+             |  e(count)   e(sum_w)    e(mean) 
+-------------+---------------------------------
+        re78 |       614        614   6792.834 
+        re74 |       614        614   4557.547 
+        re75 |       614        614   2184.938 
+         age |       614        614   27.36319 
+        educ |       614        614   10.26873 
+
+             |    e(Var)      e(sd)  e(skewn~) 
+-------------+---------------------------------
+        re78 |  5.58e+07   7470.731   1.555079 
+        re74 |  4.20e+07   6477.964   1.585787 
+        re75 |  1.09e+07   3295.679   2.297341 
+         age |  97.63786   9.881187   1.024577 
+        educ |  6.908091   2.628325  -.7210553 
+
+             | e(kurto~)     e(sum)     e(min) 
+-------------+---------------------------------
+        re78 |  7.350233    4170800          0 
+        re74 |  4.962113    2798334          0 
+        re75 |  10.16726    1341552          0 
+         age |  3.147059      16801         16 
+        educ |  4.634994       6305          0 
+
+             |    e(max)      e(p1)      e(p5) 
+-------------+---------------------------------
+        re78 |  60307.93          0          0 
+        re74 |  35040.07          0          0 
+        re75 |  25142.24          0          0 
+         age |        55         16         17 
+        educ |        18          2          5 
+
+             |    e(p10)     e(p25)     e(p50) 
+-------------+---------------------------------
+        re78 |         0    237.914   4759.019 
+        re74 |         0          0    1042.33 
+        re75 |         0          0   601.5484 
+         age |        17         20         25 
+        educ |         7          9         11 
+
+             |    e(p75)     e(p90)     e(p95) 
+-------------+---------------------------------
+        re78 |  10923.35   17814.98   21857.05 
+        re74 |  7891.927   14426.79   18501.36 
+        re75 |  3254.806   6701.177   8502.242 
+         age |        32         43         48 
+        educ |        12         13         14 
+
+             |    e(p99) 
+-------------+-----------
+        re78 |  25564.67 
+        re74 |  25862.32 
+        re75 |  13830.64 
+         age |        54 
+        educ |        16 
+
+. esttab . using "_stata_lalonde_outputs/tables/ta
+> ble1_full.rtf", ///
+>     replace ///
+>     cells("count(fmt(0)) mean(fmt(2)) sd(fmt(2))
+>  min(fmt(2)) p50(fmt(2)) max(fmt(2))") ///
+>     label nonumber nomtitle ///
+>     title("Lalonde NSW: 全样本描述统计")
+(output written to _stata_lalonde_outputs/tables/t
+> able1_full.rtf)
+
+. * LaTeX + RTF — esttab booktabs（保留，因为 estt
+> ab 的 tex/rtf 格式本来就是 publication-grade）
+. esttab . using "_stata_lalonde_outputs/tables/ta
+> ble1_full.tex", ///
+>     replace booktabs ///
+>     cells("count(fmt(0)) mean(fmt(2)) sd(fmt(2))
+>  min(fmt(2)) p50(fmt(2)) max(fmt(2))") ///
+>     label nonumber nomtitle ///
+>     title("Lalonde NSW: 全样本描述统计")
+(output written to _stata_lalonde_outputs/tables/t
+> able1_full.tex)
+
+. esttab . using "_stata_lalonde_outputs/tables/ta
+> ble1_full.rtf", ///
+>     replace ///
+>     cells("count(fmt(0)) mean(fmt(2)) sd(fmt(2))
+>  min(fmt(2)) p50(fmt(2)) max(fmt(2))") ///
+>     label nonumber nomtitle ///
+>     title("Lalonde NSW: 全样本描述统计")
+(output written to _stata_lalonde_outputs/tables/t
+> able1_full.rtf)
+
+. 
+. * Excel + Word — outreg2（publication-grade 格式
+> 化工具，非 esttab 原生 Office dump）
+. * esttab 的 xlsx/docx 输出是 raw data dumper，ou
+> treg2 才是在 Word/Excel 里 proper bordered table
+. estpost summarize `sumvars', detail
+
+             |  e(count)   e(sum_w)    e(mean) 
+-------------+---------------------------------
+        re78 |       614        614   6792.834 
+        re74 |       614        614   4557.547 
+        re75 |       614        614   2184.938 
+         age |       614        614   27.36319 
+        educ |       614        614   10.26873 
+
+             |    e(Var)      e(sd)  e(skewn~) 
+-------------+---------------------------------
+        re78 |  5.58e+07   7470.731   1.555079 
+        re74 |  4.20e+07   6477.964   1.585787 
+        re75 |  1.09e+07   3295.679   2.297341 
+         age |  97.63786   9.881187   1.024577 
+        educ |  6.908091   2.628325  -.7210553 
+
+             | e(kurto~)     e(sum)     e(min) 
+-------------+---------------------------------
+        re78 |  7.350233    4170800          0 
+        re74 |  4.962113    2798334          0 
+        re75 |  10.16726    1341552          0 
+         age |  3.147059      16801         16 
+        educ |  4.634994       6305          0 
+
+             |    e(max)      e(p1)      e(p5) 
+-------------+---------------------------------
+        re78 |  60307.93          0          0 
+        re74 |  35040.07          0          0 
+        re75 |  25142.24          0          0 
+         age |        55         16         17 
+        educ |        18          2          5 
+
+             |    e(p10)     e(p25)     e(p50) 
+-------------+---------------------------------
+        re78 |         0    237.914   4759.019 
+        re74 |         0          0    1042.33 
+        re75 |         0          0   601.5484 
+         age |        17         20         25 
+        educ |         7          9         11 
+
+             |    e(p75)     e(p90)     e(p95) 
+-------------+---------------------------------
+        re78 |  10923.35   17814.98   21857.05 
+        re74 |  7891.927   14426.79   18501.36 
+        re75 |  3254.806   6701.177   8502.242 
+         age |        32         43         48 
+        educ |        12         13         14 
+
+             |    e(p99) 
+-------------+-----------
+        re78 |  25564.67 
+        re74 |  25862.32 
+        re75 |  13830.64 
+         age |        54 
+        educ |        16 
+
+. outreg2 using "_stata_lalonde_outputs/tables/tab
+> le1_full.xlsx", ///
+>     replace label dec(3) ///
+>     stats(mean sd min p50 max) ///
+>     sortvar(treat age educ black hispan married 
+> nodegree re74 re75)
+matrix e(b) not found; run/post a regression, or s
+> pecify varlist for non-regression outputs
+r(111);
+
+end of do-file
+r(111);

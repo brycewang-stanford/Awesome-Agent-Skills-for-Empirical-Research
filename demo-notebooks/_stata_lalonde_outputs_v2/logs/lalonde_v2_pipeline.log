@@ -5,7 +5,7 @@
 > tebooks/_stata_lalonde_outputs_v2/logs/lalonde_v
 > 2_pipeline.log
   log type:  text
- opened on:  29 Apr 2026, 23:21:08
+ opened on:  30 Apr 2026, 00:34:27
 
 . 
 . display "=======================================
@@ -17,7 +17,7 @@ Stata Skill Lalonde V2 Pipeline
 
 . display "Start: `c(current_date)' `c(current_tim
 > e)'"
-Start: 29 Apr 2026 23:21:08
+Start: 30 Apr 2026 00:34:27
 
 . display "Output: `OUT'"
 Output: /Users/brycewang/Documents/GitHub/Awesome-
@@ -45,9 +45,636 @@ Output: /Users/brycewang/Documents/GitHub/Awesome-
 . * Import raw data
 . import delimited "`OUT'/data/lalonde.csv", clear
 (encoding automatically selected: UTF-8)
-(10 vars, 66 obs)
+(10 vars, 614 obs)
 
 . 
 . * Rename key variables for consistency
 . rename treat treated
-variable treat not found
+
+. label var treated "Treatment indicator (1=treate
+> d, 0=control)"
+
+. 
+. * Create race dummy variables (dataset has race 
+> as string column)
+. cap drop black hispan white
+
+. gen black = (race == "black")
+
+. gen hispan = (race == "hispan")
+
+. gen white = (race == "white")
+
+. label var black "Black (1=yes)"
+
+. label var hispan "Hispanic (1=yes)"
+
+. label var white "White (1=yes)"
+
+. 
+. * Sample log matrix
+. mat sample_log = J(1, 2, .)
+
+. local row = 1
+
+. 
+. local n0 = _N
+
+. local ++row
+
+. mat sample_log = (nullmat(sample_log) \ `row', `
+> n0')
+
+. display "Step 0. raw:                           
+>    N = " %12.0fc `n0'
+Step 0. raw:                              N =     
+>      614
+
+. 
+. * Keep only complete cases on key variables
+. local key_vars "re78 treated age educ black hisp
+> an married nodegree re74 re75"
+
+. foreach v of local key_vars {
+  2.     cap confirm numeric variable `v'
+  3.     if _rc {
+  4.         display as error "`v' not found as nu
+> meric — check import"
+  5.     }
+  6. }
+
+. 
+. local n1 = _N
+
+. local ++row
+
+. mat sample_log = (nullmat(sample_log) \ `row', `
+> n1')
+
+. display "Step 1. after import:                  
+>    N = " %12.0fc `n1'
+Step 1. after import:                     N =     
+>      614
+
+. 
+. * Drop rows with missing outcome or treatment
+. qui drop if missing(re78)
+
+. qui drop if missing(treated)
+
+. 
+. local n2 = _N
+
+. local ++row
+
+. mat sample_log = (nullmat(sample_log) \ `row', `
+> n2')
+
+. display "Step 2. drop missing re78/treated:     
+>   N = " %12.0fc `n2' "  (Δ " %10.0fc `n1' - `n2'
+>  ")"
+Step 2. drop missing re78/treated:       N =      
+>     614  (Δ          0)
+
+. 
+. * Drop missing on key covariates
+. foreach v in age educ black hispan married nodeg
+> ree re74 re75 {
+  2.     qui drop if missing(`v')
+  3. }
+
+. local n3 = _N
+
+. local ++row
+
+. mat sample_log = (nullmat(sample_log) \ `row', `
+> n3')
+
+. display "Step 3. drop missing covariates:       
+>    N = " %12.0fc `n3' "  (Δ " %10.0fc `n2' - `n3
+> ' ")"
+Step 3. drop missing covariates:          N =     
+>      614  (Δ          0)
+
+. display "Step 4. final analysis sample:         
+>    N = " %12.0fc `n3'
+Step 4. final analysis sample:            N =     
+>      614
+
+. 
+. * Persist sample log to JSON
+. file open f using "`ART'/sample_construction.jso
+> n", write replace
+
+. file write f "{" _n
+
+. file write f `"  "step_0_raw": `=sample_log[1,2]
+> ',"' _n
+
+. file write f `"  "step_1_import": `=sample_log[2
+> ,2]',"' _n
+
+. file write f `"  "step_2_keyvar": `=sample_log[3
+> ,2]',"' _n
+
+. file write f `"  "step_3_covars": `=sample_log[4
+> ,2]'"' _n
+
+. file write f `"  "step_4_final": `=sample_log[5,
+> 2]'"' _n
+
+. file write f "}" _n
+
+. file close f
+
+. 
+. display "Sample log saved to `ART'/sample_constr
+> uction.json"
+Sample log saved to /Users/brycewang/Documents/Git
+> Hub/Awesome-Agent-Skills-for-Empirical-Research/
+> demo-notebooks/_stata_lalonde_outputs_v2/artifac
+> ts/sample_construction.json
+
+. 
+. * Data contract — 5 checks
+. display ""
+
+
+. display "=== Data Contract Checks ==="
+=== Data Contract Checks ===
+
+. quietly describe, short
+
+. display "Check 1. n_obs = " _N
+Check 1. n_obs = 614
+
+. 
+. * Check 2: dtypes
+. foreach v of local key_vars {
+  2.     capture confirm numeric variable `v'
+  3.     if _rc {
+  4.         display as error "Check 2 FAILED: `v'
+>  not numeric"
+  5.     }
+  6. }
+
+. display "Check 2. dtypes OK on all key vars"
+Check 2. dtypes OK on all key vars
+
+. 
+. * Check 3: missingness
+. misstable sum `key_vars'
+(variables nonmissing or string)
+
+. foreach v of local key_vars {
+  2.     qui count if missing(`v')
+  3.     if r(N) > 0 {
+  4.         display as error "Check 3 FAILED: `v'
+>  has " r(N) " missing"
+  5.     }
+  6. }
+
+. display "Check 3. missingness: PASS (no missing 
+> on key vars)"
+Check 3. missingness: PASS (no missing on key vars
+> )
+
+. 
+. * Check 4: treatment balance
+. tab treated, mis
+
+  Treatment |
+  indicator |
+(1=treated, |
+ 0=control) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        429       69.87       69.87
+          1 |        185       30.13      100.00
+------------+-----------------------------------
+      Total |        614      100.00
+
+. display "Check 4. treatment distribution: "
+Check 4. treatment distribution: 
+
+. bys treated: summarize re78
+
+--------------------------------------------------
+-> treated = 0
+
+    Variable |        Obs        Mean    Std. dev.
+>        Min        Max
+-------------+------------------------------------
+> ---------------------
+        re78 |        429     6984.17    7294.162 
+>          0   25564.67
+
+--------------------------------------------------
+-> treated = 1
+
+    Variable |        Obs        Mean    Std. dev.
+>        Min        Max
+-------------+------------------------------------
+> ---------------------
+        re78 |        185    6349.144    7867.402 
+>          0   60307.93
+
+
+. 
+. *===============================================
+> ===============================
+. * STEP 1 — Data Import & Cleaning (already done 
+> in Step 0)
+. *===============================================
+> ===============================
+. display ""
+
+
+. display "=== STEP 1: Data Import & Cleaning ==="
+=== STEP 1: Data Import & Cleaning ===
+
+. 
+. * Already imported and cleaned above — just save
+>  the analysis dataset
+. save "`DAT'/lalonde_analysis.dta", replace
+(file
+    /Users/brycewang/Documents/GitHub/Awesome-Ag
+    > ent-Skills-for-Empirical-Research/demo-not
+    > ebooks/_stata_lalonde_outputs_v2/data/lalo
+    > nde_analysis.dta not found)
+file
+    /Users/brycewang/Documents/GitHub/Awesome-Ag
+    > ent-Skills-for-Empirical-Research/demo-not
+    > ebooks/_stata_lalonde_outputs_v2/data/lalo
+    > nde_analysis.dta saved
+
+. display "Analysis dataset saved to `DAT'/lalonde
+> _analysis.dta"
+Analysis dataset saved to /Users/brycewang/Documen
+> ts/GitHub/Awesome-Agent-Skills-for-Empirical-Res
+> earch/demo-notebooks/_stata_lalonde_outputs_v2/d
+> ata/lalonde_analysis.dta
+
+. 
+. *===============================================
+> ===============================
+. * STEP 2 — Variable Construction
+. *===============================================
+> ===============================
+. display ""
+
+
+. display "=== STEP 2: Variable Construction ==="
+=== STEP 2: Variable Construction ===
+
+. 
+. use "`DAT'/lalonde_analysis.dta", clear
+
+. 
+. * Create log-transformed earnings (floor at 1 to
+>  handle any zeros)
+. gen re78_log = log(re78) if re78 > 0
+(143 missing values generated)
+
+. replace re78_log = log(1) if re78 <= 0
+(143 real changes made)
+
+. label var re78_log "Log(1978 earnings), floor at
+>  1"
+
+. 
+. * Real earnings in 2023 USD (CPI adjustment appr
+> ox 3x from 1978)
+. gen re78_real = re78 * 3.0
+
+. label var re78_real "1978 earnings in 2023 USD (
+> approx)"
+
+. 
+. * Pre-treatment earnings total
+. gen re74_real = re74 * 3.0
+
+. gen re75_real = re75 * 3.0
+
+. label var re74_real "1974 earnings in 2023 USD"
+
+. label var re75_real "1975 earnings in 2023 USD"
+
+. 
+. * Pre-treatment earnings growth
+. gen earnings_growth = re75 - re74
+
+. label var earnings_growth "Earnings change 1974-
+> 1975"
+
+. 
+. * Potential earnings loss (1975 vs 1974)
+. gen earnings_loss = (re75 - re74) < 0
+
+. label var earnings_loss "Earnings decline 1974-1
+> 975"
+
+. 
+. * Age squared
+. gen age_sq = age^2
+
+. label var age_sq "Age squared"
+
+. 
+. * Education × treatment interaction
+. gen educ_x_treat = educ * treated
+
+. label var educ_x_treat "Education × Treatment"
+
+. 
+. * Black × treatment interaction
+. gen black_x_treat = black * treated
+
+. label var black_x_treat "Black × Treatment"
+
+. 
+. * Married × treatment interaction
+. gen married_x_treat = married * treated
+
+. label var married_x_treat "Married × Treatment"
+
+. 
+. * Log pre-treatment earnings
+. gen re74_log = log(max(re74, 1))
+
+. gen re75_log = log(max(re75, 1))
+
+. label var re74_log "Log(1974 earnings), floor at
+>  1"
+
+. label var re75_log "Log(1975 earnings), floor at
+>  1"
+
+. 
+. * Indicator for zero earnings in pre-period
+. gen zero_earnings_74 = (re74 == 0)
+
+. gen zero_earnings_75 = (re75 == 0)
+
+. label var zero_earnings_74 "Zero earnings in 197
+> 4"
+
+. label var zero_earnings_75 "Zero earnings in 197
+> 5"
+
+. 
+. * Re-define key variable list with new vars
+. local x_vars "age educ black hispan married node
+> gree re74 re75"
+
+. local y_var  "re78"
+
+. 
+. save "`DAT'/lalonde_analysis.dta", replace
+file
+    /Users/brycewang/Documents/GitHub/Awesome-Ag
+    > ent-Skills-for-Empirical-Research/demo-not
+    > ebooks/_stata_lalonde_outputs_v2/data/lalo
+    > nde_analysis.dta saved
+
+. display "Variable construction complete. Dataset
+>  saved."
+Variable construction complete. Dataset saved.
+
+. 
+. *===============================================
+> ===============================
+. * STEP 2.5 — Empirical Strategy
+. *===============================================
+> ===============================
+. display ""
+
+
+. display "=== STEP 2.5: Empirical Strategy ==="
+=== STEP 2.5: Empirical Strategy ===
+
+. 
+. display "Design: Cross-sectional, selection-on-o
+> bservables"
+Design: Cross-sectional, selection-on-observables
+
+. display "Estimand: ATT (Average Treatment Effect
+>  on the Treated)"
+Estimand: ATT (Average Treatment Effect on the Tre
+> ated)
+
+. display "Identifying assumption: Unconfoundednes
+> s + Overlap"
+Identifying assumption: Unconfoundedness + Overlap
+
+. display ""
+
+
+. display "Estimating equation (OLS):"
+Estimating equation (OLS):
+
+. display "  re78 = α + β·treat + X'γ + ε"
+  re78 = α + β·treat + X'γ + ε
+
+. display ""
+
+
+. display "Estimating equation (matching/IPW):"
+Estimating equation (matching/IPW):
+
+. display "  ATT = E[Y_1 - Y_0 | D=1]"
+  ATT = E[Y_1 - Y_0 | D=1]
+
+. display "  = E[E[Y_1 - Y_0 | X, D=1]]  (conditio
+> nal on covariates)"
+  = E[E[Y_1 - Y_0 | X, D=1]]  (conditional on cova
+> riates)
+
+. display ""
+
+
+. display "Estimator stack:"
+Estimator stack:
+
+. display "  1. OLS with progressive controls"
+  1. OLS with progressive controls
+
+. display "  2. teffects psmatch (nearest-neighbor
+>  PSM)"
+  2. teffects psmatch (nearest-neighbor PSM)
+
+. display "  3. teffects ipwra (IPW with regressio
+> n adjustment)"
+  3. teffects ipwra (IPW with regression adjustmen
+> t)
+
+. display "  4. teffects aipw (doubly-robust AIPW)
+> "
+  4. teffects aipw (doubly-robust AIPW)
+
+. display "  5. psmatch2 (alternative PSM with com
+> mon support)"
+  5. psmatch2 (alternative PSM with common support
+> )
+
+. display "  6. ebalance (entropy balancing)"
+  6. ebalance (entropy balancing)
+
+. 
+. *===============================================
+> ===============================
+. * STEP 3 — Descriptive Statistics & Table 1
+. *===============================================
+> ===============================
+. display ""
+
+
+. display "=== STEP 3: Descriptive Statistics & Ta
+> ble 1 ==="
+=== STEP 3: Descriptive Statistics & Table 1 ===
+
+. 
+. use "`DAT'/lalonde_analysis.dta", clear
+
+. 
+. * 3a. Full-sample summary
+. local sum_vars "re78 re74 re75 age educ black hi
+> span married nodegree"
+
+. tabstat `sum_vars', statistics(n mean sd min p25
+>  p50 p75 max) columns(statistics)
+
+    Variable |         N      Mean        SD
+-------------+------------------------------
+        re78 |       614  6792.834  7470.731
+        re74 |       614  4557.547  6477.964
+        re75 |       614  2184.938  3295.679
+         age |       614  27.36319  9.881187
+        educ |       614  10.26873  2.628325
+       black |       614  .3957655  .4894132
+      hispan |       614  .1172638  .3219967
+     married |       614  .4153094  .4931771
+    nodegree |       614  .6302932  .4831189
+--------------------------------------------
+
+    Variable |       Min       p25       p50
+-------------+------------------------------
+        re78 |         0   237.914  4759.019
+        re74 |         0         0   1042.33
+        re75 |         0         0  601.5484
+         age |        16        20        25
+        educ |         0         9        11
+       black |         0         0         0
+      hispan |         0         0         0
+     married |         0         0         0
+    nodegree |         0         0         1
+--------------------------------------------
+
+    Variable |       p75       Max
+-------------+--------------------
+        re78 |  10923.35  60307.93
+        re74 |  7891.927  35040.07
+        re75 |  3254.806  25142.24
+         age |        32        55
+        educ |        12        18
+       black |         1         1
+      hispan |         0         1
+     married |         1         1
+    nodegree |         1         1
+----------------------------------
+
+. 
+. * 3b. Full Table 1 (all strata) via esttab
+. eststo clear
+
+. estpost tabstat `sum_vars', by(treated) statisti
+> cs(mean sd) columns(statistics) nototal
+
+Summary statistics: mean sd
+     for variables: re78 re74 re75 age educ black 
+> hispan married nodegree
+  by categories of: treated
+
+     treated |   e(mean)      e(sd) 
+-------------+----------------------
+0            |                      
+        re78 |   6984.17   7294.162 
+        re74 |  5619.237   6788.751 
+        re75 |  2466.484   3291.996 
+         age |   28.0303   10.78665 
+        educ |  10.23543   2.855238 
+       black |  .2027972   .4025521 
+      hispan |  .1421911   .3496538 
+     married |  .5128205   .5004192 
+    nodegree |  .5967366   .4911255 
+-------------+----------------------
+1            |                      
+        re78 |  6349.144   7867.402 
+        re74 |  2095.574    4886.62 
+        re75 |  1532.055   3219.251 
+         age |  25.81622   7.155019 
+        educ |  10.34595    2.01065 
+       black |  .8432432   .3645579 
+      hispan |  .0594595   .2371244 
+     married |  .1891892   .3927217 
+    nodegree |  .7081081   .4558666 
+
+. esttab using "`TAB'/table1_full.tex", replace //
+> /
+>     se star(* 0.10 ** 0.05 *** 0.01) ///
+>     label booktabs ///
+>     mtitles("(1) Control" "(2) Treated" "(3) Dif
+> f" "(4) SMD") ///
+>     title("Table 1: Summary Statistics by Treatm
+> ent Status")
+(file
+    /Users/brycewang/Documents/GitHub/Awesome-Ag
+    > ent-Skills-for-Empirical-Research/demo-not
+    > ebooks/_stata_lalonde_outputs_v2/tables/ta
+    > ble1_full.tex not found)
+(output written to /Users/brycewang/Documents/GitH
+> ub/Awesome-Agent-Skills-for-Empirical-Research/d
+> emo-notebooks/_stata_lalonde_outputs_v2/tables/t
+> able1_full.tex)
+
+. esttab using "`TAB'/table1_full.rtf", replace //
+> /
+>     se star(* 0.10 ** 0.05 *** 0.01) ///
+>     label ///
+>     mtitles("(1) Control" "(2) Treated" "(3) Dif
+> f" "(4) SMD")
+(file
+    /Users/brycewang/Documents/GitHub/Awesome-Ag
+    > ent-Skills-for-Empirical-Research/demo-not
+    > ebooks/_stata_lalonde_outputs_v2/tables/ta
+    > ble1_full.rtf not found)
+(output written to /Users/brycewang/Documents/GitH
+> ub/Awesome-Agent-Skills-for-Empirical-Research/d
+> emo-notebooks/_stata_lalonde_outputs_v2/tables/t
+> able1_full.rtf)
+
+. 
+. * outreg2 for xlsx/docx
+. esttab, label
+
+------------------------------------
+                              (1)   
+                                    
+------------------------------------
+------------------------------------
+Observations                  614   
+------------------------------------
+t statistics in parentheses
+* p<0.05, ** p<0.01, *** p<0.001
+
+. outreg2 using "`TAB'/table1_full.xlsx", replace 
+> label dec(3) ///
+>     keep(`sum_vars') addstat("Mean (T)", `=2.341
+> ', "Mean (C)", `=1.794') ///
+>     title("Table 1: Summary Statistics")
+==1 invalid name
+r(198);
+
+end of do-file
+
+r(198);
+

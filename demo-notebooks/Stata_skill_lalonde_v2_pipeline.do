@@ -47,13 +47,22 @@ import delimited "`OUT'/data/lalonde.csv", clear
 rename treat treated
 label var treated "Treatment indicator (1=treated, 0=control)"
 
+* Create race dummy variables (dataset has race as string column)
+cap drop black hispan white
+gen black = (race == "black")
+gen hispan = (race == "hispan")
+gen white = (race == "white")
+label var black "Black (1=yes)"
+label var hispan "Hispanic (1=yes)"
+label var white "White (1=yes)"
+
 * Sample log matrix
-matrix sample_log = J(0, 2, .)
-local row = 0
+mat sample_log = J(1, 2, .)
+local row = 1
 
 local n0 = _N
 local ++row
-matrix sample_log = (nullmat(sample_log) \ `row', `n0')
+mat sample_log = (nullmat(sample_log) \ `row', `n0')
 display "Step 0. raw:                              N = " %12.0fc `n0'
 
 * Keep only complete cases on key variables
@@ -67,7 +76,7 @@ foreach v of local key_vars {
 
 local n1 = _N
 local ++row
-matrix sample_log = (nullmat(sample_log) \ `row', `n1')
+mat sample_log = (nullmat(sample_log) \ `row', `n1')
 display "Step 1. after import:                     N = " %12.0fc `n1'
 
 * Drop rows with missing outcome or treatment
@@ -76,7 +85,7 @@ qui drop if missing(treated)
 
 local n2 = _N
 local ++row
-matrix sample_log = (nullmat(sample_log) \ `row', `n2')
+mat sample_log = (nullmat(sample_log) \ `row', `n2')
 display "Step 2. drop missing re78/treated:       N = " %12.0fc `n2' "  (Δ " %10.0fc `n1' - `n2' ")"
 
 * Drop missing on key covariates
@@ -85,8 +94,9 @@ foreach v in age educ black hispan married nodegree re74 re75 {
 }
 local n3 = _N
 local ++row
-matrix sample_log = (nullmat(sample_log) \ `row', `n3')
+mat sample_log = (nullmat(sample_log) \ `row', `n3')
 display "Step 3. drop missing covariates:          N = " %12.0fc `n3' "  (Δ " %10.0fc `n2' - `n3' ")"
+display "Step 4. final analysis sample:            N = " %12.0fc `n3'
 
 * Persist sample log to JSON
 file open f using "`ART'/sample_construction.json", write replace
@@ -95,6 +105,7 @@ file write f `"  "step_0_raw": `=sample_log[1,2]',"' _n
 file write f `"  "step_1_import": `=sample_log[2,2]',"' _n
 file write f `"  "step_2_keyvar": `=sample_log[3,2]',"' _n
 file write f `"  "step_3_covars": `=sample_log[4,2]'"' _n
+file write f `"  "step_4_final": `=sample_log[5,2]'"' _n
 file write f "}" _n
 file close f
 
@@ -116,7 +127,7 @@ foreach v of local key_vars {
 display "Check 2. dtypes OK on all key vars"
 
 * Check 3: missingness
-mdesc `key_vars'
+misstable sum `key_vars'
 foreach v of local key_vars {
     qui count if missing(`v')
     if r(N) > 0 {
@@ -128,7 +139,7 @@ display "Check 3. missingness: PASS (no missing on key vars)"
 * Check 4: treatment balance
 tab treated, mis
 display "Check 4. treatment distribution: "
-tabstat re78, by(treated) diff
+bys treated: summarize re78
 
 *==============================================================================
 * STEP 1 — Data Import & Cleaning (already done in Step 0)
@@ -256,24 +267,42 @@ esttab using "`TAB'/table1_full.rtf", replace ///
     label ///
     mtitles("(1) Control" "(2) Treated" "(3) Diff" "(4) SMD")
 
-* outreg2 for xlsx/docx
+* outreg2 for xlsx/docx (basic, without custom addstat to avoid expression syntax issues)
 esttab, label
 outreg2 using "`TAB'/table1_full.xlsx", replace label dec(3) ///
-    keep(`sum_vars') addstat("Mean (T)", `=2.341', "Mean (C)", `=1.794') ///
+    keep(`sum_vars') ///
     title("Table 1: Summary Statistics")
 outreg2 using "`TAB'/table1_full.doc", replace label dec(3) ///
-    keep(`sum_vars') addstat("Mean (T)", `=2.341', "Mean (C)", `=1.794') ///
+    keep(`sum_vars') ///
     title("Table 1: Summary Statistics")
 
 display "Table 1 (full) saved to `TAB'/table1_full.{tex,rtf,xlsx,doc}"
 
 * 3c. Balance table via balancetable (with SMD and p-values)
-balancetable treated age educ black hispan married nodegree re74 re75 ///
-    using "`TAB'/table1_balance.tex", replace varlabels pval smd
-balancetable treated age educ black hispan married nodegree re74 re75 ///
-    using "`TAB'/table1_balance.xlsx", excel
-
-display "Balance table saved to `TAB'/table1_balance.{tex,xlsx}"
+cap which balancetable
+if _rc {
+    * Fallback: manual balance table via esttab
+    eststo clear
+    foreach var of varlist age educ black hispan married nodegree re74 re75 {
+        qui ttest `var', by(treated)
+        eststo: qui mean `var', over(treated)
+    }
+    esttab using "`TAB'/table1_balance.tex", replace ///
+        se star(* 0.10 ** 0.05 *** 0.01) ///
+        label booktabs ///
+        title("Table: Covariate Balance")
+    esttab using "`TAB'/table1_balance.xlsx", replace ///
+        label se star ///
+        title("Table: Covariate Balance")
+    display "Balance table (fallback) saved to `TAB'/table1_balance.{tex,xlsx}"
+}
+else {
+    balancetable treated age educ black hispan married nodegree re74 re75 ///
+        using "`TAB'/table1_balance.tex", replace varlabels pval smd
+    balancetable treated age educ black hispan married nodegree re74 re75 ///
+        using "`TAB'/table1_balance.xlsx", excel
+    display "Balance table saved to `TAB'/table1_balance.{tex,xlsx}"
+}
 
 * 3d. Distribution plots — KDE of outcome by treatment
 twoway (kdensity re78 if treated==0, lcolor(gs3)) ///
@@ -452,19 +481,25 @@ display "Table 2 (main) saved to `TAB'/table2_main.{tex,rtf,xlsx,doc}"
 
 *-------------------------------------------------------------------------------
 * Figure 3: Coefficient plot across M1-M6
-*-------------------------------------------------------------------------------
-coefplot m1 m2 m3 m4 m5 m6, keep(treated) vertical omitted ///
-    yline(0, lpattern(dash) lcolor(gs10)) ///
-    ciopts(recast(rcap)) levels(95) ///
-    xtitle("Specification") ///
-    ytitle("Coefficient on Treatment (ATT, 95% CI)") ///
-    title("Figure 3: Treatment Effect Across Specifications (M1–M6)") ///
-    scheme(s2color) ///
-    addplot(line 0 0, lcolor(gs10) lpattern(dash)) ///
-    name(coefplot_m1_m6, replace)
-graph export "`FIG'/fig3_coefplot.pdf", replace
-graph export "`FIG'/fig3_coefplot.png", replace width(2400) height(1800)
-display "Figure 3 (coefplot) saved to `FIG'/fig3_coefplot.{pdf,png}"
+cap which coefplot
+if _rc {
+    * Fallback: twoway scatter coef CI manually
+    display "coefplot not installed — skipping Figure 3"
+}
+else {
+    coefplot m1 m2 m3 m4 m5 m6, keep(treated) vertical omitted ///
+        yline(0, lpattern(dash) lcolor(gs10)) ///
+        ciopts(recast(rcap)) levels(95) ///
+        xtitle("Specification") ///
+        ytitle("Coefficient on Treatment (ATT, 95% CI)") ///
+        title("Figure 3: Treatment Effect Across Specifications (M1–M6)") ///
+        scheme(s2color) ///
+        addplot(line 0 0, lcolor(gs10) lpattern(dash)) ///
+        name(coefplot_m1_m6, replace)
+    graph export "`FIG'/fig3_coefplot.pdf", replace
+    graph export "`FIG'/fig3_coefplot.png", replace width(2400) height(1800)
+    display "Figure 3 (coefplot) saved to `FIG'/fig3_coefplot.{pdf,png}"
+}
 
 *-------------------------------------------------------------------------------
 * 5.B Pattern B — Design Horse Race (Table 2-bis)
@@ -488,31 +523,94 @@ eststo ipwra: qui teffects ipwra (re78) (treated age educ black hispan married n
 * M4: teffects aipw (augmented IPW, doubly-robust)
 eststo aipw: qui teffects aipw (re78) (treated age educ black hispan married nodegree re74 re75), atet
 
-* M5: psmatch2 with common support
+* M5: psmatch2 with common support (if installed)
 cap which psmatch2
-eststo psm2: qui psmatch2 treated age educ black hispan married nodegree re74 re75, out(re78) ate kernel
-
-* M6: ebalance (entropy balancing)
-cap which ebalance
-ebalance treated age educ black hispan married nodegree re74 re75, replace
-qui reg re78 treated age educ black hispan married nodegree re74 re75 [pw=_webal], vce(robust)
-eststo ebal: qui reg re78 treated age educ black hispan married nodegree re74 re75 [pw=_webal], vce(robust)
-
-* Horse-race table
-foreach ext in tex rtf {
-    esttab ols psm ipwra aipw psm2 ebal using "`TAB'/table2b_designs.`ext'", ///
-        replace se star(* 0.10 ** 0.05 *** 0.01) ///
-        label booktabs ///
-        keep(treated) ///
-        mtitles("(1) OLS" "(2) PSM" "(3) IPWRA" "(4) AIPW" "(5) PSM2" "(6) Entropy Bal.") ///
-        stats(N, labels("N")) ///
-        addnotes("ATT estimates. OLS: cluster-robust SE. PSM: teffects psmatch NN(1). IPWRA: IPW with regression adjustment. AIPW: doubly-robust. PSM2: psmatch2 kernel. Entropy Bal.: entropy balancing weights.")
+if _rc {
+    display "psmatch2 not installed — skipping PSM2 column"
+}
+else {
+    eststo psm2: qui psmatch2 treated age educ black hispan married nodegree re74 re75, out(re78) ate kernel
 }
 
-outreg2 using "`TAB'/table2b_designs.xlsx", replace label dec(3) ///
-    keep(treated) addtext(Controls, Yes) title("Table 2b: Design Horse Race (ATT Estimates)")
-outreg2 using "`TAB'/table2b_designs.doc", replace label dec(3) ///
-    keep(treated) addtext(Controls, Yes) title("Table 2b: Design Horse Race (ATT Estimates)")
+* M6: ebalance (entropy balancing, if installed)
+cap which ebalance
+if _rc {
+    display "ebalance not installed — skipping Entropy Balancing column"
+}
+else {
+    cap qui ebalance treated age educ black hispan married nodegree re74 re75, replace
+    if _rc {
+        display "ebalance failed — skipping Entropy Balancing column"
+    }
+    else {
+        qui reg re78 treated age educ black hispan married nodegree re74 re75 [pw=_webal], vce(robust)
+        eststo ebal: qui reg re78 treated age educ black hispan married nodegree re74 re75 [pw=_webal], vce(robust)
+    }
+}
+
+* Horse-race table
+cap which psmatch2
+local has_psm2 = !_rc
+cap which ebalance
+local has_ebal = !_rc
+
+if `has_psm2' & `has_ebal' {
+    foreach ext in tex rtf {
+        esttab ols psm ipwra aipw psm2 ebal using "`TAB'/table2b_designs.`ext'", ///
+            replace se star(* 0.10 ** 0.05 *** 0.01) ///
+            label booktabs ///
+            keep(treated) ///
+            mtitles("(1) OLS" "(2) PSM" "(3) IPWRA" "(4) AIPW" "(5) PSM2" "(6) Entropy Bal.") ///
+            stats(N, labels("N")) ///
+            addnotes("ATT estimates. OLS: cluster-robust SE. PSM: teffects psmatch NN(1). IPWRA: IPW with regression adjustment. AIPW: doubly-robust. PSM2: psmatch2 kernel. Entropy Bal.: entropy balancing weights.")
+    }
+}
+else if `has_psm2' {
+    foreach ext in tex rtf {
+        esttab ols psm ipwra aipw psm2 using "`TAB'/table2b_designs.`ext'", ///
+            replace se star(* 0.10 ** 0.05 *** 0.01) ///
+            label booktabs ///
+            keep(treated) ///
+            mtitles("(1) OLS" "(2) PSM" "(3) IPWRA" "(4) AIPW" "(5) PSM2") ///
+            stats(N, labels("N")) ///
+            addnotes("ATT estimates. OLS: cluster-robust SE. PSM: teffects psmatch NN(1). IPWRA: IPW with regression adjustment. AIPW: doubly-robust. PSM2: psmatch2 kernel.")
+    }
+}
+else {
+    foreach ext in tex rtf {
+        esttab ols psm ipwra aipw using "`TAB'/table2b_designs.`ext'", ///
+            replace se star(* 0.10 ** 0.05 *** 0.01) ///
+            label booktabs ///
+            keep(treated) ///
+            mtitles("(1) OLS" "(2) PSM" "(3) IPWRA" "(4) AIPW") ///
+            stats(N, labels("N")) ///
+            addnotes("ATT estimates. OLS: cluster-robust SE. PSM: teffects psmatch NN(1). IPWRA: IPW with regression adjustment. AIPW: doubly-robust.")
+    }
+}
+
+cap which psmatch2
+local has_psm2 = !_rc
+cap which ebalance
+local has_ebal = !_rc
+
+if `has_psm2' & `has_ebal' {
+    outreg2 using "`TAB'/table2b_designs.xlsx", replace label dec(3) ///
+        keep(treated) addtext(Controls, Yes) title("Table 2b: Design Horse Race (ATT Estimates)")
+    outreg2 using "`TAB'/table2b_designs.doc", replace label dec(3) ///
+        keep(treated) addtext(Controls, Yes) title("Table 2b: Design Horse Race (ATT Estimates)")
+}
+else if `has_psm2' {
+    outreg2 using "`TAB'/table2b_designs.xlsx", replace label dec(3) ///
+        keep(treated) addtext(Controls, Yes) title("Table 2b: Design Horse Race (ATT Estimates, OLS/PSM/IPWRA/AIPW)")
+    outreg2 using "`TAB'/table2b_designs.doc", replace label dec(3) ///
+        keep(treated) addtext(Controls, Yes) title("Table 2b: Design Horse Race (ATT Estimates, OLS/PSM/IPWRA/AIPW)")
+}
+else {
+    outreg2 using "`TAB'/table2b_designs.xlsx", replace label dec(3) ///
+        keep(treated) addtext(Controls, Yes) title("Table 2b: Design Horse Race (ATT Estimates, OLS/PSM/IPWRA/AIPW)")
+    outreg2 using "`TAB'/table2b_designs.doc", replace label dec(3) ///
+        keep(treated) addtext(Controls, Yes) title("Table 2b: Design Horse Race (ATT Estimates, OLS/PSM/IPWRA/AIPW)")
+}
 
 display "Table 2b (designs) saved to `TAB'/table2b_designs.{tex,rtf,xlsx,doc}"
 
@@ -530,15 +628,29 @@ eststo clear
 eststo base: qui reg re78 treated age educ black hispan married nodegree re74 re75, vce(robust)
 
 * R1: Winsorized outcome at 1st/99th percentile
-winsor2 re78, cuts(1 99) suffix(_w)
-eststo r1: qui reg re78_w treated age educ black hispan married nodegree re74 re75, vce(robust)
+cap which winsor2
+if _rc {
+    * Fallback: manual winsorization
+    qui sum re78, detail
+    local w_lo = r(p1)
+    local w_hi = r(p99)
+    gen re78_w = re78
+    qui replace re78_w = `w_lo' if re78 < `w_lo'
+    qui replace re78_w = `w_hi' if re78 > `w_hi'
+    eststo r1: qui reg re78_w treated age educ black hispan married nodegree re74 re75, vce(robust)
+    display "Winsorized regression (fallback) completed"
+}
+else {
+    winsor2 re78, cuts(1 99) suffix(_w)
+    eststo r1: qui reg re78_w treated age educ black hispan married nodegree re74 re75, vce(robust)
+}
 
 * R2: Log earnings outcome
 gen re78_ln = log(max(re78, 1))
 eststo r2: qui reg re78_ln treated age educ black hispan married nodegree re74 re75, vce(robust)
 
 * R3: Exclude zero-earners
-eststo r3: qui reg re78 treat age educ black hispan married nodegree re74 re75 if re78 > 0, vce(robust)
+eststo r3: qui reg re78 treated age educ black hispan married nodegree re74 re75 if re78 > 0, vce(robust)
 
 * R4: Alternative SE — cluster at household level (if available, else use robust)
 eststo r4: qui reg re78 treated age educ black hispan married nodegree re74 re75, vce(cluster married)
@@ -569,16 +681,22 @@ outreg2 using "`TAB'/tableA1_robustness.doc", replace label dec(3) ///
 display "Table A1 (robustness) saved to `TAB'/tableA1_robustness.{tex,rtf,xlsx,doc}"
 
 * Figure 5: Spec curve — coefficient + CI across all specs
-coefplot base r1 r2 r3 r4 r5 r6, keep(treated) vertical omitted ///
-    yline(0, lpattern(dash) lcolor(gs10)) ///
-    ciopts(recast(rcap)) levels(95) ///
-    xtitle("Specification") ///
-    ytitle("Coefficient on Treatment (ATT, 95% CI)") ///
-    title("Figure 5: Specification Curve — Robustness Battery") ///
-    scheme(s2color)
-graph export "`FIG'/fig5_spec_curve.pdf", replace
-graph export "`FIG'/fig5_spec_curve.png", replace width(2400) height(1800)
-display "Figure 5 (spec curve) saved to `FIG'/fig5_spec_curve.{pdf,png}"
+cap which coefplot
+if _rc {
+    display "coefplot not installed — skipping Figure 5"
+}
+else {
+    coefplot base r1 r2 r3 r4 r5 r6, keep(treated) vertical omitted ///
+        yline(0, lpattern(dash) lcolor(gs10)) ///
+        ciopts(recast(rcap)) levels(95) ///
+        xtitle("Specification") ///
+        ytitle("Coefficient on Treatment (ATT, 95% CI)") ///
+        title("Figure 5: Specification Curve — Robustness Battery") ///
+        scheme(s2color)
+    graph export "`FIG'/fig5_spec_curve.pdf", replace
+    graph export "`FIG'/fig5_spec_curve.png", replace width(2400) height(1800)
+    display "Figure 5 (spec curve) saved to `FIG'/fig5_spec_curve.{pdf,png}"
+}
 
 *==============================================================================
 * STEP 7 — Further Analysis: Heterogeneity
@@ -628,36 +746,42 @@ outreg2 using "`TAB'/table4_heterogeneity.doc", replace label dec(3) ///
 display "Table 4 (heterogeneity) saved to `TAB'/table4_heterogeneity.{tex,rtf,xlsx,doc}"
 
 * Figure 4: Heterogeneity — coefplot by subgroup
-coefplot h_black h_nblack h_coll h_ncoll h_married h_single, keep(treated) vertical omitted ///
-    yline(0, lpattern(dash) lcolor(gs10)) ///
-    ciopts(recast(rcap)) levels(95) ///
-    xtitle("Subgroup") ///
-    ytitle("ATT Estimate (95% CI)") ///
-    title("Figure 4: Treatment Effects by Subgroup") ///
-    scheme(s2color)
-graph export "`FIG'/fig4_heterogeneity.pdf", replace
-graph export "`FIG'/fig4_heterogeneity.png", replace width(2400) height(1800)
-display "Figure 4 (heterogeneity) saved to `FIG'/fig4_heterogeneity.{pdf,png}"
+cap which coefplot
+if _rc {
+    display "coefplot not installed — skipping Figure 4"
+}
+else {
+    coefplot h_black h_nblack h_coll h_ncoll h_married h_single, keep(treated) vertical omitted ///
+        yline(0, lpattern(dash) lcolor(gs10)) ///
+        ciopts(recast(rcap)) levels(95) ///
+        xtitle("Subgroup") ///
+        ytitle("ATT Estimate (95% CI)") ///
+        title("Figure 4: Treatment Effects by Subgroup") ///
+        scheme(s2color)
+    graph export "`FIG'/fig4_heterogeneity.pdf", replace
+    graph export "`FIG'/fig4_heterogeneity.png", replace width(2400) height(1800)
+    display "Figure 4 (heterogeneity) saved to `FIG'/fig4_heterogeneity.{pdf,png}"
 
-* Subgroup-specific heterogeneity figures
-* By race
-coefplot h_black h_nblack, keep(1.treated#1.black) vertical omitted ///
-    yline(0, lpattern(dash)) ///
-    xtitle("Subgroup") xlabel(1 "Black" 2 "Non-Black") ///
-    ytitle("Treatment Effect × Black (ATT, 95% CI)") ///
-    title("Figure: Treatment Effect Differential by Race")
-graph export "`FIG'/het_treat_by_black.pdf", replace
-graph export "`FIG'/het_treat_by_black.png", replace width(2400) height(1800)
+    * Subgroup-specific heterogeneity figures
+    * By race
+    coefplot h_black h_nblack, keep(1.treated#1.black) vertical omitted ///
+        yline(0, lpattern(dash)) ///
+        xtitle("Subgroup") xlabel(1 "Black" 2 "Non-Black") ///
+        ytitle("Treatment Effect × Black (ATT, 95% CI)") ///
+        title("Figure: Treatment Effect Differential by Race")
+    graph export "`FIG'/het_treat_by_black.pdf", replace
+    graph export "`FIG'/het_treat_by_black.png", replace width(2400) height(1800)
 
-* By education
-coefplot h_coll h_ncoll, keep(1.treated#1.college) vertical omitted ///
-    yline(0, lpattern(dash)) ///
-    xtitle("Subgroup") xlabel(1 "College" 2 "Non-College") ///
-    ytitle("Treatment Effect × College (ATT, 95% CI)") ///
-    title("Figure: Treatment Effect Differential by Education")
-graph export "`FIG'/het_treat_by_educ.pdf", replace
-graph export "`FIG'/het_treat_by_educ.png", replace width(2400) height(1800)
-display "Subgroup heterogeneity plots saved"
+    * By education
+    coefplot h_coll h_ncoll, keep(1.treated#1.college) vertical omitted ///
+        yline(0, lpattern(dash)) ///
+        xtitle("Subgroup") xlabel(1 "College" 2 "Non-College") ///
+        ytitle("Treatment Effect × College (ATT, 95% CI)") ///
+        title("Figure: Treatment Effect Differential by Education")
+    graph export "`FIG'/het_treat_by_educ.pdf", replace
+    graph export "`FIG'/het_treat_by_educ.png", replace width(2400) height(1800)
+    display "Subgroup heterogeneity plots saved"
+}
 
 *==============================================================================
 * STEP 8 — Publication Tables & Figures
@@ -666,17 +790,23 @@ display ""
 display "=== STEP 8: Final Publication Export ==="
 
 * Coefficient plot — main estimators comparison (Figure 3 companion)
-coefplot ols psm ipwra aipw psm2 ebal, keep(treated) vertical omitted ///
-    yline(0, lpattern(dash) lcolor(gs10)) ///
-    ciopts(recast(rcap)) levels(95) ///
-    xtitle("Estimator") ///
-    ytitle("ATT Estimate (95% CI)") ///
-    title("Figure 3b: ATT Estimates Across Estimators") ///
-    scheme(s2color) ///
-    name(coefplot_estimators, replace)
-graph export "`FIG'/coefplot_estimators.pdf", replace
-graph export "`FIG'/coefplot_estimators.png", replace width(2400) height(1800)
-display "Figure 3b (coefplot estimators) saved to `FIG'/coefplot_estimators.{pdf,png}"
+cap which coefplot
+if _rc {
+    display "coefplot not installed — skipping Figure 3b"
+}
+else {
+    coefplot ols psm ipwra aipw psm2 ebal, keep(treated) vertical omitted ///
+        yline(0, lpattern(dash) lcolor(gs10)) ///
+        ciopts(recast(rcap)) levels(95) ///
+        xtitle("Estimator") ///
+        ytitle("ATT Estimate (95% CI)") ///
+        title("Figure 3b: ATT Estimates Across Estimators") ///
+        scheme(s2color) ///
+        name(coefplot_estimators, replace)
+    graph export "`FIG'/coefplot_estimators.pdf", replace
+    graph export "`FIG'/coefplot_estimators.png", replace width(2400) height(1800)
+    display "Figure 3b (coefplot estimators) saved to `FIG'/coefplot_estimators.{pdf,png}"
+}
 
 * Summary of all outputs
 display ""
