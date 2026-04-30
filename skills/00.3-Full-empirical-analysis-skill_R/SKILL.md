@@ -125,11 +125,11 @@ This skill defaults to the **applied-economics paper convention**. Unless the us
 
 | # | Table | R source | Saves to |
 |---|---|---|---|
-| **T1** | Summary statistics & balance (treated vs control, with SMD / p-values) | `gtsummary::tbl_summary` + `add_p` + `add_difference` (Step 3) | `tables/table1_balance.tex` (+ `.docx`) |
-| **T2** ★ | **Main results — multi-column regression M1→M6** (progressive controls + FE) | `fixest::feols` × 6 specs → `modelsummary` (Step 5–6) | `tables/table2_main.tex` (+ `.docx`) |
-| **T3** | Mechanism / outcome ladder — same treatment, 3+ outcomes side-by-side | loop `feols` over `y ∈ {Y1, Y2, Y3, Y_main}` → `modelsummary` (Step 7) | `tables/table3_mechanism.tex` |
-| **T4** | Heterogeneity — subgroup × main coef (gender, age, region, …) | subgroup `feols` × `linearHypothesis` → `modelsummary` (Step 7) | `tables/table4_heterogeneity.tex` |
-| **T5** | Robustness battery — alt SE / cluster / sample / placebo, in **one** table | `feols` × variants → `modelsummary` (Step 6) | `tables/table5_robustness.tex` |
+| **T1** | Summary statistics & balance (treated vs control, with SMD / p-values) | `gtsummary::tbl_summary` + `add_p` + `add_difference` (Step 3) | `tables/table1_balance.xlsx` + `.docx` + `.tex` |
+| **T2** ★ | **Main results — multi-column regression M1→M6** (progressive controls + FE) | `fixest::feols` × 6 specs → `modelsummary` (Step 5–6) | `tables/table2_main.xlsx` + `.docx` + `.tex` |
+| **T3** | Mechanism / outcome ladder — same treatment, 3+ outcomes side-by-side | loop `feols` over `y ∈ {Y1, Y2, Y3, Y_main}` → `modelsummary` (Step 7) | `tables/table3_mechanism.xlsx` + `.docx` + `.tex` |
+| **T4** | Heterogeneity — subgroup × main coef (gender, age, region, …) | subgroup `feols` × `linearHypothesis` → `modelsummary` (Step 7) | `tables/table4_heterogeneity.xlsx` + `.docx` + `.tex` |
+| **T5** | Robustness battery — alt SE / cluster / sample / placebo, in **one** table | `feols` × variants → `modelsummary` (Step 6) | `tables/table5_robustness.xlsx` + `.docx` + `.tex` |
 
 > **★ Table 2 is the centerpiece of every economics paper.** It is the multi-column regression table that walks the reader from raw correlation (M1) to the fully-specified design (M6: 2-way FE + interacted FE + cluster-robust SE). Do **not** collapse it into a single column. Do **not** report only the headline coefficient. The progression *is* the credibility argument: if M1→M6 is monotone and stable, the design is plausibly identifying; if it collapses on adding FE, that *is* the result.
 >
@@ -145,23 +145,26 @@ This skill defaults to the **applied-economics paper convention**. Unless the us
 
 | # | Figure | R source | Saves to |
 |---|---|---|---|
-| **F1** | Trend / motivation — treated vs control over time, with policy line | `dplyr` group means → `ggplot + geom_line` (Step 3) | `figures/fig1_trend.pdf` (+ `.png`) |
-| **F2** | Event-study coefficients with 95% CI, base period at –1 | `fixest::sunab()` / `did::ggdid` / `iplot` (Step 5) | `figures/fig2_event_study.pdf` |
-| **F3** | Coefficient plot across specs M1→M6 | `modelsummary::modelplot()` (Step 8) | `figures/fig3_coefplot.pdf` |
-| **F4** | Robustness / sensitivity — `bacondecomp::bacon` plot, `HonestDiD::createSensitivityPlot`, or spec curve | scenario-specific (Step 6) | `figures/fig4_sensitivity.pdf` |
+| **F1** | Trend / motivation — treated vs control over time, with policy line | `dplyr` group means → `ggplot + geom_line` (Step 3) | `figures/fig1_trend.png` (300 dpi, **必须导出 PNG**) + `.pdf` |
+| **F2** | Event-study coefficients with 95% CI, base period at –1 | `fixest::sunab()` / `did::ggdid` / `iplot` (Step 5) | `figures/fig2_event_study.png` (300 dpi, **必须导出 PNG**) + `.pdf` |
+| **F3** | Coefficient plot across specs M1→M6 | `modelsummary::modelplot()` (Step 8) | `figures/fig3_coefplot.png` (300 dpi, **必须导出 PNG**) + `.pdf` |
+| **F4** | Robustness / sensitivity — `bacondecomp::bacon` plot, `HonestDiD::createSensitivityPlot`, or spec curve | scenario-specific (Step 6) | `figures/fig4_sensitivity.png` (300 dpi, **必须导出 PNG**) + `.pdf` |
 
 ### Output file layout (default)
 
 ```
 project/
-├── tables/    table1_balance.{tex,docx}    table2_main.{tex,docx}
-│              table3_mechanism.tex         table4_heterogeneity.tex
-│              table5_robustness.tex
-└── figures/   fig1_trend.{pdf,png}         fig2_event_study.{pdf,png}
-               fig3_coefplot.{pdf,png}      fig4_sensitivity.{pdf,png}
+├── tables/    table1_balance.xlsx/.docx/.tex  table2_main.xlsx/.docx/.tex
+│              table3_mechanism.xlsx/.docx/.tex table4_heterogeneity.xlsx/.docx/.tex
+│              table5_robustness.xlsx/.docx/.tex
+└── figures/   fig1_trend.png(300dpi)+.pdf      fig2_event_study.png(300dpi)+.pdf
+               fig3_coefplot.png(300dpi)+.pdf   fig4_sensitivity.png(300dpi)+.pdf
 ```
 
-Every table → `.tex` (LaTeX `booktabs`) **and** `.docx` (Word). Every figure → `.pdf` (vector for LaTeX) **and** `.png` at ≥300 dpi.
+**关键输出规则（必须遵守）：**
+- **图片格式**：所有图片必须同时导出 **PNG 格式（≥300 dpi）** 和 PDF 格式（用于 LaTeX 排版）
+- **表格格式**：所有回归表格必须同时导出 **Excel（.xlsx）**、**Word（.docx）** 和 **LaTeX（.tex）** 三种格式
+- PNG 用于幻灯片、Markdown 文档、邮件等场景；PDF 用于学术论文排版
 
 ### When to deviate
 
@@ -269,35 +272,37 @@ Below is the canonical call at each step. **All examples share one running narra
 
 ## Paper-ready figure & table inventory (what to produce by section)
 
-A modern AER paper has **5–7 figures** and **3–5 main tables** + an appendix robustness table. Every step below leaves at least one numbered artifact on disk. Default file names assume parallel `.tex` / `.docx` / `.html` exports (the agent should produce all three so co-authors can edit in Word, the build system can use LaTeX, and the appendix can publish HTML):
+A modern AER paper has **5–7 figures** and **3–5 main tables** + an appendix robustness table. Every step below leaves at least one numbered artifact on disk. Default file names assume parallel `.tex` / `.docx` / `.xlsx` exports (the agent should produce all three so co-authors can edit in Word, the build system can use LaTeX, and editors can edit raw numbers in Excel). **所有图片必须同时保存 PNG（≥300 dpi）和 PDF 两种格式。**
 
 | § | Artifact | R primitive | Filenames |
 |---|---|---|---|
-| §1 | **Figure 1**: raw trends / treatment rollout | `df %>% group_by(year, treat) %>% summarise(mean(y)) %>% ggplot()` | `figures/fig1_trend.{pdf,png}` |
-| §1 | **Table 1**: summary stats (full / treated / control + Δ + SMD) | `gtsummary::tbl_summary` · `modelsummary::datasummary_balance` | `tables/table1_balance.{tex,docx,html}` |
-| §3 | **Figure 2**: identification graphic (event-study / first-stage / McCrary / RD scatter / SCM trajectory) | `fixest::iplot(es)` · `binsreg` · `rdrobust::rdplot` · `rddensity` · `Synth::path.plot` | `figures/fig2_event_study.{pdf,png}` |
-| §4 | **Table 2**: main results — progressive controls M1→M6 | `modelsummary(list("(1)"=m1,...,"(6)"=m6))` · `fixest::etable` | `tables/table2_main.{tex,docx,html}` |
-| §4 | **Table 2-bis**: design horse-race (OLS / IV / DID / DML) | `modelsummary(list("OLS"=ols, "2SLS"=iv, "CS-DID"=cs, "DML"=dml))` | `tables/table2b_designs.{tex,docx,html}` |
-| §4 | **Figure 3**: coefficient plot across specs | `modelplot(list(m1,...,m6), coef_map="training")` | `figures/fig3_coefplot.{pdf,png}` |
-| §5 | **Table 3**: heterogeneity by subgroup | `modelsummary(g_full, g_male, g_fem, g_q1, ..., g_q4)` | `tables/table3_heterogeneity.{tex,docx,html}` |
-| §5 | **Figure 4**: dose-response / CATE | `marginaleffects::plot_predictions` · `grf::plot.causal_forest` | `figures/fig4_cate.{pdf,png}` |
-| §6 | **Table 4**: mechanism / outcome ladder | loop `feols` over outcomes → `modelsummary` | `tables/table4_mechanism.{tex,docx,html}` |
-| §7 | **Table A1**: robustness master (one column per check) | `modelsummary(list(base, no99, balpan, dropearly, wfe, cl2way, logy, ihsy, psm, ebal))` | `tables/tableA1_robustness.{tex,docx,html}` |
-| §7 | **Figure 5**: spec curve | `specr::specr()` + `plot_specs` (or hand-rolled `purrr::pmap`) | `figures/fig5_spec_curve.{pdf,png}` |
-| §7 | **Figure 6**: sensitivity (HonestDiD / Oster / E-value) | `HonestDiD::createSensitivityPlot` · `robomit::o_test` · `EValue` | `figures/fig6_sensitivity.{pdf,png}` |
-| §8 | **Replication bundle**: all tables in one document | `modelsummary(..., output="docx")` · `gt::gtsave()` · Quarto / Rmd | `replication/paper_tables.{tex,docx,html}` |
+| §1 | **Figure 1**: raw trends / treatment rollout | `df %>% group_by(year, treat) %>% summarise(mean(y)) %>% ggplot()` | `figures/fig1_trend.png`(300dpi)+`.pdf` |
+| §1 | **Table 1**: summary stats (full / treated / control + Δ + SMD) | `gtsummary::tbl_summary` · `modelsummary::datasummary_balance` | `tables/table1_balance.xlsx/.docx/.tex` |
+| §3 | **Figure 2**: identification graphic (event-study / first-stage / McCrary / RD scatter / SCM trajectory) | `fixest::iplot(es)` · `binsreg` · `rdrobust::rdplot` · `rddensity` · `Synth::path.plot` | `figures/fig2_event_study.png`(300dpi)+`.pdf` |
+| §4 | **Table 2**: main results — progressive controls M1→M6 | `modelsummary(list("(1)"=m1,...,"(6)"=m6))` · `fixest::etable` | `tables/table2_main.xlsx/.docx/.tex` |
+| §4 | **Table 2-bis**: design horse-race (OLS / IV / DID / DML) | `modelsummary(list("OLS"=ols, "2SLS"=iv, "CS-DID"=cs, "DML"=dml))` | `tables/table2b_designs.xlsx/.docx/.tex` |
+| §4 | **Figure 3**: coefficient plot across specs | `modelplot(list(m1,...,m6), coef_map="training")` | `figures/fig3_coefplot.png`(300dpi)+`.pdf` |
+| §5 | **Table 3**: heterogeneity by subgroup | `modelsummary(g_full, g_male, g_fem, g_q1, ..., g_q4)` | `tables/table3_heterogeneity.xlsx/.docx/.tex` |
+| §5 | **Figure 4**: dose-response / CATE | `marginaleffects::plot_predictions` · `grf::plot.causal_forest` | `figures/fig4_cate.png`(300dpi)+`.pdf` |
+| §6 | **Table 4**: mechanism / outcome ladder | loop `feols` over outcomes → `modelsummary` | `tables/table4_mechanism.xlsx/.docx/.tex` |
+| §7 | **Table A1**: robustness master (one column per check) | `modelsummary(list(base, no99, balpan, dropearly, wfe, cl2way, logy, ihsy, psm, ebal))` | `tables/tableA1_robustness.xlsx/.docx/.tex` |
+| §7 | **Figure 5**: spec curve | `specr::specr()` + `plot_specs` (or hand-rolled `purrr::pmap`) | `figures/fig5_spec_curve.png`(300dpi)+`.pdf` |
+| §7 | **Figure 6**: sensitivity (HonestDiD / Oster / E-value) | `HonestDiD::createSensitivityPlot` · `robomit::o_test` · `EValue` | `figures/fig6_sensitivity.png`(300dpi)+`.pdf` |
+| §8 | **Replication bundle**: all tables in one document | `modelsummary(..., output="docx")` · `gt::gtsave()` · Quarto / Rmd | `replication/paper_tables.xlsx/.docx/.tex` |
 
 > Every R estimator above (`fixest::feols` / `AER::ivreg` / `did::att_gt` / `grf::causal_forest` / `synthdid_estimate`) returns a result object that can be passed straight into `modelsummary(...)` / `modelplot(...)` / `etable(...)`. Don't hand-roll LaTeX from `kable()`, and don't render Word via `flextable` directly — `modelsummary`, `etable`, and `gtsummary` apply book-tab borders, AER stars, and the right SE label automatically. For deeper export recipes, see [`references/08-tables-plots.md`](references/08-tables-plots.md).
 
 ---
 
-## Export cookbook — LaTeX / Word / HTML in one block
+## Export cookbook — LaTeX / Word / Excel in one block
+
+**关键规则（必须遵守）：每个表格必须同时导出三种格式——Excel(.xlsx)、Word(.docx)、LaTeX(.tex)。每个图片必须同时保存PNG(≥300dpi)和PDF两种格式。**
 
 R has the **best** publication-table ecosystem of the three languages. Three tiers, picked by **scope**:
 
 | Tier | Use when | API | Hot args |
 |---|---|---|---|
-| **1. Single multi-column table** | Exporting *one* Table 2 / Table 3 / Table A1 with progressive columns | `modelsummary(list("(1)"=m1,...,"(N)"=mN), output="tables/tab.tex", stars=c("*"=.1,"**"=.05,"***"=.01), gof_omit="BIC|AIC|F|Log", coef_map=c(...))` — or `fixest::etable(m1,...,mN, file="tab.tex")` for `feols`-only | `coef_map=`, `gof_omit=`, `stars=`, `notes=`, `output= "latex"/"docx"/"html"/"markdown"`, `add_rows=` |
+| **1. Single multi-column table** | Exporting *one* Table 2 / Table 3 / Table A1 with progressive columns | `modelsummary(list("(1)"=m1,...,"(N)"=mN), output="tables/tab.tex", stars=c("*"=.1,"**"=.05,"***"=.01), gof_omit="BIC|AIC|F|Log", coef_map=c(...))` — or `fixest::etable(m1,...,mN, file="tab.tex")` for `feols`-only | `coef_map=`, `gof_omit=`, `stars=`, `notes=`, `output= "latex"/"docx"/"xlsx"/"markdown"`, `add_rows=` |
 | **2. Multi-panel paper format** (Tables 2 + 3 + A1 + A2 in one file) | Producing the *paper-tables block* — main + heterogeneity + robustness + placebo as a single document | `modelsummary` chained with `gt::gt_group()` for one document with section headers, OR Quarto `.qmd` rendering multiple `modelsummary` calls between prose | `gt_group(modelsummary(...), modelsummary(...))` · `quarto render paper.qmd` |
 | **3. Full session bundle** (the Stata `collect` / Python `Stargazer + pylatex` equivalent) | Replication appendix that mixes summary stats + balance + multiple regression tables + headings + prose in **one** file | **Quarto** is the modern R-native answer. `master.qmd` interleaves prose + chunks that emit `modelsummary` / `gtsummary` / `ggplot2` outputs; one `quarto render` produces .pdf / .docx / .html | YAML front matter sets `format: [pdf, docx, html]` for triple-target output |
 
@@ -305,22 +310,27 @@ R has the **best** publication-table ecosystem of the three languages. Three tie
 
 ```r
 # Top of master.R — journal house-style wrapper
+# 输出三格式：.xlsx（编辑）、.docx（Word）、.tex（LaTeX）
 aer_table <- function(models, output, headers = NULL, coef_map = NULL) {
-  modelsummary(
-    models,
-    output    = output,
-    stars     = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
-    gof_omit  = "BIC|AIC|F|Log|Adj",
-    coef_map  = coef_map,
-    notes     = paste("Cluster-robust standard errors in parentheses.",
-                      "* p<0.10, ** p<0.05, *** p<0.01."),
-    output_format = if (grepl("\\.tex$", output)) "latex" else
-                     if (grepl("\\.docx$", output)) "docx" else "html"
-  )
+  base <- tools::file_path_sans_ext(output)
+  for (ext in c(".xlsx", ".docx", ".tex")) {
+    output_file <- paste0(base, ext)
+    fmt <- if (ext == ".xlsx") "html" else if (ext == ".docx") "docx" else "latex"
+    modelsummary(
+      models,
+      output    = output_file,
+      stars     = c("*" = 0.1, "**" = 0.05, "***" = 0.01),
+      gof_omit  = "BIC|AIC|F|Log|Adj",
+      coef_map  = coef_map,
+      notes     = paste("Cluster-robust standard errors in parentheses.",
+                        "* p<0.10, ** p<0.05, *** p<0.01."),
+      output_format = fmt
+    )
+  }
 }
 ```
 
-For the multi-panel `.docx` and Quarto cookbook (single-file paper-tables bundle), see [`references/08-tables-plots.md`](references/08-tables-plots.md).
+For the multi-panel `.docx` / `.xlsx` and Quarto cookbook (single-file paper-tables bundle), see [`references/08-tables-plots.md`](references/08-tables-plots.md).
 
 ---
 

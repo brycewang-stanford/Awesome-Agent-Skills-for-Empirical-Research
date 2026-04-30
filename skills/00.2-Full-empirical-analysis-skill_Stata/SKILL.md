@@ -126,11 +126,11 @@ This skill defaults to the **applied-economics paper convention**. Unless the us
 
 | # | Table | Stata source | Saves to |
 |---|---|---|---|
-| **T1** | Summary statistics & balance (treated vs control, with SMD / p-values) | `balancetable` + `asdoc sum` (Step 3) | `tables/table1_balance.tex` (+ `.rtf`) |
-| **T2** ★ | **Main results — multi-column regression M1→M6** (progressive controls + FE) | `eststo` 6 specs → `esttab` (Step 5–6) | `tables/table2_main.tex` (+ `.rtf`) |
-| **T3** | Mechanism / outcome ladder — same treatment, 3+ outcomes side-by-side | loop `eststo: reghdfe` over outcomes → `esttab` (Step 7) | `tables/table3_mechanism.tex` |
-| **T4** | Heterogeneity — subgroup × main coef (gender, age, region, …) | subgroup `eststo` + `suest` Wald → `esttab` (Step 7) | `tables/table4_heterogeneity.tex` |
-| **T5** | Robustness battery — alt SE / cluster / sample / placebo, in **one** table | `eststo` × variants → `esttab` (Step 6) | `tables/table5_robustness.tex` |
+| **T1** | Summary statistics & balance (treated vs control, with SMD / p-values) | `balancetable` + `asdoc sum` (Step 3) | `tables/table1_balance.{tex,rtf,xlsx,docx}` |
+| **T2** ★ | **Main results — multi-column regression M1→M6** (progressive controls + FE) | `eststo` 6 specs → `esttab` (Step 5–6) | `tables/table2_main.{tex,rtf,xlsx,docx}` |
+| **T3** | Mechanism / outcome ladder — same treatment, 3+ outcomes side-by-side | loop `eststo: reghdfe` over outcomes → `esttab` (Step 7) | `tables/table3_mechanism.{tex,rtf,xlsx,docx}` |
+| **T4** | Heterogeneity — subgroup × main coef (gender, age, region, …) | subgroup `eststo` + `suest` Wald → `esttab` (Step 7) | `tables/table4_heterogeneity.{tex,rtf,xlsx,docx}` |
+| **T5** | Robustness battery — alt SE / cluster / sample / placebo, in **one** table | `eststo` × variants → `esttab` (Step 6) | `tables/table5_robustness.{tex,rtf,xlsx,docx}` |
 
 > **★ Table 2 is the centerpiece of every economics paper.** It is the multi-column regression table that walks the reader from raw correlation (M1) to the fully-specified design (M6: 2-way FE + interacted FE + cluster-robust SE). Do **not** collapse it into a single column. Do **not** report only the headline coefficient. The progression *is* the credibility argument: if M1→M6 is monotone and stable, the design is plausibly identifying; if it collapses on adding FE, that *is* the result.
 >
@@ -155,14 +155,14 @@ This skill defaults to the **applied-economics paper convention**. Unless the us
 
 ```
 project/
-├── tables/    table1_balance.{tex,rtf}    table2_main.{tex,rtf}
-│              table3_mechanism.tex        table4_heterogeneity.tex
-│              table5_robustness.tex
+├── tables/    table1_balance.{tex,rtf,xlsx,docx}  table2_main.{tex,rtf,xlsx,docx}
+│              table3_mechanism.{tex,rtf,xlsx,docx}   table4_heterogeneity.{tex,rtf,xlsx,docx}
+│              table5_robustness.{tex,rtf,xlsx,docx}
 └── figures/   fig1_trend.{pdf,png}        fig2_event_study.{pdf,png}
                fig3_coefplot.{pdf,png}     fig4_sensitivity.{pdf,png}
 ```
 
-Every table → `.tex` (LaTeX `booktabs`) **and** `.rtf` (Word). Every figure → `.pdf` (vector for LaTeX) **and** `.png` at ≥300 dpi (slides / web).
+Every table → `.tex` (LaTeX `booktabs`) **and** `.rtf` (Word) **and** `.xlsx` (Excel) **and** `.docx` (Word OOXML). Every figure → `.pdf` (vector for LaTeX) **and** `.png` at ≥300 dpi (slides / web).
 
 ### When to deviate
 
@@ -268,18 +268,18 @@ A modern AER paper has **5–7 figures** and **3–5 main tables** + an appendix
 | § | Artifact | Stata primitive | Filenames |
 |---|---|---|---|
 | §1 | **Figure 1**: raw trends / treatment rollout | `collapse` + `twoway line` · `heatplot` for staggered rollout | `figures/fig1_trend.{pdf,png}` |
-| §1 | **Table 1**: summary stats (full / treated / control + Δ + SMD) | `balancetable` · `asdoc sum, by()` · `tabstat` | `tables/table1_balance.{tex,rtf}` |
+| §1 | **Table 1**: summary stats (full / treated / control + Δ + SMD) | `balancetable` · `asdoc sum, by()` · `tabstat` | `tables/table1_balance.{tex,rtf,xlsx,docx}` |
 | §3 | **Figure 2**: identification graphic (event-study / first-stage / McCrary / RD scatter / SCM trajectory) | `coefplot` after `eventstudyinteract`/`csdid` · `binscatter` · `rdplot` · `rddensity, plot` · `synth` | `figures/fig2_event_study.{pdf,png}` |
-| §4 | **Table 2**: main results — progressive controls M1→M6 | `eststo` 6 specs → `esttab` | `tables/table2_main.{tex,rtf}` |
-| §4 | **Table 2-bis**: design horse-race (OLS / IV / DID / matching) | `eststo` mix + `esttab` | `tables/table2b_designs.{tex,rtf}` |
+| §4 | **Table 2**: main results — progressive controls M1→M6 | `eststo` 6 specs → `esttab` | `tables/table2_main.{tex,rtf,xlsx,docx}` |
+| §4 | **Table 2-bis**: design horse-race (OLS / IV / DID / matching) | `eststo` mix + `esttab` | `tables/table2b_designs.{tex,rtf,xlsx,docx}` |
 | §4 | **Figure 3**: coefficient plot across specs | `coefplot m1 m2 m3 m4 m5 m6, keep(treat)` | `figures/fig3_coefplot.{pdf,png}` |
-| §5 | **Table 3**: heterogeneity by subgroup | `eststo` per slice + `esttab` + `suest` Wald | `tables/table3_heterogeneity.{tex,rtf}` |
+| §5 | **Table 3**: heterogeneity by subgroup | `eststo` per slice + `esttab` + `suest` Wald | `tables/table3_heterogeneity.{tex,rtf,xlsx,docx}` |
 | §5 | **Figure 4**: dose-response / margins-by-quartile | `xtile` + `margins` + `marginsplot` | `figures/fig4_dose.{pdf,png}` |
-| §6 | **Table 4**: mechanism / outcome ladder | loop `eststo: reghdfe` over outcomes → `esttab` | `tables/table4_mechanism.{tex,rtf}` |
-| §7 | **Table A1**: robustness master (one column per check) | `eststo` × variants → `esttab` | `tables/tableA1_robustness.{tex,rtf}` |
+| §6 | **Table 4**: mechanism / outcome ladder | loop `eststo: reghdfe` over outcomes → `esttab` | `tables/table4_mechanism.{tex,rtf,xlsx,docx}` |
+| §7 | **Table A1**: robustness master (one column per check) | `eststo` × variants → `esttab` | `tables/tableA1_robustness.{tex,rtf,xlsx,docx}` |
 | §7 | **Figure 5**: spec curve — coefficient + 95% CI across all specs | hand-rolled spec loop + `twoway rcap` | `figures/fig5_spec_curve.{pdf,png}` |
 | §7 | **Figure 6**: sensitivity (HonestDiD / Oster / E-value) | `honestdid, coefplot` · `psacalc plot` · `evalue` table | `figures/fig6_sensitivity.{pdf,png}` |
-| §8 | **Replication bundle**: all tables in one document | `esttab ..., append` to one `.tex` / `.rtf` · `texdoc` | `replication/paper_tables.{tex,rtf}` |
+| §8 | **Replication bundle**: all tables in one document | `esttab ..., append` to one `.tex` / `.rtf` · `texdoc` | `replication/paper_tables.{tex,rtf,xlsx,docx}` |
 
 > Every Stata estimator above stores results via `eststo` and can be passed straight into `esttab` / `coefplot` / `outreg2`. Don't hand-roll LaTeX, and don't render Word from `outsheet`/`putexcel` matrices — `esttab` and `outreg2` apply book-tab borders, AER-style stars, and the right SE label automatically. For deeper export recipes (LaTeX / Word / Markdown variants, `texdoc`, `frmttable`), see [`references/08-tables-plots.md`](references/08-tables-plots.md).
 
@@ -291,9 +291,9 @@ Stata's export stack is more fragmented than Python's StatsPAI. Three tiers, pic
 
 | Tier | Use when | API | Hot options |
 |---|---|---|---|
-| **1. Single multi-column table** | Exporting *one* Table 2 / Table 3 / Table A1 with progressive columns | `eststo m1 ... m6` then `esttab m1 ... m6 using "tab.tex", replace ...` | `keep()`, `drop()`, `mtitles()`, `stats(N r2 r2_a, labels(...))`, `star(* 0.10 ** 0.05 *** 0.01)`, `label`, `booktabs`, `addnotes()` |
-| **2. Multi-panel paper format** (Tables 2 + 3 + A1 + A2 in one file) | Producing the paper-tables block — main + heterogeneity + robustness + placebo as a single document | `esttab ... using "paper.tex", replace` for first panel; subsequent `esttab ... using "paper.tex", append` for each next panel; `texdoc init "paper.tex"` for full LaTeX with prose | first panel: `replace`; subsequent: `append`; surround with `texdoc` for headings |
-| **3. Full session bundle** (the Stata 17+ `collect` equivalent) | Replication appendix that mixes summary stats + balance + multiple regression tables + headings + prose in **one** file | `collect create paper`<br>`collect get summary, ...`<br>`collect get est ...`<br>`collect layout ...`<br>`collect export "paper.docx"` (also `.html`/`.tex`/`.md`) | Stata 17+ only; for older Stata use `texdoc` / `markdoc` |
+| **1. Single multi-column table** | Exporting *one* Table 2 / Table 3 / Table A1 with progressive columns | `eststo m1 ... m6` then loop over `.tex` / `.rtf` / `.xlsx` / `.docx` with `esttab ... using "tab.ext", replace ...` | `keep()`, `drop()`, `mtitles()`, `stats(N r2 r2_a, labels(...))`, `star(* 0.10 ** 0.05 *** 0.01)`, `label`, `booktabs`, `addnotes()`. Always emit all four formats (`.tex`/`.rtf`/`.xlsx`/`.docx`) in one foreach block. |
+| **2. Multi-panel paper format** (Tables 2 + 3 + A1 + A2 in one file) | Producing the paper-tables block — main + heterogeneity + robustness + placebo as a single document | `esttab ... using "paper.tex", replace` for first panel; subsequent `esttab ... using "paper.tex", append` for each next panel; `texdoc init "paper.tex"` for full LaTeX with prose. Repeat for `.rtf`/`.xlsx`/`.docx` bundles. | first panel: `replace`; subsequent: `append`; surround with `texdoc` for headings |
+| **3. Full session bundle** (the Stata 17+ `collect` equivalent) | Replication appendix that mixes summary stats + balance + multiple regression tables + headings + prose in **one** file | `collect create paper`<br>`collect get summary, ...`<br>`collect get est ...`<br>`collect layout ...`<br>`collect export "paper.xlsx"` (also `.docx`/`.html`/`.tex`/`.md`) | Stata 17+ only; for older Stata use `texdoc` / `markdoc` |
 
 **Journal styling — pick the right `star` levels and SE label.** The AEA convention is `* 0.10 ** 0.05 *** 0.01` and SE label "Standard errors in parentheses"; QJE / Econometrica / RES variants only differ in stars / notes / fonts. Define an `esttab` wrapper once at the top of the do-file:
 
@@ -303,9 +303,34 @@ local AER_STAR  "* 0.10 ** 0.05 *** 0.01"
 local AER_NOTES "Cluster-robust standard errors in parentheses. * p<0.10, ** p<0.05, *** p<0.01."
 local AER_STATS stats(N r2_a, labels("N" "Adj. R²"))
 
-* Then every esttab call uses:
+* Then every esttab call uses BOTH extensions — LaTeX + Word + Excel:
 * esttab m1 m2 m3 m4 m5 m6 using "tables/table2.tex", replace ///
 *     se star(`AER_STAR') label booktabs `AER_STATS' addnotes(`AER_NOTES')
+* esttab m1 m2 m3 m4 m5 m6 using "tables/table2.rtf", replace ///
+*     se star(`AER_STAR') label `AER_STATS' addnotes(`AER_NOTES')
+* esttab m1 m2 m3 m4 m5 m6 using "tables/table2.xlsx", replace ///
+*     se star(`AER_STAR') label `AER_STATS' addnotes(`AER_NOTES')
+* esttab m1 m2 m3 m4 m5 m6 using "tables/table2.docx", replace ///
+*     se star(`AER_STAR') label `AER_STATS' addnotes(`AER_NOTES')
+```
+
+**Multi-format export pattern** — whenever you call `esttab` for one table artifact, always emit all four formats (`.tex` / `.rtf` / `.xlsx` / `.docx`) in one block so co-authors can edit in Word and the build system uses LaTeX:
+
+```stata
+foreach ext in tex rtf xlsx docx {
+    esttab m1 m2 m3 using "tables/table2_main.`ext'", ///
+        replace se star(* 0.10 ** 0.05 *** 0.01) ///
+        label booktabs mtitles("(1)" "(2)" "(3)") ///
+        stats(N r2_a, labels("N" "Adj. R²")) ///
+        addnotes("Cluster-robust SE in parentheses. * p<0.10, ** p<0.05, *** p<0.01.")
+}
+```
+
+**Figures always export to both `.pdf` and `.png` at ≥300 dpi** (vector for LaTeX, raster for slides/web/Word embedding):
+
+```stata
+graph export "figures/fig1_trend.pdf", replace
+graph export "figures/fig1_trend.png", replace width(2400) height(1800)
 ```
 
 For the `collect` / `texdoc` / `markdoc` cookbook (Stata 17+ multi-panel paper bundle and prose+tables PDF/Word generation), see [`references/08-tables-plots.md`](references/08-tables-plots.md).
