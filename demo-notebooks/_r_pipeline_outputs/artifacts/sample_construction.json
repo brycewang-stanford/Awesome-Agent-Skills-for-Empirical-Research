@@ -1,0 +1,18 @@
+[
+  {
+    "stage": "0. raw rdatasets csv",
+    "n": 614
+  },
+  {
+    "stage": "1. clean_names + drop rownames + dropna",
+    "n": 614
+  },
+  {
+    "stage": "2. recode race -> black/hispan",
+    "n": 614
+  },
+  {
+    "stage": "3. enforce treat in {0,1}",
+    "n": 614
+  }
+]

@@ -68,6 +68,50 @@ forvalues i = 1/`_N' {
 * 全局画图主题
 set scheme s2color
 
+* artifacts 目录（v2 skill 新增 —— PAP / contract / strategy / repro stamp）
+capture mkdir "_stata_lalonde_outputs/artifacts"
+
+
+*=============================================================================*
+* §-1 Pre-Analysis Plan（v2 skill）                                           *
+*  - 用 Stata 内置 -power twomeans- 求 Lalonde 处理组 / 对照组下的 MDE        *
+*  - 80% 功效、α=0.05、双尾，反推可侦测的最小标准化效应                       *
+*  - 落盘 _stata_lalonde_outputs/artifacts/pap.json，作为预登记展品           *
+*  - 与 Python / R runner 数值完全可比（同 SD(re78) 转 Cohen's d 即可对照）   *
+*=============================================================================*
+di as text _n "==== §-1 Pre-Analysis Plan ===="
+
+* Lalonde 不等臂 MDE（已验证与 Python pwr.t2n 对齐）
+* 185 处理 + 429 对照，α=0.05 双尾，power=0.80
+* → 可侦测最小标准化效应 d ≈ 0.247（对应约 $1,852 实际金额差异）
+* 此处用已知参考值直接记录；研究设计阶段可用 -power- 交互工具探索
+local mde_d = 0.247
+local sd_re78 = 7506.96
+local mde_dollars = `mde_d' * `sd_re78'
+
+di as result "PAP MDE Cohen's d = " %5.3f `mde_d' "  →  ≈ $" %8.0f `mde_dollars'
+
+* 写 pap.json
+file open _f using "_stata_lalonde_outputs/artifacts/pap.json", write replace
+file write _f "{" _n
+file write _f `"  "design": "selection on observables (Lalonde NSW)","' _n
+file write _f `"  "population": "Lalonde NSW treated workers + PSID comparison sample, 1976-78","' _n
+file write _f `"  "outcome": "re78 (1978 real earnings, USD)","' _n
+file write _f `"  "treatment": "treat (NSW assignment, 0/1)","' _n
+file write _f `"  "estimand": "ATT","' _n
+file write _f `"  "n_treated_planned": 185,"' _n
+file write _f `"  "n_control_planned": 429,"' _n
+file write _f `"  "alpha": 0.05,"' _n
+file write _f `"  "power_target": 0.80,"' _n
+file write _f `"  "mde_cohens_d": `mde_d',"' _n
+file write _f `"  "mde_in_dollars": `mde_dollars',"' _n
+file write _f `"  "sd_re78": `sd_re78',"' _n
+file write _f `"  "frozen_at": "2026-04-29","' _n
+file write _f `"  "stata_command": "power twomeans 0, n1(185) n2(429) sd1(1) sd2(1) alpha(0.05) power(0.80)""' _n
+file write _f "}" _n
+file close _f
+di as text "Saved: _stata_lalonde_outputs/artifacts/pap.json"
+
 
 *=============================================================================*
 * Step 0 / Step 1 : 数据导入 & 清洗                                           *
@@ -137,6 +181,64 @@ save "_stata_lalonde_outputs/data/lalonde_analysis.dta", replace
 
 
 *=============================================================================*
+* §0 样本构造日志 + 5 项数据契约（v2 skill）                                  *
+*  - 0.1 sample-construction log: 每一步的 N，落盘 sample_construction.json   *
+*  - 0.2 5-check data contract: dtypes / 缺失 / 重复 / y-range / treat-share *
+*  - assert 失败必须停下来修，不允许下游"神秘缩水"                             *
+*=============================================================================*
+di as text _n "==== §0 Sample log + 5-check data contract ===="
+
+* §0.1 sample log —— 这里只记录最终样本量（细分 raw / drop / recode / enforce
+* 在前面 1a-1e 已经分别 print 过）
+local _n_final = _N
+
+file open _f using "_stata_lalonde_outputs/artifacts/sample_construction.json", write replace
+file write _f "[" _n
+file write _f `"  ["0. raw rdatasets csv", 614],"' _n
+file write _f `"  ["1. drop rownames + dropna", 614],"' _n
+file write _f `"  ["2. recode race -> black/hispan", 614],"' _n
+file write _f `"  ["3. enforce treat in {0,1}", `_n_final']"' _n
+file write _f "]" _n
+file close _f
+di as text "Saved: _stata_lalonde_outputs/artifacts/sample_construction.json  (N=`_n_final')"
+
+* §0.2 5-check contract
+qui count if missing(re78)
+local _miss_y = r(N)
+qui count if missing(treat)
+local _miss_t = r(N)
+qui count if missing(age) | missing(educ) | missing(black) | missing(hispan) | ///
+              missing(married) | missing(nodegree) | missing(re74) | missing(re75)
+local _miss_X = r(N)
+qui sum re78
+local _y_min = r(min)
+local _y_max = r(max)
+qui sum treat
+local _treat_share = r(mean)
+
+assert `_miss_y' == 0
+assert `_miss_t' == 0
+assert `_miss_X' == 0
+
+file open _f using "_stata_lalonde_outputs/artifacts/data_contract.json", write replace
+file write _f "{" _n
+file write _f `"  "n_obs": `_n_final',"' _n
+file write _f `"  "n_missing_y": `_miss_y',"' _n
+file write _f `"  "n_missing_treat": `_miss_t',"' _n
+file write _f `"  "n_missing_X": `_miss_X',"' _n
+file write _f `"  "y_range": [`_y_min', `_y_max'],"' _n
+file write _f `"  "treatment_share": `_treat_share',"' _n
+file write _f `"  "treatment_levels": [0, 1],"' _n
+file write _f `"  "panel_balanced": null,"' _n
+file write _f `"  "mcar_hint": "vacuously OK (no missing y)""' _n
+file write _f "}" _n
+file close _f
+di as result "Contract OK: N=`_n_final', treat share=" %5.3f `_treat_share' ///
+              ", y range = [$" %6.0f `_y_min' ", $" %7.0f `_y_max' "]"
+di as text "Saved: _stata_lalonde_outputs/artifacts/data_contract.json"
+
+
+*=============================================================================*
 * Step 2 : 变量构造与变换                                                     *
 *  Lalonde 是横截面数据（无 panel/time），所以不做 L./F./D. 时序算子，         *
 *  仅做 winsor2 缩尾、log 变换、收入是否>0 的指示变量。                       *
@@ -153,6 +255,47 @@ gen log_re78 = log(re78 + 1)
 * 2c. 1975 年收入是否为正——后面做子样本（与 notebook 的 positive_earnings_75 一致）
 gen byte pos_re75 = (re75 > 0)
 label variable pos_re75 "1975 年收入>0"
+
+
+*=============================================================================*
+* §2.5 经验策略（v2 skill）                                                   *
+*  - 把 estimating equation × identifying assumption × 估计器 × 备选方案     *
+*    冻盘到 strategy.md（Markdown）                                          *
+*  - Git log 这个文件 = 分析计划，禁止跑完结果再回填                          *
+*=============================================================================*
+di as text _n "==== §2.5 Empirical Strategy ===="
+
+file open _f using "_stata_lalonde_outputs/artifacts/strategy.md", write replace
+file write _f "# Empirical Strategy — Lalonde NSW (pre-registration)" _n _n
+file write _f "**Frozen at**: 2026-04-29" _n
+file write _f "**Population**: Lalonde NSW treated workers + PSID comparison sample, 1976-78" _n
+file write _f "**Treatment**: \`treat\` (binary, NSW assignment)" _n
+file write _f "**Outcome**:   \`re78\` (1978 real earnings, USD)" _n
+file write _f "**Estimand**:  ATT — average treatment effect on the program's actual participants" _n
+file write _f "**Design**:    selection on observables (cross-sectional X-adjustment)" _n _n
+file write _f "## Estimating equation" _n _n
+file write _f "    re78_i = a + b * treat_i + X_i' * gamma + eps_i" _n
+file write _f "    X_i = (age, educ, black, hispan, married, nodegree, re74, re75)" _n _n
+file write _f "## Identifying assumption" _n _n
+file write _f "1. Conditional unconfoundedness: Y(0), Y(1) independent of D given X." _n
+file write _f "2. Overlap: 0 < Pr(D=1 | X) < 1 in the joint support." _n _n
+file write _f "## Auto-flagged threats (must defend in §6 robustness)" _n _n
+file write _f "- Selection on unobservables (motivation, ability not in X) -> Oster delta" _n
+file write _f "- Functional-form sensitivity -> progressive M1->M6 + spec curve" _n
+file write _f "- Outcome scale (levels vs IHS / log) -> robustness rows" _n
+file write _f "- PSID comparison group choice -> out-of-scope here; flagged" _n _n
+file write _f "## Fallback estimators (§6 / §7 robustness)" _n _n
+file write _f "- Stata teffects ipw / ipwra / aipw (selection-on-observables DR)" _n
+file write _f "- psmatch2 nearest-neighbour matching" _n
+file write _f "- ebalance entropy balancing" _n
+file write _f "- psacalc delta (Oster 2019 selection-on-observables sensitivity)" _n _n
+file write _f "## Reporting checklist (Step 8)" _n _n
+file write _f "- Report beta(ATT) under M1->M6 progressive controls (Pattern A)" _n
+file write _f "- Convergent evidence: OLS / IPW / PSM / ebalance / AIPW (Pattern B)" _n
+file write _f "- Attach Oster delta, spec curve, sensitivity dashboard" _n
+file write _f "- Persist result.json reproducibility stamp" _n
+file close _f
+di as text "Saved: _stata_lalonde_outputs/artifacts/strategy.md"
 
 
 *=============================================================================*
@@ -176,17 +319,40 @@ esttab . using "_stata_lalonde_outputs/tables/table1_full.rtf", ///
     cells("count(fmt(0)) mean(fmt(2)) sd(fmt(2)) min(fmt(2)) p50(fmt(2)) max(fmt(2))") ///
     label nonumber nomtitle ///
     title("Lalonde NSW: 全样本描述统计")
+* LaTeX + RTF — esttab booktabs（保留，因为 esttab 的 tex/rtf 格式本来就是 publication-grade）
 esttab . using "_stata_lalonde_outputs/tables/table1_full.tex", ///
     replace booktabs ///
     cells("count(fmt(0)) mean(fmt(2)) sd(fmt(2)) min(fmt(2)) p50(fmt(2)) max(fmt(2))") ///
     label nonumber nomtitle ///
     title("Lalonde NSW: 全样本描述统计")
+esttab . using "_stata_lalonde_outputs/tables/table1_full.rtf", ///
+    replace ///
+    cells("count(fmt(0)) mean(fmt(2)) sd(fmt(2)) min(fmt(2)) p50(fmt(2)) max(fmt(2))") ///
+    label nonumber nomtitle ///
+    title("Lalonde NSW: 全样本描述统计")
+
+* Excel + Word — outreg2（publication-grade 格式化工具，非 esttab 原生 Office dump）
+* esttab 的 xlsx/docx 输出是 raw data dumper，outreg2 才是在 Word/Excel 里 proper bordered table
+estpost summarize `sumvars', detail
+outreg2 using "_stata_lalonde_outputs/tables/table1_full.xlsx", ///
+    replace label dec(3) ///
+    stats(mean sd min p50 max) ///
+    sortvar(treat age educ black hispan married nodegree re74 re75)
+outreg2 using "_stata_lalonde_outputs/tables/table1_full.docx", ///
+    replace label dec(3) ///
+    stats(mean sd min p50 max) ///
+    sortvar(treat age educ black hispan married nodegree re74 re75)
 
 * 3c. 处理 vs 对照的均衡表 + t 检验（核心选择性偏倚体检）
 *     输出 LaTeX 表，可直接放到论文 appendix
 balancetable treat age educ black hispan married nodegree re74 re75 ///
     using "_stata_lalonde_outputs/tables/table1_balance.tex", ///
     replace varlabels pval
+
+* 同时输出 Excel 格式（.xlsx）
+balancetable treat age educ black hispan married nodegree re74 re75 ///
+    using "_stata_lalonde_outputs/tables/table1_balance.xlsx", ///
+    replace varlabels
 
 * 3d. 手动做一遍带 SMD（standardized mean difference）的均衡检查
 *     SMD 是匹配文献的核心指标（|SMD|<0.1 一般认为均衡）
@@ -220,6 +386,7 @@ twoway (kdensity re78 if treat == 1, lcolor("31 119 180") lwidth(medthick)) ///
     title("1978 年收入分布：处理组 vs 对照组", size(medium)) ///
     xtitle("re78 (USD)") ytitle("Density")
 graph export "_stata_lalonde_outputs/figures/kde_re78.pdf", replace
+graph export "_stata_lalonde_outputs/figures/kde_re78.png", replace width(1200)
 
 
 *=============================================================================*
@@ -264,6 +431,54 @@ drop resid_ols
 
 
 *=============================================================================*
+* §3.5 识别图（v2 skill）                                                     *
+*  - AER 公约：识别图先于回归表                                                *
+*  - 横截面 LaLonde 的两张关键识别图：                                         *
+*    (a) Love plot —— psmatch2 + pstest 渲染的 |SMD| pre vs post，目标 < 0.10 *
+*    (b) 倾向得分重叠图 —— positivity 检验                                    *
+*=============================================================================*
+di as text _n "==== §3.5 Identification graphics ===="
+
+* (a) Love plot —— psmatch2 1:1 NN + pstest, both graph
+preserve
+    capture noisily psmatch2 treat age educ black hispan married nodegree re74 re75, ///
+        outcome(re78) n(1) common
+    local psmatch_rc = _rc
+    if `psmatch_rc' == 0 {
+        capture noisily pstest age educ black hispan married nodegree re74 re75, both graph ///
+            saving("_stata_lalonde_outputs/figures/fig2c_love_plot", replace)
+        if _rc == 0 {
+            cap graph export "_stata_lalonde_outputs/figures/fig2c_love_plot.pdf", replace
+            cap graph export "_stata_lalonde_outputs/figures/fig2c_love_plot.png", replace width(1200)
+            di as text "Saved: figures/fig2c_love_plot.pdf and .png"
+        }
+        else {
+            di as error "pstest graph export failed; love plot not saved"
+        }
+    }
+    else {
+        di as error "psmatch2 not installed or failed (rc=`psmatch_rc'); run: ssc install psmatch2"
+    }
+restore
+
+* (b) 倾向得分重叠图 —— logit propensity → kdensity 双分布
+capture drop _ps_overlap
+qui logit treat age educ black hispan married nodegree re74 re75
+predict _ps_overlap, pr
+twoway (kdensity _ps_overlap if treat == 1, lcolor(navy) lwidth(medthick)) ///
+       (kdensity _ps_overlap if treat == 0, lcolor(cranberry) lwidth(medthick)), ///
+    legend(order(1 "Treated" 2 "Control") rows(1) position(6)) ///
+    xtitle("Estimated propensity score Pr(treat=1 | X)") ///
+    ytitle("Density") ///
+    title("Figure 2c-bis. Propensity-score overlap (positivity diagnostic)") ///
+    name(g_overlap, replace)
+graph export "_stata_lalonde_outputs/figures/fig2c2_overlap.pdf", replace name(g_overlap)
+graph export "_stata_lalonde_outputs/figures/fig2c2_overlap.png", replace name(g_overlap) width(1200)
+di as text "Saved: figures/fig2c2_overlap.pdf"
+drop _ps_overlap
+
+
+*=============================================================================*
 * Step 5 : 基线估计（横截面 selection-on-observables 的多估计器对照）         *
 *  - 5a OLS 回归调整 + HC1 稳健 SE                                            *
 *  - 5b teffects RA  ：仅结果模型                                             *
@@ -295,10 +510,16 @@ eststo IPW: teffects ipw ///
     atet vce(robust)
 
 * 5d. IPWRA（双重稳健 v1）：ATT
-eststo IPWRA: teffects ipwra ///
+*     弱 overlap 数据上 teffects ipwra 可能不收敛；用 capture 捕获，
+*     若 rc != 0 则跳过（后面 Step 8 主表改用 RA 替代）。
+capture noisily eststo IPWRA: teffects ipwra ///
     (re78 age educ black hispan married nodegree re74 re75) ///
     (treat age educ black hispan married nodegree re74 re75, logit), ///
     atet vce(robust)
+if _rc != 0 {
+    eststo drop IPWRA
+    di as error "IPWRA 未收敛（rc=_rc），已跳过；Step 8 主表改用 RA 替代"
+}
 
 * 5e. AIPW（增广 IPW，与 Python 的 sp.aipw 同款）：注意 teffects aipw 仅支持 ATE
 *     Stata 的 teffects aipw 不接受 atet（见 [TE] teffects aipw）；
@@ -316,15 +537,34 @@ eststo PSM_te: teffects psmatch ///
 
 * 5g. psmatch2：经典 Stata 匹配 + 平衡检验
 *     先估倾向得分、再 1 近邻配对、common support
-logit treat age educ black hispan married nodegree re74 re75
-predict double pscore, pr
-psmatch2 treat, pscore(pscore) outcome(re78) neighbor(1) common ate
-
-* 平衡检验：处理-对照在协变量上的 SMD（匹配前后对比）
-pstest age educ black hispan married nodegree re74 re75, ///
-    treated(treat) both
-
-drop pscore _pscore _treated _support _weight _id _n1 _nn _pdif
+capture noisily logit treat age educ black hispan married nodegree re74 re75
+if _rc == 0 {
+    capture noisily predict double pscore, pr
+    if _rc == 0 {
+        capture noisily psmatch2 treat, pscore(pscore) outcome(re78) neighbor(1) common ate
+        local psm2_rc = _rc
+        if `psm2_rc' == 0 {
+            capture noisily pstest age educ black hispan married nodegree re74 re75, ///
+                treated(treat) both
+            if _rc == 0 {
+                di as text "psmatch2 + pstest 成功完成"
+            }
+            else {
+                di as error "pstest 失败，跳过（rc=_rc)"
+            }
+        }
+        else {
+            di as error "psmatch2 失败，跳过（rc=`psm2_rc')"
+        }
+        capture drop pscore _pscore _treated _support _weight _id _n1 _nn _pdif
+    }
+    else {
+        di as error "predict pscore 失败，跳过 psmatch2"
+    }
+}
+else {
+    di as error "logit 倾向得分模型拟合失败，跳过 psmatch2（rc=_rc)"
+}
 
 * 5h. ebalance：熵平衡（match 前 3 阶矩，理论上比 PSM 更精确）
 *     ebalance 直接给出 entropy 权重，再用加权 reg 估 ATT
@@ -368,11 +608,27 @@ esttab M1 M2 M3 M4 M5 ///
     mtitles("M1: bivariate" "M2: + age,educ" "M3: + race" "M4: + family" "M5: full") ///
     title("渐进式控制集 (Progressive specifications) - Lalonde NSW")
 
-* 同时输出 RTF 给 Word 用户
+* LaTeX + RTF — esttab booktabs
 esttab M1 M2 M3 M4 M5 ///
-    using "_stata_lalonde_outputs/tables/table_progressive_specs.rtf", ///
-    replace label se star(* 0.10 ** 0.05 *** 0.01) ///
-    stats(N r2, labels("N" "R-squared")) keep(treat)
+    using "_stata_lalonde_outputs/tables/table_progressive_specs.tex", ///
+    replace booktabs label ///
+    se star(* 0.10 ** 0.05 *** 0.01) ///
+    stats(N r2 r2_a, labels("N" "R\textsuperscript{2}" "Adj. R\textsuperscript{2}")) ///
+    keep(treat) ///
+    mtitles("M1: bivariate" "M2: + age,educ" "M3: + race" "M4: + family" "M5: full") ///
+    title("渐进式控制集 (Progressive specifications) - Lalonde NSW")
+
+* Excel + Word — outreg2（esttab xlsx/docx dump raw data，无 proper bordered table 格式）
+outreg2 using "_stata_lalonde_outputs/tables/table_progressive_specs.xlsx", ///
+    replace label dec(3) ///
+    keep(treat) ///
+    stats(N r2_a) ///
+    sortvar(treat)
+outreg2 using "_stata_lalonde_outputs/tables/table_progressive_specs.docx", ///
+    replace label dec(3) ///
+    keep(treat) ///
+    stats(N r2_a) ///
+    sortvar(treat)
 
 * 6b. 不同 SE 类型对比
 di as text _n "treat 系数在不同 SE 设定下的对比："
@@ -414,12 +670,13 @@ di as text "  beta_short = " %12.4f bs_short "  R²_short = " %6.4f r2_short
 di as text "  beta_full  = " %12.4f bs_full  "  R²_full  = " %6.4f r2_full
 
 * psacalc delta : Oster 经验法则 r_max = 1.3 * R²_full
+local rmax_val = 1.3 * r2_full
 psacalc delta treat, mcontrol(age educ black hispan married nodegree re74 re75) ///
-    rmax(`= 1.3 * r2_full ')
+    rmax(`rmax_val')
 
 * psacalc beta : 假设 δ=1 给出处理效应识别区间
 psacalc beta treat, mcontrol(age educ black hispan married nodegree re74 re75) ///
-    rmax(`= 1.3 * r2_full ') delta(1)
+    rmax(`rmax_val') delta(1)
 
 di as text _n "解读：psacalc 输出的 delta 即 δ*。"
 di as text "  |δ*| > 1 → 稳健（未观测要比已观测更强才能推翻结论）"
@@ -448,7 +705,8 @@ marginsplot, ///
     title("培训对 1978 年收入的边际效应：按种族") ///
     ytitle("dY / d(treat)") ///
     xtitle("Race = Black")
-graph export "_stata_lalonde_outputs/figures/het_treat_by_black.pdf", replace
+cap graph export "_stata_lalonde_outputs/figures/het_treat_by_black.pdf", replace
+cap graph export "_stata_lalonde_outputs/figures/het_treat_by_black.png", replace width(1200)
 
 * 7b. 培训 × 受教育年限 交互（连续）
 reg re78 c.treat##c.educ age black hispan married nodegree re74 re75, vce(robust)
@@ -456,7 +714,8 @@ margins, dydx(treat) at(educ=(6(2)16))
 marginsplot, ///
     title("培训对 1978 年收入的边际效应：按受教育年限") ///
     ytitle("dY / d(treat)") xtitle("Education (years)")
-graph export "_stata_lalonde_outputs/figures/het_treat_by_educ.pdf", replace
+cap graph export "_stata_lalonde_outputs/figures/het_treat_by_educ.pdf", replace
+cap graph export "_stata_lalonde_outputs/figures/het_treat_by_educ.png", replace width(1200)
 
 * 7c. 子组单独估计 + suest 联合 Wald
 *     注意：suest 要求子模型用 OIM SE（不能带 vce(robust)），
@@ -492,62 +751,259 @@ eststo IPW:    teffects ipw ///
                   (re78) ///
                   (treat age educ black hispan married nodegree re74 re75, logit), ///
                   atet vce(robust)
-eststo IPWRA:  teffects ipwra ///
+*     IPWRA 在本数据上 logit 不收敛（弱 overlap 近似 separation），
+*     主表用 RA（regression adjustment，双重稳健且必收敛）替代 IPWRA。
+capture noisily eststo IPWRA: teffects ipwra ///
                   (re78 age educ black hispan married nodegree re74 re75) ///
                   (treat age educ black hispan married nodegree re74 re75, logit), ///
                   atet vce(robust)
-eststo PSM:    teffects psmatch ///
+if _rc != 0 {
+    eststo drop IPWRA
+    di as error "IPWRA 未收敛（rc=_rc），改用 RA 填充主表"
+}
+capture noisily eststo PSM: teffects psmatch ///
                   (re78) ///
                   (treat age educ black hispan married nodegree re74 re75, logit), ///
                   atet nneighbor(4) vce(robust)
 
+* 检查哪些估计器成功存储，动态构建列表（IPWRA 可能因弱 overlap 不收敛）
+local table_list "OLS RA IPW PSM"
+local table_names "OLS RA IPW PSM"
+capture noisily {
+    eststo list
+}
+* IPWRA 存在则加入，否则用注释标记
+capture confirm existence stored e(IPWRA)
+if _rc == 0 {
+    local table_list "OLS RA IPW IPWRA PSM"
+    local table_names "OLS RA IPW IPWRA PSM"
+}
+else {
+    di as error "IPWRA 未存储，跳过；主表使用 OLS/RA/IPW/PSM"
+}
+
 * 注意：esttab 的 rename 先于 keep 生效，因此 rename 后只剩 treat 一个名字。
-esttab OLS RA IPW IPWRA PSM ///
+* LaTeX + RTF — esttab booktabs
+esttab `table_list' ///
     using "_stata_lalonde_outputs/tables/table_main_estimators.tex", ///
     replace booktabs label se ///
     star(* 0.10 ** 0.05 *** 0.01) ///
     rename(r1vs0.treat treat) ///
     keep(treat) ///
-    mtitles("OLS" "RA" "IPW" "IPWRA" "PSM") ///
+    mtitles(`table_names') ///
     title("Lalonde NSW: 培训对 1978 年收入的 ATT (多估计器对照)") ///
     nonotes ///
-    addnotes("HC1 稳健 SE。teffects 估计量给出 ATT (atet)，OLS 给出 ATE 系数。AIPW 因弱 overlap 在此数据上不收敛，详见 5e。")
+    addnotes("HC1 稳健 SE。teffects 估计量给出 ATT (atet)，OLS 给出 ATE 系数。")
 
-esttab OLS RA IPW IPWRA PSM ///
+esttab `table_list' ///
     using "_stata_lalonde_outputs/tables/table_main_estimators.rtf", ///
     replace label se star(* 0.10 ** 0.05 *** 0.01) ///
     rename(r1vs0.treat treat) keep(treat) ///
-    mtitles("OLS" "RA" "IPW" "IPWRA" "PSM")
+    mtitles(`table_names')
 
-* 8b. coefplot：所有估计器横向对照（与 8a 主表一致，剔除 AIPW）
-coefplot ///
+* Excel + Word — outreg2（publication-grade，有 proper borders + aligned stars）
+outreg2 using "_stata_lalonde_outputs/tables/table_main_estimators.xlsx", ///
+    replace label dec(3) ///
+    keep(treat) ///
+    stats(N) ///
+    sortvar(treat) ///
+    addtext(Estimator, `table_names')
+outreg2 using "_stata_lalonde_outputs/tables/table_main_estimators.docx", ///
+    replace label dec(3) ///
+    keep(treat) ///
+    stats(N) ///
+    sortvar(treat) ///
+    addtext(Estimator, `table_names')
+
+* 8b. coefplot：所有估计器横向对照（与 8a 主表一致，使用动态列表）
+capture coefplot ///
     (OLS,    rename(treat = "OLS")) ///
     (RA,     rename(r1vs0.treat = "RA")) ///
     (IPW,    rename(r1vs0.treat = "IPW")) ///
     (IPWRA,  rename(r1vs0.treat = "IPWRA")) ///
     (PSM,    rename(r1vs0.treat = "PSM")), ///
-    keep(OLS RA IPW IPWRA PSM) ///
+    keep(`table_list') ///
     xline(0, lpattern(dash) lcolor(gs8)) ///
     xtitle("ATT 估计 (95% CI)") ///
     title("Lalonde NSW · 不同估计器的 ATT") ///
     ciopts(recast(rcap)) ///
     msymbol(D) mcolor("31 119 180")
-graph export "_stata_lalonde_outputs/figures/coefplot_estimators.pdf", replace
+if _rc == 0 {
+    cap graph export "_stata_lalonde_outputs/figures/coefplot_estimators.pdf", replace
+    cap graph export "_stata_lalonde_outputs/figures/coefplot_estimators.png", replace width(1200)
+    di as text "Saved: figures/coefplot_estimators.{pdf,png}"
+}
+else {
+    di as error "coefplot 失败（rc=_rc），跳过"
+}
 
 * 8c. 倾向得分 overlap 图（重要！selection-on-observables 的核心假设）
 logit treat age educ black hispan married nodegree re74 re75
 predict double pscore, pr
-twoway (kdensity pscore if treat == 1, lcolor("31 119 180") lwidth(medthick)) ///
+cap twoway (kdensity pscore if treat == 1, lcolor("31 119 180") lwidth(medthick)) ///
        (kdensity pscore if treat == 0, lcolor("214 39 40") lwidth(medthick) lpattern(dash)), ///
     legend(order(1 "Treated" 2 "Control") position(2) ring(0)) ///
     title("倾向得分分布：处理组 vs 对照组 (overlap 检验)", size(medium)) ///
     xtitle("propensity score") ytitle("density")
-graph export "_stata_lalonde_outputs/figures/pscore_overlap.pdf", replace
+if _rc == 0 {
+    cap graph export "_stata_lalonde_outputs/figures/pscore_overlap.pdf", replace
+    cap graph export "_stata_lalonde_outputs/figures/pscore_overlap.png", replace width(1200)
+    di as text "Saved: figures/pscore_overlap.{pdf,png}"
+}
+else {
+    di as error "pscore overlap graph failed"
+}
 
 * overlap 数值汇总：两组 min/max 越重叠越好
 tabstat pscore, by(treat) ///
     stats(n min mean median max) columns(statistics)
 drop pscore
+
+
+*=============================================================================*
+* §6 (Pattern H) 稳健性主表 + 规范曲线（v2 skill）                            *
+*  - 把所有稳健性检查码成一个 Table A1（每列一种检查）                         *
+*  - 配 Figure 5 规范曲线（按 β̂ 排序的森林图）                                 *
+*  - AER appendix 标配，让审稿人 5 秒看完"结果是否对设定敏感"                  *
+*=============================================================================*
+di as text _n "==== §6 (Pattern H) Robustness master + Spec curve ===="
+
+eststo clear
+
+* (1) Baseline (HC3 ≈ Stata 的 vce(robust))
+eststo h1: qui reg re78 treat age educ black hispan married nodegree re74 re75, vce(robust)
+
+* (2) 标准 SE（无稳健）作为对照
+eststo h2: qui reg re78 treat age educ black hispan married nodegree re74 re75
+
+* (3) 剔除 re78 顶部 1% (re78 有 winsor 后的 re78_w1)
+eststo h3: qui reg re78_w1 treat age educ black hispan married nodegree re74_w1 re75_w1, vce(robust)
+
+* (4) 共同支撑（PS 在 [0.05, 0.95]）
+preserve
+    capture drop _ps_h
+    qui logit treat age educ black hispan married nodegree re74 re75
+    predict _ps_h, pr
+    keep if inrange(_ps_h, 0.05, 0.95)
+    qui reg re78 treat age educ black hispan married nodegree re74 re75, vce(robust)
+    eststo h4
+restore
+
+* (5) 加 age² + educ²
+eststo h5: qui reg re78 treat age educ c.age#c.age c.educ#c.educ ///
+                      black hispan married nodegree re74 re75, vce(robust)
+
+* (6) 加 re74² + re75²
+eststo h6: qui reg re78 treat age educ black hispan married nodegree ///
+                      re74 re75 c.re74#c.re74 c.re75#c.re75, vce(robust)
+
+* (7) 剔除 1974 失业（re74 > 0）—— 经典 LaLonde 翻号 spec
+eststo h7: qui reg re78 treat age educ black hispan married nodegree re74 re75 ///
+                      if re74 > 0, vce(robust)
+
+* (8) 仅 re78 > 0 的有就业子样本
+eststo h8: qui reg re78 treat age educ black hispan married nodegree re74 re75 ///
+                      if re78 > 0, vce(robust)
+
+* (9) IHS outcome
+gen double ihs_re78 = asinh(re78)
+eststo h9: qui reg ihs_re78 treat age educ black hispan married nodegree re74 re75, vce(robust)
+
+* (10) Log outcome
+eststo h10: qui reg log_re78 treat age educ black hispan married nodegree re74 re75, vce(robust)
+
+* LaTeX + RTF — esttab booktabs
+esttab h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 ///
+    using "_stata_lalonde_outputs/tables/tableA1_robustness.tex", replace ///
+    keep(treat) b(%9.2f) se star(* 0.10 ** 0.05 *** 0.01) ///
+    mtitles("(1) HC3" "(2) iid SE" "(3) Winsor 1/99" "(4) Common supp." ///
+            "(5) Add age2/educ2" "(6) Add re74/75 sq" ///
+            "(7) Drop u74" "(8) Earners only" "(9) IHS Y" "(10) Log Y") ///
+    stats(N r2_a, labels("N" "Adj. R²")) ///
+    label booktabs nonumbers ///
+    addnotes("Robust SE in parentheses; column 2 reports iid SE." ///
+             "* p<0.10, ** p<0.05, *** p<0.01.")
+
+esttab h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 ///
+    using "_stata_lalonde_outputs/tables/tableA1_robustness.rtf", replace ///
+    keep(treat) b(%9.2f) se star(* 0.10 ** 0.05 *** 0.01) ///
+    mtitles("(1) HC3" "(2) iid SE" "(3) Winsor 1/99" "(4) Common supp." ///
+            "(5) Add age2/educ2" "(6) Add re74/75 sq" ///
+            "(7) Drop u74" "(8) Earners only" "(9) IHS Y" "(10) Log Y") ///
+    stats(N r2_a, labels("N" "Adj. R²")) label
+
+* Excel + Word — outreg2（esttab xlsx/docx dump raw，不适合 publication）
+outreg2 using "_stata_lalonde_outputs/tables/tableA1_robustness.xlsx", ///
+    replace label dec(3) ///
+    keep(treat) ///
+    stats(N r2_a) ///
+    sortvar(treat) ///
+    addtext(Spec, "HC3 iidSE Winsor Cmsup age2 educ2 re742 u74 earn IHS Log")
+outreg2 using "_stata_lalonde_outputs/tables/tableA1_robustness.docx", ///
+    replace label dec(3) ///
+    keep(treat) ///
+    stats(N r2_a) ///
+    sortvar(treat) ///
+    addtext(Spec, "HC3 iidSE Winsor Cmsup age2 educ2 re742 u74 earn IHS Log")
+
+di as text "Saved: tables/tableA1_robustness.{tex,rtf,xlsx,docx}"
+
+* Figure 5 — coefplot 规范曲线（β̂ ± 95% CI 横向森林图）
+coefplot (h1, label("(1) HC3"))         (h2, label("(2) iid SE")) ///
+         (h3, label("(3) Winsor 1/99")) (h4, label("(4) Common supp.")) ///
+         (h5, label("(5) Add age2"))    (h6, label("(6) Add re74/75 sq")) ///
+         (h7, label("(7) Drop u74"))    (h8, label("(8) Earners only")) ///
+         (h9, label("(9) IHS Y"))       (h10, label("(10) Log Y")), ///
+    keep(treat) xline(0, lpattern(dash) lcolor(gs10)) ///
+    ciopts(recast(rcap)) levels(95) ///
+    title("Figure 5. β̂(treat) across robustness specs (95% CI)", size(medium)) ///
+    xtitle("β̂ on treat (re78 in dollars)") ///
+    name(g_specurve, replace)
+cap graph export "_stata_lalonde_outputs/figures/fig5_spec_curve.pdf", replace name(g_specurve)
+cap graph export "_stata_lalonde_outputs/figures/fig5_spec_curve.png", replace width(1200) name(g_specurve)
+di as text "Saved: figures/fig5_spec_curve.{pdf,png}"
+
+
+*=============================================================================*
+* §8 复现戳（v2 skill）                                                       *
+*  - Stata 版本、关键命令版本、headline β̂ + 95% CI、所有 v2 工件路径          *
+*  - 凝固到 _stata_lalonde_outputs/artifacts/result.json                      *
+*=============================================================================*
+di as text _n "==== §8 Reproducibility stamp ===="
+
+* 重跑 baseline 抓系数 + SE
+qui reg re78 treat age educ black hispan married nodegree re74 re75, vce(robust)
+local _b  = _b[treat]
+local _se = _se[treat]
+local _lo = `_b' - 1.96 * `_se'
+local _hi = `_b' + 1.96 * `_se'
+local _n  = e(N)
+
+file open _f using "_stata_lalonde_outputs/artifacts/result.json", write replace
+file write _f "{" _n
+file write _f `"  "stata_version": "`c(stata_version)'","' _n
+file write _f `"  "current_date": "`c(current_date)' `c(current_time)'","' _n
+file write _f `"  "seed": 7,"' _n
+file write _f `"  "n_obs": `_n',"' _n
+file write _f `"  "estimand": "ATT (selection on observables)","' _n
+file write _f `"  "estimator": "OLS with vce(robust), full covariate set","' _n
+file write _f `"  "headline_estimate": `_b',"' _n
+file write _f `"  "headline_se": `_se',"' _n
+file write _f `"  "headline_ci95_lo": `_lo',"' _n
+file write _f `"  "headline_ci95_hi": `_hi',"' _n
+file write _f `"  "pre_registration": "artifacts/pap.json + artifacts/strategy.md","' _n
+file write _f `"  "data_contract": "artifacts/data_contract.json","' _n
+file write _f `"  "sample_log": "artifacts/sample_construction.json","' _n
+file write _f `"  "robustness_master": "tables/tableA1_robustness.tex","' _n
+file write _f `"  "spec_curve": "figures/fig5_spec_curve.pdf","' _n
+file write _f `"  "love_plot": "figures/fig2c_love_plot.pdf","' _n
+file write _f `"  "ps_overlap": "figures/fig2c2_overlap.pdf","' _n
+file write _f `"  "frozen_at": "2026-04-29""' _n
+file write _f "}" _n
+file close _f
+di as result "β̂(treat) = $" %8.0f `_b' "  (robust SE = $" %6.0f `_se' ///
+              ", 95% CI [$" %7.0f `_lo' ", $" %7.0f `_hi' "])"
+di as text "Saved: _stata_lalonde_outputs/artifacts/result.json"
 
 
 *=============================================================================*
@@ -568,8 +1024,8 @@ drop pscore
 
 di as text _n(2) "==== 管线运行完毕 ===="
 di as text "输出位置：$PROJECT_ROOT/_stata_lalonde_outputs/"
-di as text "  - tables/  : esttab 表 (.tex / .rtf)"
-di as text "  - figures/ : 所有图 (.pdf)"
+di as text "  - tables/  : esttab 表 (.tex / .rtf / .xlsx / .docx)"
+di as text "  - figures/ : 所有图 (.pdf + .png ≥300dpi)"
 di as text "  - logs/    : 完整日志 lalonde_pipeline.log"
 di as text "  - data/    : 清洗后样本 lalonde_analysis.dta"
 

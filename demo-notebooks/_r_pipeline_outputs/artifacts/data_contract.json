@@ -1,0 +1,11 @@
+{
+  "n_obs": 614,
+  "dtypes": ["numeric", "numeric", "numeric", "numeric", "integer", "integer", "numeric", "numeric", "numeric", "numeric"],
+  "n_missing": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "n_dupes_on_keys": 5,
+  "y_range": [0, 60307.93],
+  "treatment_share": 0.3013,
+  "treatment_levels": [0, 1],
+  "panel_balanced": {},
+  "mcar_hint": "vacuously OK (no missing y after Step 0.1 dropna)"
+}

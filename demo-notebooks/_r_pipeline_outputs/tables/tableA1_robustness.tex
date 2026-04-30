@@ -1,0 +1,25 @@
+\begin{table}
+\centering
+\begin{talltblr}[         %% tabularray outer open
+entry=none,label=none,
+note{}={* p \num{< 0.1}, ** p \num{< 0.05}, *** p \num{< 0.01}},
+note{ }={HC3 robust SE in parentheses (HC1 in column 2).},
+note{  }={* p<0.10, ** p<0.05, *** p<0.01.},
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]},
+hline{2}={1-11}{solid, black, 0.05em},
+hline{4}={1-11}{solid, black, 0.05em},
+hline{1}={1-11}{solid, black, 0.08em},
+hline{7}={1-11}{solid, black, 0.08em},
+column{2-11}={}{halign=c},
+column{1}={}{halign=l},
+}                     %% tabularray inner close
+& (1) Baseline (HC3) & (2) HC1 SE & (3) Drop top 1\% re78 & (4) Common support & (5) Add age\textasciicircum{}2 + educ\textasciicircum{}2 & (6) Add re74\textasciicircum{}2 + re75\textasciicircum{}2 & (7) Drop u74 strata & (8) Earners only & (9) IHS outcome & (10) Log outcome \\
+Job training (treat) & \num{1548.244}** & \num{1548.244}** & \num{747.338} & \num{1389.672}* & \num{1517.055}** & \num{1235.721}* & \num{-1293.622} & \num{1093.492} & \num{0.940}** & \num{0.893}** \\
+& (\num{749.987}) & (\num{749.987}) & (\num{655.513}) & (\num{772.863}) & (\num{757.871}) & (\num{714.111}) & (\num{1154.292}) & (\num{848.276}) & (\num{0.437}) & (\num{0.407}) \\
+Num.Obs. & \num{614} & \num{614} & \num{596} & \num{456} & \num{614} & \num{614} & \num{371} & \num{471} & \num{614} & \num{614} \\
+R2 & \num{0.148} & \num{0.148} & \num{0.096} & \num{0.059} & \num{0.153} & \num{0.189} & \num{0.244} & \num{0.168} & \num{0.080} & \num{0.082} \\
+Std.Errors & HC3 & HC3 & HC3 & HC3 & HC3 & HC3 & HC3 & HC3 & HC3 & HC3 \\
+\end{talltblr}
+\end{table}

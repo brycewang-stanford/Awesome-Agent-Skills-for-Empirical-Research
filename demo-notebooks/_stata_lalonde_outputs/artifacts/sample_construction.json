@@ -1,0 +1,6 @@
+[
+  ["0. raw rdatasets csv", 614],
+  ["1. drop rownames + dropna", 614],
+  ["2. recode race -> black/hispan", 614],
+  ["3. enforce treat in {0,1}", 614]
+]

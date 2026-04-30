@@ -1,0 +1,16 @@
+{
+  "design": "selection on observables (Lalonde NSW)",
+  "population": "Lalonde NSW treated workers + PSID comparison sample, 1976\u201378",
+  "outcome": "re78 (1978 real earnings, USD)",
+  "treatment": "treat (NSW assignment, 0/1)",
+  "estimand": "ATT",
+  "n_treated_planned": 185,
+  "n_control_planned": 429,
+  "alpha": 0.05,
+  "power_target": 0.8,
+  "mde_cohens_d": 0.24680583741964934,
+  "mde_in_dollars": 1843.8199692724368,
+  "sd_re78": 7470.730792065301,
+  "frozen_at": "2026-04-29",
+  "note": "MDE solved by statsmodels.stats.power.TTestIndPower with ratio = N_ctrl / N_treated, two-sided. Convert d \u2192 dollars via SD(re78) on the analytic sample."
+}

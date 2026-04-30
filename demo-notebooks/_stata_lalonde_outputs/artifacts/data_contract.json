@@ -1,0 +1,11 @@
+{
+  "n_obs": 614,
+  "n_missing_y": 0,
+  "n_missing_treat": 0,
+  "n_missing_X": 0,
+  "y_range": [0, 60307.9296875],
+  "treatment_share": .3013029315960912,
+  "treatment_levels": [0, 1],
+  "panel_balanced": null,
+  "mcar_hint": "vacuously OK (no missing y)"
+}

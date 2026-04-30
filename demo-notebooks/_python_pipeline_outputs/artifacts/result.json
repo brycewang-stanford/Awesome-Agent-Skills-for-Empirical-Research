@@ -1,0 +1,25 @@
+{
+  "python_version": "3.13.2",
+  "statsmodels_version": "0.14.4",
+  "pyfixest_version": "0.50.1",
+  "sklearn_version": "1.8.0",
+  "seed": 20260425,
+  "dataset_sha256_16": "f244df71588c4771",
+  "n_obs": 614,
+  "estimand": "ATT (selection on observables)",
+  "estimator": "OLS with HC3 SE, full covariate set",
+  "headline_estimate": 1548.2438019991596,
+  "headline_se": 749.9867588629278,
+  "headline_ci95": [
+    78.26975462782116,
+    3018.217849370498
+  ],
+  "pre_registration": "artifacts/pap.json + artifacts/strategy.md",
+  "data_contract": "artifacts/data_contract.json",
+  "sample_log": "artifacts/sample_construction.json",
+  "robustness_master": "tables/tableA1_robustness.tex",
+  "spec_curve": "figures/fig5_spec_curve.png",
+  "love_plot": "figures/fig2c_love_plot.png",
+  "ps_overlap": "figures/fig2c2_overlap.png",
+  "frozen_at": "2026-04-29"
+}

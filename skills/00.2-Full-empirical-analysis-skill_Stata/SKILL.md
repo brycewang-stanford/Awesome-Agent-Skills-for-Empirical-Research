@@ -291,7 +291,7 @@ Stata's export stack is more fragmented than Python's StatsPAI. Three tiers, pic
 
 | Tier | Use when | API | Hot options |
 |---|---|---|---|
-| **1. Single multi-column table** | Exporting *one* Table 2 / Table 3 / Table A1 with progressive columns | `eststo m1 ... m6` then loop over `.tex` / `.rtf` / `.xlsx` / `.docx` with `esttab ... using "tab.ext", replace ...` | `keep()`, `drop()`, `mtitles()`, `stats(N r2 r2_a, labels(...))`, `star(* 0.10 ** 0.05 *** 0.01)`, `label`, `booktabs`, `addnotes()`. Always emit all four formats (`.tex`/`.rtf`/`.xlsx`/`.docx`) in one foreach block. |
+| **1. Single multi-column table** | Exporting *one* Table 2 / Table 3 / Table A1 with progressive columns | **`.tex` / `.rtf`**: `esttab` with `booktabs`<br>**`.xlsx` / `.docx`**: `outreg2` (esttab's native Office export is a data dumper, not a publication formatter — outreg2 produces properly formatted Word/Excel with borders, aligned stars, and AER-style layout) | **`esttab`** for tex/rtf: `keep()`, `drop()`, `mtitles()`, `stats(N r2 r2_a, labels(...))`, `star(* 0.10 ** 0.05 *** 0.01)`, `label`, `booktabs`, `addnotes()`.<br>**`outreg2`** for xlsx/docx: `label dec(3)`, `addtext()` for FE indicators, `replace` first / `append` subsequent columns.<br>Always emit all four formats — esttab for tex/rtf in a `foreach ext in tex rtf` loop, outreg2 for xlsx/docx in a separate `foreach ext in xlsx docx` loop. |
 | **2. Multi-panel paper format** (Tables 2 + 3 + A1 + A2 in one file) | Producing the paper-tables block — main + heterogeneity + robustness + placebo as a single document | `esttab ... using "paper.tex", replace` for first panel; subsequent `esttab ... using "paper.tex", append` for each next panel; `texdoc init "paper.tex"` for full LaTeX with prose. Repeat for `.rtf`/`.xlsx`/`.docx` bundles. | first panel: `replace`; subsequent: `append`; surround with `texdoc` for headings |
 | **3. Full session bundle** (the Stata 17+ `collect` equivalent) | Replication appendix that mixes summary stats + balance + multiple regression tables + headings + prose in **one** file | `collect create paper`<br>`collect get summary, ...`<br>`collect get est ...`<br>`collect layout ...`<br>`collect export "paper.xlsx"` (also `.docx`/`.html`/`.tex`/`.md`) | Stata 17+ only; for older Stata use `texdoc` / `markdoc` |
 
@@ -303,27 +303,53 @@ local AER_STAR  "* 0.10 ** 0.05 *** 0.01"
 local AER_NOTES "Cluster-robust standard errors in parentheses. * p<0.10, ** p<0.05, *** p<0.01."
 local AER_STATS stats(N r2_a, labels("N" "Adj. R²"))
 
-* Then every esttab call uses BOTH extensions — LaTeX + Word + Excel:
-* esttab m1 m2 m3 m4 m5 m6 using "tables/table2.tex", replace ///
+* LaTeX + RTF via esttab (booktabs for tex)
+* esttab m1 m2 m3 using "tables/table2.tex", replace ///
 *     se star(`AER_STAR') label booktabs `AER_STATS' addnotes(`AER_NOTES')
-* esttab m1 m2 m3 m4 m5 m6 using "tables/table2.rtf", replace ///
+* esttab m1 m2 m3 using "tables/table2.rtf", replace ///
 *     se star(`AER_STAR') label `AER_STATS' addnotes(`AER_NOTES')
-* esttab m1 m2 m3 m4 m5 m6 using "tables/table2.xlsx", replace ///
-*     se star(`AER_STAR') label `AER_STATS' addnotes(`AER_NOTES')
-* esttab m1 m2 m3 m4 m5 m6 using "tables/table2.docx", replace ///
-*     se star(`AER_STAR') label `AER_STATS' addnotes(`AER_NOTES')
+
+* Excel + Word via outreg2 (publication-grade Office formatting)
+* First column: replace; subsequent: append
+* outreg2 using "tables/table2.xlsx", replace label dec(3) ///
+*     keep(training age edu tenure) addtext(Worker FE, Yes, Year FE, Yes)
+* outreg2 using "tables/table2.xlsx", append   label dec(3) ///
+*     keep(training age edu tenure region) addtext(Worker FE, Yes, Year FE, Yes, Region, Yes)
 ```
 
-**Multi-format export pattern** — whenever you call `esttab` for one table artifact, always emit all four formats (`.tex` / `.rtf` / `.xlsx` / `.docx`) in one block so co-authors can edit in Word and the build system uses LaTeX:
+**Multi-format export pattern** — emit `.tex` and `.rtf` via `esttab`, then `.xlsx` and `.docx` via `outreg2`. Never use `esttab ... using "... .xlsx"` or `esttab ... using "... .docx"` — esttab's native Office export is a raw data dumper, not a publication formatter:
 
 ```stata
-foreach ext in tex rtf xlsx docx {
+* LaTeX + RTF — use esttab (booktabs for tex, rich text for rtf)
+foreach ext in tex rtf {
     esttab m1 m2 m3 using "tables/table2_main.`ext'", ///
         replace se star(* 0.10 ** 0.05 *** 0.01) ///
         label booktabs mtitles("(1)" "(2)" "(3)") ///
         stats(N r2_a, labels("N" "Adj. R²")) ///
         addnotes("Cluster-robust SE in parentheses. * p<0.10, ** p<0.05, *** p<0.01.")
 }
+
+* Excel + Word — use outreg2 (proper Office table formatting, aligned stars, borders)
+* First model: replace
+eststo m1: qui reghdfe log_wage training age edu tenure, absorb(worker_id year) vce(cluster worker_id)
+outreg2 using "tables/table2_main.xlsx", replace label dec(3) ///
+    keep(training age edu tenure) ///
+    addtext(Worker FE, Yes, Year FE, Yes)
+
+* Subsequent models: append
+eststo m2: qui reghdfe log_wage training age edu tenure region, absorb(worker_id year) vce(cluster worker_id)
+outreg2 using "tables/table2_main.xlsx", append label dec(3) ///
+    keep(training age edu tenure region) ///
+    addtext(Worker FE, Yes, Year FE, Yes, Region, Yes)
+
+* docx follows the same pattern but with the .doc extension
+outreg2 using "tables/table2_main.doc", replace label dec(3) ///
+    keep(training age edu tenure) ///
+    addtext(Worker FE, Yes, Year FE, Yes)
+eststo m2
+outreg2 using "tables/table2_main.doc", append label dec(3) ///
+    keep(training age edu tenure region) ///
+    addtext(Worker FE, Yes, Year FE, Yes, Region, Yes)
 ```
 
 **Figures always export to both `.pdf` and `.png` at ≥300 dpi** (vector for LaTeX, raster for slides/web/Word embedding):
