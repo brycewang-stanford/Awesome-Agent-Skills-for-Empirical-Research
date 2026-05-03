@@ -1,0 +1,8 @@
+Sample construction (LaLonde 1986, MatchIt R package):
+- Source: NSW experimental treated + CPS/PSID comparison
+- Final analysis sample: 614 individuals
+- Treated (NSW job training): 185
+- Control (CPS/PSID comparison): 429
+- Pre-treatment earnings (1974) mean: $4558
+- Pre-treatment earnings (1975) mean: $2185
+- Outcome: real earnings in 1978

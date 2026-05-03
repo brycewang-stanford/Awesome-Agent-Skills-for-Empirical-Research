@@ -1,0 +1,21 @@
+{\rtf1\fs24
+\trowd\trgaph75\trleft-75\intbl\trqc\clbrdrt\brdrs\cellx3312\clbrdrt\brdrs\cellx8208
+\ql \cell\qc (1)\cell\row
+\trowd\trgaph75\trleft-75\trqc\cellx3312\cellx8208
+\trowd\trgaph75\trleft-75\trqc\clbrdrb\brdrs\cellx3312\clbrdrb\brdrs\cellx8208
+\ql VARIABLES\cell\qc 1978 年收入 (美元)\cell\row
+\trowd\trgaph75\trleft-75\trqc\cellx3312\cellx8208
+\ql \cell\qc \cell\row
+\ql NSW 职业培训 (0/1)\cell\qc 3,865.10**\cell\row
+\ql \cell\qc (1,598.89)\cell\row
+\ql Constant\cell\qc 7,385.07*\cell\row
+\ql \cell\qc (4,305.57)\cell\row
+\ql \cell\qc \cell\row
+\ql Observations\cell\qc 187\cell\row
+\ql R-squared\cell\qc 0.33\cell\row
+\trowd\trgaph75\trleft-75\trqc\trbrdrb\brdrs\clbrdrb\brdrs\cellx3312\clbrdrb\brdrs\cellx8208
+\ql Subgroup\cell\qc All Black Non-Blk Age<30 Age≥30\cell\row
+\pard\qc
+Robust standard errors in parentheses\par
+*** p<0.01, ** p<0.05, * p<0.1\par
+}

@@ -1,0 +1,20 @@
+{
+  "stata_version": "18", 
+  "current_date": " 3 May 2026 00:08:18", 
+  "seed": 7, 
+  "n_obs": 614, 
+  "estimand": "ATT (selection on observables)", 
+  "estimator": "OLS with vce(robust), full covariate set", 
+  "headline_estimate": 1548.243752358955, 
+  "headline_se": 740.5760487347528, 
+  "headline_ci95_lo": 96.71469683883947, 
+  "headline_ci95_hi": 2999.772807879071, 
+  "pre_registration": "artifacts/pap.json + artifacts/strategy.md", 
+  "data_contract": "artifacts/data_contract.json", 
+  "sample_log": "artifacts/sample_construction.json", 
+  "robustness_master": "tables/tableA1_robustness.tex", 
+  "spec_curve": "figures/fig4_spec_curve.pdf", 
+  "love_plot": "figures/fig2_love_plot.pdf", 
+  "ps_overlap": "figures/fig2b_ps_overlap.pdf", 
+  "frozen_at": "2026-05-02"
+}

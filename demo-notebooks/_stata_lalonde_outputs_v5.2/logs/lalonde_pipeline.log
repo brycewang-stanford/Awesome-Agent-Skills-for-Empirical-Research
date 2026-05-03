@@ -1,0 +1,2328 @@
+-------------------------------------------------------------------------------
+      name:  pipelog
+       log:  /Users/brycewang/Documents/GitHub/Awesome-Agent-Skills-for-Empiric
+> al-Research/demo-notebooks/_stata_lalonde_outputs_v5.2/logs/lalonde_pipeline.
+> log
+  log type:  text
+ opened on:   3 May 2026, 00:08:12
+
+. di as text "Pipeline log started: `c(current_date)' `c(current_time)'"
+Pipeline log started:  3 May 2026 00:08:12
+
+. 
+. *============================================================================
+> =*
+. * 包依赖：自动按需安装                                                       
+>  *
+. *============================================================================
+> =*
+. local _cmds  esttab    coefplot  winsor2  balancetable  psmatch2  ebalance  p
+> sacalc
+
+. local _pkgs  estout    coefplot  winsor2  balancetable  psmatch2  ebalance  p
+> sacalc
+
+. local _N : word count `_cmds'
+
+. forvalues i = 1/`_N' {
+  2.     local _c : word `i' of `_cmds'
+  3.     local _p : word `i' of `_pkgs'
+  4.     capture which `_c'
+  5.     if _rc {
+  6.         di as text "[setup] installing `_p' from SSC ..."
+  7.         capture noisily ssc install `_p', replace
+  8.         if _rc di as error "[setup] 安装 `_p' 失败"
+  9.     }
+ 10. }
+
+. 
+. * 全局画图主题
+. set scheme s2color
+
+. 
+. * Journal style macros (skill §export cookbook — AER convention)
+. local AER_STAR  "* 0.10 ** 0.05 *** 0.01"
+
+. local AER_NOTES "Robust standard errors in parentheses. * p<0.10, ** p<0.05, 
+> *** p<0.01."
+
+. local AER_STATS stats(N r2_a, labels("N" "Adj. R²"))
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step −1 : Pre-Analysis Plan (skill §Step −1)                               
+>  *
+. *  - MDE 计算 + 协议冻结到 artifacts/pap.json                                
+>  *
+. *============================================================================
+> =*
+. di as text _n "==== Step −1: Pre-Analysis Plan ===="
+
+==== Step −1: Pre-Analysis Plan ====
+
+. 
+. * Lalonde 不等臂 MDE: 185 treated + 429 control, α=0.05, power=0.80
+. * → d ≈ 0.247, 对应 ~$1,846 (SD ≈ 7506)
+. local mde_d = 0.246
+
+. local sd_re78 = 7506.96
+
+. local mde_dollars = `mde_d' * `sd_re78'
+
+. di as result "PAP MDE Cohen's d = " %5.3f `mde_d' "  →  ≈ $" %8.0f `mde_dolla
+> rs'
+PAP MDE Cohen's d = 0.246  →  ≈ $    1847
+
+. 
+. file open _f using "_stata_lalonde_outputs_v5.2/artifacts/pap.json", write re
+> place
+
+. file write _f "{" _n
+
+. file write _f `"  "design": "selection on observables (Lalonde NSW)", "' _n
+
+. file write _f `"  "population": "Lalonde NSW treated + PSID comparison, 1976-
+> 78", "' _n
+
+. file write _f `"  "outcome": "re78 (1978 real earnings, USD)", "' _n
+
+. file write _f `"  "treatment": "treat (NSW assignment 0/1)", "' _n
+
+. file write _f `"  "estimand": "ATT", "' _n
+
+. file write _f `"  "n_treated_planned": 185, "' _n
+
+. file write _f `"  "n_control_planned": 429, "' _n
+
+. file write _f `"  "alpha": 0.05, "' _n
+
+. file write _f `"  "power_target": 0.80, "' _n
+
+. file write _f `"  "mde_cohens_d": `mde_d', "' _n
+
+. file write _f `"  "mde_in_dollars": `mde_dollars', "' _n
+
+. file write _f `"  "sd_re78": `sd_re78', "' _n
+
+. file write _f `"  "frozen_at": "2026-05-02", "' _n
+
+. file write _f `"  "stata_command": "power twomeans 0, n1(185) n2(429) sd1(1) 
+> sd2(1) alpha(0.05) power(0.80)""' _n
+
+. file write _f "}" _n
+
+. file close _f
+
+. di as text "Saved: artifacts/pap.json"
+Saved: artifacts/pap.json
+
+. 
+. * --- 策略协议 (skill §2.5 — strategy.do) ---
+. file open _f using "_stata_lalonde_outputs_v5.2/artifacts/strategy.md", write
+>  replace
+
+. file write _f "# Empirical Strategy — Lalonde NSW (pre-registration)" _n _n
+
+. file write _f "**Frozen at**: 2026-05-02" _n
+
+. file write _f "**Design (per skill §2.5 picker)**: selection-on-observables (
+> cross-section)" _n
+
+. file write _f "**Population**: Lalonde NSW treated workers + PSID comparison,
+>  1976-78" _n
+
+. file write _f "**Treatment**: `treat` (binary NSW assignment)" _n
+
+. file write _f "**Outcome**:   `re78` (1978 real earnings, USD)" _n
+
+. file write _f "**Estimand**:  ATT" _n _n
+
+. file write _f "## Estimating equation" _n _n
+
+. file write _f "    re78_i = a + b * treat_i + X_i' * gamma + eps_i" _n
+
+. file write _f "    X_i = (age, educ, black, hispan, married, nodegree, re74, 
+> re75)" _n _n
+
+. file write _f "## Identifying assumption" _n _n
+
+. file write _f "1. Conditional unconfoundedness: Y(0), Y(1) ⟂ D | X" _n
+
+. file write _f "2. Overlap: 0 < Pr(D=1 | X) < 1 in joint support" _n _n
+
+. file write _f "## Auto-flagged threats" _n _n
+
+. file write _f "- Selection on unobservables (motivation, ability) → Oster δ" 
+> _n
+
+. file write _f "- Functional-form sensitivity → progressive M1→M5 + spec curve
+> " _n
+
+. file write _f "- Weak overlap in PS tails → common support trimming" _n _n
+
+. file write _f "## Fallback estimators (§6)" _n _n
+
+. file write _f "- teffects ipw / ipwra / aipw (DR)" _n
+
+. file write _f "- psmatch2 NN matching" _n
+
+. file write _f "- ebalance entropy balancing" _n
+
+. file write _f "- psacalc delta (Oster 2019 sensitivity)" _n
+
+. file close _f
+
+. di as text "Saved: artifacts/strategy.md"
+Saved: artifacts/strategy.md
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 1 : 数据导入 & 清洗 (skill §Step 1)                                   
+>  *
+. *============================================================================
+> =*
+. di as text _n "==== Step 1: Data import & cleaning ===="
+
+==== Step 1: Data import & cleaning ====
+
+. 
+. * 1a. 从 Rdatasets URL 直接读入
+. import delimited using ///
+>     "https://vincentarelbundock.github.io/Rdatasets/csv/MatchIt/lalonde.csv",
+>  ///
+>     clear varnames(1) encoding("utf-8")
+(10 vars, 614 obs)
+
+. 
+. * 1b. 初步检视
+. describe, short
+
+Contains data
+ Observations:           614                  
+    Variables:            10                  
+Sorted by: 
+     Note: Dataset has changed since last saved.
+
+. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+    rownames |          0
+       treat |        614    .3013029    .4591981          0          1
+         age |        614    27.36319    9.881187         16         55
+        educ |        614    10.26873    2.628325          0         18
+        race |          0
+-------------+---------------------------------------------------------
+     married |        614    .4153094    .4931771          0          1
+    nodegree |        614    .6302932    .4831189          0          1
+        re74 |        614    4557.547    6477.964          0   35040.07
+        re75 |        614    2184.938    3295.679          0   25142.24
+        re78 |        614    6792.834    7470.731          0   60307.93
+
+. 
+. * 1c. 缺失诊断
+. qui count
+
+. local _Ntotal = r(N)
+
+. di as text _n "Missingness per variable:"
+
+Missingness per variable:
+
+. foreach v of varlist * {
+  2.     qui count if missing(`v')
+  3.     di as text "  " %-15s "`v'" "  missing=" %5.0f r(N) ///
+>         "  (" %5.2f 100*r(N)/`_Ntotal' "%)"
+  4. }
+  rownames         missing=    0  ( 0.00%)
+  treat            missing=    0  ( 0.00%)
+  age              missing=    0  ( 0.00%)
+  educ             missing=    0  ( 0.00%)
+  race             missing=    0  ( 0.00%)
+  married          missing=    0  ( 0.00%)
+  nodegree         missing=    0  ( 0.00%)
+  re74             missing=    0  ( 0.00%)
+  re75             missing=    0  ( 0.00%)
+  re78             missing=    0  ( 0.00%)
+
+. misstable summarize
+(variables nonmissing or string)
+
+. 
+. * 1d. race → black/hispan dummies (skill §1 — 与 Python notebook 对齐)
+. gen byte black  = (race == "black")
+
+. gen byte hispan = (race == "hispan")
+
+. label variable black  "Race = Black"
+
+. label variable hispan "Race = Hispanic"
+
+. 
+. * 1e. 删除冗余列 + listwise deletion
+. capture drop v1
+
+. capture drop rownames
+
+. local analysis_vars "treat re78 age educ black hispan married nodegree re74 r
+> e75"
+
+. foreach v of local analysis_vars {
+  2.     drop if missing(`v')
+  3. }
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+(0 observations deleted)
+
+. 
+. * 1f. 断言 treat ∈ {0,1}
+. levelsof treat, local(_tlev)
+0 1
+
+. assert "`_tlev'" == "0 1"
+
+. di as text "Assert OK: treat is binary {0,1}"
+Assert OK: treat is binary {0,1}
+
+. 
+. * 1g. 标签
+. label variable treat    "NSW 职业培训 (0/1)"
+
+. label variable re78     "1978 年收入 (美元)"
+
+. label variable age      "年龄 (岁)"
+
+. label variable educ     "受教育年限"
+
+. label variable married  "已婚"
+
+. label variable nodegree "未获高中文凭"
+
+. label variable re74     "1974 年收入 (美元)"
+
+. label variable re75     "1975 年收入 (美元)"
+
+. 
+. tab treat, missing
+
+        NSW |
+     职业培 |
+   训 (0/1) |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        429       69.87       69.87
+          1 |        185       30.13      100.00
+------------+-----------------------------------
+      Total |        614      100.00
+
+. 
+. * 1h. 保存清洗后数据
+. save "_stata_lalonde_outputs_v5.2/data/lalonde_analysis.dta", replace
+file _stata_lalonde_outputs_v5.2/data/lalonde_analysis.dta saved
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 0 : Sample log + 5-check data contract (skill §Step 0)                
+>  *
+. *============================================================================
+> =*
+. di as text _n "==== Step 0: Sample log + 5-check data contract ===="
+
+==== Step 0: Sample log + 5-check data contract ====
+
+. 
+. * 0.1 Sample construction log
+. local _n_final = _N
+
+. file open _f using "_stata_lalonde_outputs_v5.2/artifacts/sample_construction
+> .json", write replace
+
+. file write _f "[" _n
+
+. file write _f `"  ["0. raw rdatasets csv", 614], "' _n
+
+. file write _f `"  ["1. drop rownames + dropna", 614], "' _n
+
+. file write _f `"  ["2. recode race -> black/hispan", 614], "' _n
+
+. file write _f `"  ["3. enforce treat in {0,1}", `_n_final'] "' _n
+
+. file write _f "]" _n
+
+. file close _f
+
+. di as text "Sample: N=`_n_final'"
+Sample: N=614
+
+. 
+. * 0.2 Five-check contract (skill §0.2)
+. * Check 1-3: missingness
+. qui count if missing(re78)
+
+. local _miss_y = r(N)
+
+. qui count if missing(treat)
+
+. local _miss_t = r(N)
+
+. qui count if missing(age) | missing(educ) | missing(black) | missing(hispan) 
+> | ///
+>               missing(married) | missing(nodegree) | missing(re74) | missing(
+> re75)
+
+. local _miss_X = r(N)
+
+. 
+. assert `_miss_y' == 0
+
+. assert `_miss_t' == 0
+
+. assert `_miss_X' == 0
+
+. di as result "Check 1-3: Zero missing on key vars — PASS"
+Check 1-3: Zero missing on key vars — PASS
+
+. 
+. * Check 4: y-range
+. qui sum re78
+
+. assert r(min) >= 0
+
+. di as result "Check 4: y-range [$" %6.0f r(min) ", $" %7.0f r(max) "] — PASS"
+Check 4: y-range [$     0, $  60308] — PASS
+
+. 
+. * Check 5: treat share
+. qui sum treat
+
+. local _treat_share = r(mean)
+
+. assert `_treat_share' > 0 & `_treat_share' < 1
+
+. di as result "Check 5: treat share = " %5.3f `_treat_share' " — PASS"
+Check 5: treat share = 0.301 — PASS
+
+. 
+. * Persist contract
+. file open _f using "_stata_lalonde_outputs_v5.2/artifacts/data_contract.json"
+> , write replace
+
+. file write _f "{" _n
+
+. file write _f `"  "n_obs": `_n_final', "' _n
+
+. file write _f `"  "n_missing_y": `_miss_y', "' _n
+
+. file write _f `"  "n_missing_treat": `_miss_t', "' _n
+
+. file write _f `"  "n_missing_X": `_miss_X', "' _n
+
+. file write _f `"  "y_range": [`=r(min)', `=r(max)'], "' _n
+
+. file write _f `"  "treatment_share": `_treat_share', "' _n
+
+. file write _f `"  "treatment_levels": [0, 1], "' _n
+
+. file write _f `"  "design": "cross-sectional selection-on-observables", "' _n
+
+. file write _f `"  "panel_balanced": null "' _n
+
+. file write _f "}" _n
+
+. file close _f
+
+. di as text "Saved: artifacts/data_contract.json"
+Saved: artifacts/data_contract.json
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 2 : 变量构造 (skill §Step 2)                                          
+>  *
+. *  - 横截面无时序算子，做 winsorize + log/IHS 供稳健性                       
+>  *
+. *============================================================================
+> =*
+. di as text _n "==== Step 2: Variable construction ===="
+
+==== Step 2: Variable construction ====
+
+. 
+. * 2a. Winsorize 1/99 (skill §2b)
+. winsor2 re78 re74 re75, cuts(1 99) suffix(_w1)
+
+. 
+. * 2b. IHS (arcsinh — handles zeros, unlike log)
+. gen double ihs_re78 = asinh(re78)
+
+. 
+. * 2c. Log(1+y)
+. gen log_re78 = log(re78 + 1)
+
+. 
+. * 2d. Positive earnings indicators
+. gen byte pos_re74 = (re74 > 0)
+
+. gen byte pos_re75 = (re75 > 0)
+
+. label variable pos_re74 "1974 年收入>0"
+
+. label variable pos_re75 "1975 年收入>0"
+
+. 
+. * 2e. 多项式项 (供稳健性)
+. gen age_sq   = age^2
+
+. gen educ_sq  = educ^2
+
+. gen re74_sq  = re74^2
+
+. gen re75_sq  = re75^2
+
+. 
+. label variable age_sq  "年龄平方"
+
+. label variable educ_sq "教育年限平方"
+
+. 
+. di as text "Step 2 done: winsorized, IHS, log, squared terms created."
+Step 2 done: winsorized, IHS, log, squared terms created.
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 3 : 描述统计 & 均衡表 — T1 (skill §Step 3)                            
+>  *
+. *  - 3a 全样本描述统计                                                       
+>  *
+. *  - 3b 处理 vs 对照均衡表 (balancetable)                                    
+>  *
+. *  - 3c SMD + t 检验                                                         
+> *
+. *  - 3d KDE 收入分布 (F1 — 横截面替代 trend plot)                            
+>  *
+. *============================================================================
+> =*
+. di as text _n "==== Step 3: Descriptive statistics & Table 1 ===="
+
+==== Step 3: Descriptive statistics & Table 1 ====
+
+. 
+. * 3a. 全样本描述统计 (连续变量)
+. local sumvars "re78 re74 re75 age educ"
+
+. tabstat `sumvars', statistics(n mean sd min p25 p50 p75 max) columns(statisti
+> cs)
+
+    Variable |         N      Mean        SD       Min       p25       p50
+-------------+------------------------------------------------------------
+        re78 |       614  6792.834  7470.731         0   237.914  4759.019
+        re74 |       614  4557.547  6477.964         0         0   1042.33
+        re75 |       614  2184.938  3295.679         0         0  601.5484
+         age |       614  27.36319  9.881187        16        20        25
+        educ |       614  10.26873  2.628325         0         9        11
+--------------------------------------------------------------------------
+
+    Variable |       p75       Max
+-------------+--------------------
+        re78 |  10923.35  60307.93
+        re74 |  7891.927  35040.07
+        re75 |  3254.806  25142.24
+         age |        32        55
+        educ |        12        18
+----------------------------------
+
+. 
+. * 3b. 均衡表 — skill §3b, §8b 多格式
+. estpost summarize re78 re74 re75 age educ, detail
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd) 
+-------------+-------------------------------------------------------
+        re78 |       614        614   6792.834   5.58e+07   7470.731 
+        re74 |       614        614   4557.547   4.20e+07   6477.964 
+        re75 |       614        614   2184.938   1.09e+07   3295.679 
+         age |       614        614   27.36319   97.63786   9.881187 
+        educ |       614        614   10.26873   6.908091   2.628325 
+
+             | e(skewn~)  e(kurto~)     e(sum)     e(min)     e(max) 
+-------------+-------------------------------------------------------
+        re78 |  1.555079   7.350233    4170800          0   60307.93 
+        re74 |  1.585787   4.962113    2798334          0   35040.07 
+        re75 |  2.297341   10.16726    1341552          0   25142.24 
+         age |  1.024577   3.147059      16801         16         55 
+        educ | -.7210553   4.634994       6305          0         18 
+
+             |     e(p1)      e(p5)     e(p10)     e(p25)     e(p50) 
+-------------+-------------------------------------------------------
+        re78 |         0          0          0    237.914   4759.019 
+        re74 |         0          0          0          0    1042.33 
+        re75 |         0          0          0          0   601.5484 
+         age |        16         17         17         20         25 
+        educ |         2          5          7          9         11 
+
+             |    e(p75)     e(p90)     e(p95)     e(p99) 
+-------------+--------------------------------------------
+        re78 |  10923.35   17814.98   21857.05   25564.67 
+        re74 |  7891.927   14426.79   18501.36   25862.32 
+        re75 |  3254.806   6701.177   8502.242   13830.64 
+         age |        32         43         48         54 
+        educ |        12         13         14         16 
+
+. 
+. * T1a: 全样本描述统计表 (LaTeX/RTF — esttab)
+. esttab . using "_stata_lalonde_outputs_v5.2/tables/table1_full.tex", ///
+>     replace booktabs ///
+>     cells("count(fmt(0)) mean(fmt(2)) sd(fmt(2)) min(fmt(2)) p50(fmt(2)) max(
+> fmt(2))") ///
+>     label nonumber nomtitle ///
+>     title("Lalonde NSW: 全样本描述统计")
+(output written to _stata_lalonde_outputs_v5.2/tables/table1_full.tex)
+
+. 
+. esttab . using "_stata_lalonde_outputs_v5.2/tables/table1_full.rtf", ///
+>     replace ///
+>     cells("count(fmt(0)) mean(fmt(2)) sd(fmt(2)) min(fmt(2)) p50(fmt(2)) max(
+> fmt(2))") ///
+>     label nonumber nomtitle ///
+>     title("Lalonde NSW: 全样本描述统计")
+(output written to _stata_lalonde_outputs_v5.2/tables/table1_full.rtf)
+
+. 
+. * T1b: 均衡表 (balancetable) — skill §8b
+. balancetable treat age educ black hispan married nodegree re74 re75 ///
+>     using "_stata_lalonde_outputs_v5.2/tables/table1_balance.tex", ///
+>     replace varlabels pval booktabs
+
+. 
+. balancetable treat age educ black hispan married nodegree re74 re75 ///
+>     using "_stata_lalonde_outputs_v5.2/tables/table1_balance.xlsx", ///
+>     replace varlabels
+
+. 
+. * 3c. SMD + t 检验 (skill §3b)
+. di as text _n "Standardized Mean Differences (|SMD|<0.1 = balanced):"
+
+Standardized Mean Differences (|SMD|<0.1 = balanced):
+
+. foreach v in age educ black hispan married nodegree re74 re75 {
+  2.     qui sum `v' if treat == 1
+  3.     local m1 = r(mean)
+  4.     local sd1 = r(sd)
+  5.     qui sum `v' if treat == 0
+  6.     local m0 = r(mean)
+  7.     local sd0 = r(sd)
+  8.     local smd = (`m1' - `m0') / sqrt((`sd1'^2 + `sd0'^2)/2)
+  9.     qui ttest `v', by(treat)
+ 10.     di as text "  `v': diff=" %9.3f (`m1'-`m0') "  SMD=" %7.3f `smd' "  p=
+> " %6.4f r(p)
+ 11. }
+  age: diff=   -2.214  SMD= -0.242  p=0.0107
+  educ: diff=    0.111  SMD=  0.045  p=0.6330
+  black: diff=    0.640  SMD=  1.668  p=0.0000
+  hispan: diff=   -0.083  SMD= -0.277  p=0.0034
+  married: diff=   -0.324  SMD= -0.719  p=0.0000
+  nodegree: diff=    0.111  SMD=  0.235  p=0.0087
+  re74: diff=-3523.663  SMD= -0.596  p=0.0000
+  re75: diff= -934.429  SMD= -0.287  p=0.0012
+
+. 
+. * 朴素差值 (vs notebook)
+. qui sum re78 if treat == 1
+
+. local mean_t = r(mean)
+
+. qui sum re78 if treat == 0
+
+. local mean_c = r(mean)
+
+. local naive = `mean_t' - `mean_c'
+
+. di as result "Naive (treated - control) diff: $" %12.2fc `naive'
+Naive (treated - control) diff: $     -635.03
+
+. 
+. * 3d. F1 — KDE 收入分布对比 (横截面替代 trend plot — skill §when to deviate)
+. twoway (kdensity re78 if treat == 1, lcolor("31 119 180") lwidth(medthick)) /
+> //
+>        (kdensity re78 if treat == 0, lcolor("214 39 40") lwidth(medthick) lpa
+> ttern(dash)), ///
+>     legend(order(1 "Treated" 2 "Control") position(2) ring(0)) ///
+>     title("Figure 1. 1978 Earnings density by treatment status") ///
+>     xtitle("re78 (USD)") ytitle("Density") ///
+>     note("Cross-sectional design: event-study figure N/A, shown earnings dens
+> ity instead.")
+
+. graph export "_stata_lalonde_outputs_v5.2/figures/fig1_kde_re78.pdf", replace
+file _stata_lalonde_outputs_v5.2/figures/fig1_kde_re78.pdf saved as PDF
+    format
+
+. graph export "_stata_lalonde_outputs_v5.2/figures/fig1_kde_re78.png", replace
+>  width(1200)
+file _stata_lalonde_outputs_v5.2/figures/fig1_kde_re78.png written in PNG forma
+> t
+
+. di as text "Saved: figures/fig1_kde_re78.{pdf,png}"
+Saved: figures/fig1_kde_re78.{pdf,png}
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 3.5 : 识别图 — F2 Love plot (skill §3.5.4)                            
+>  *
+. *============================================================================
+> =*
+. di as text _n "==== Step 3.5: Identification graphics ===="
+
+==== Step 3.5: Identification graphics ====
+
+. 
+. * 3.5a Love plot — psmatch2 + pstest (skill §3.5.4)
+. preserve
+
+.     capture noisily psmatch2 treat age educ black hispan married nodegree re7
+> 4 re75, ///
+>         outcome(re78) n(1) common logit
+
+Logistic regression                                     Number of obs =    614
+                                                        LR chi2(8)    = 263.65
+                                                        Prob > chi2   = 0.0000
+Log likelihood = -243.92197                             Pseudo R2     = 0.3508
+
+------------------------------------------------------------------------------
+       treat | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   .0157771   .0135771     1.16   0.245    -.0108335    .0423876
+        educ |   .1613069   .0651264     2.48   0.013     .0336614    .2889524
+       black |   3.065368   .2865262    10.70   0.000     2.503787    3.626949
+      hispan |   .9836336    .425664     2.31   0.021     .1493476     1.81792
+     married |  -.8321133   .2903292    -2.87   0.004    -1.401148   -.2630786
+    nodegree |   .7072969   .3376683     2.09   0.036     .0454792    1.369115
+        re74 |  -.0000718   .0000287    -2.50   0.013    -.0001281   -.0000154
+        re75 |   .0000534   .0000463     1.15   0.249    -.0000374    .0001443
+       _cons |  -4.728649   1.017069    -4.65   0.000    -6.722068    -2.73523
+------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+> ---------
+        Variable     Sample |    Treated     Controls   Difference         S.E.
+>    T-stat
+----------------------------+--------------------------------------------------
+> ---------
+            re78  Unmatched |  6349.1435   6984.16975   -635.02625   657.137424
+>     -0.97
+                        ATT | 6082.05891   4330.83272    1751.2262   1012.19617
+>      1.73
+----------------------------+--------------------------------------------------
+> ---------
+Note: S.E. does not take into account that the propensity score is estimated.
+
+ psmatch2: |   psmatch2: Common
+ Treatment |        support
+assignment | Off suppo  On suppor |     Total
+-----------+----------------------+----------
+ Untreated |         0        429 |       429 
+   Treated |         8        177 |       185 
+-----------+----------------------+----------
+     Total |         8        606 |       614 
+
+.     if _rc == 0 {
+.         capture noisily pstest age educ black hispan married nodegree re74 re
+> 75, ///
+>             both graph saving("_stata_lalonde_outputs_v5.2/figures/fig2_love_
+> plot", replace)
+
+-------------------------------------------------------------------------------
+> ---------
+                Unmatched |       Mean               %reduct |     t-test    | 
+>  V(T)/
+Variable          Matched | Treated Control    %bias  |bias| |    t    p>|t| | 
+>  V(C)
+--------------------------+----------------------------------+---------------+-
+> ---------
+age                    U  | 25.816    28.03    -24.2         |  -2.56  0.011 | 
+>  0.44*
+                       M  | 25.446   24.288     12.7    47.7 |   1.29  0.198 | 
+>  0.52*
+                          |                                  |               |
+educ                   U  | 10.346   10.235      4.5         |   0.48  0.633 | 
+>  0.50*
+                       M  | 10.322    10.35     -1.1    74.4 |  -0.11  0.911 | 
+>  0.59*
+                          |                                  |               |
+black                  U  | .84324    .2028    166.8         |  18.60  0.000 | 
+>     .
+                       M  | .83616   .83051      1.5    99.1 |   0.14  0.887 | 
+>     .
+                          |                                  |               |
+hispan                 U  | .05946   .14219    -27.7         |  -2.94  0.003 | 
+>     .
+                       M  | .06215    .0678     -1.9    93.2 |  -0.22  0.830 | 
+>     .
+                          |                                  |               |
+married                U  | .18919   .51282    -71.9         |  -7.82  0.000 | 
+>     .
+                       M  | .19774   .13559     13.8    80.8 |   1.57  0.117 | 
+>     .
+                          |                                  |               |
+nodegree               U  | .70811   .59674     23.5         |   2.63  0.009 | 
+>     .
+                       M  | .69492   .68927      1.2    94.9 |   0.11  0.909 | 
+>     .
+                          |                                  |               |
+re74                   U  | 2095.6   5619.2    -59.6         |  -6.38  0.000 | 
+>  0.52*
+                       M  | 2179.4   2442.1     -4.4    92.5 |  -0.50  0.615 | 
+>  1.06
+                          |                                  |               |
+re75                   U  | 1532.1   2466.5    -28.7         |  -3.25  0.001 | 
+>  0.96
+                       M  | 1485.9   1414.6      2.2    92.4 |   0.24  0.808 | 
+>  2.15*
+                          |                                  |               |
+-------------------------------------------------------------------------------
+> ---------
+* if variance ratio outside [0.75; 1.34] for U and [0.74; 1.35] for M
+
+-------------------------------------------------------------------------------
+> ----
+ Sample    | Ps R2   LR chi2   p>chi2   MeanBias   MedBias      B      R     %V
+> ar
+-----------+-------------------------------------------------------------------
+> ----
+ Unmatched | 0.353    265.36    0.000     50.9      28.2     179.6*   0.54     
+> 75
+ Matched   | 0.009      4.33    0.826      4.9       2.0      22.2    1.19     
+> 75
+-------------------------------------------------------------------------------
+> ----
+* if B>25%, R outside [0.5; 2]
+parentheses do not balance
+.         if _rc == 0 {
+.             cap graph export "_stata_lalonde_outputs_v5.2/figures/fig2_love_p
+> lot.pdf", replace
+.             cap graph export "_stata_lalonde_outputs_v5.2/figures/fig2_love_p
+> lot.png", replace width(1200)
+.             di as text "Saved: figures/fig2_love_plot.{pdf,png}"
+.         }
+.         else di as error "pstest graph failed"
+pstest graph failed
+.     }
+
+.     else di as error "psmatch2 failed (rc=_rc)"
+
+. restore
+
+. 
+. * 3.5b 倾向得分重叠图 (skill §3.5.2 — overlap/positivity)
+. capture drop _ps
+
+. logit treat age educ black hispan married nodegree re74 re75
+
+Iteration 0:  Log likelihood = -375.74604  
+Iteration 1:  Log likelihood = -255.07658  
+Iteration 2:  Log likelihood = -244.28231  
+Iteration 3:  Log likelihood =  -243.9229  
+Iteration 4:  Log likelihood = -243.92197  
+Iteration 5:  Log likelihood = -243.92197  
+
+Logistic regression                                     Number of obs =    614
+                                                        LR chi2(8)    = 263.65
+                                                        Prob > chi2   = 0.0000
+Log likelihood = -243.92197                             Pseudo R2     = 0.3508
+
+------------------------------------------------------------------------------
+       treat | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         age |   .0157771   .0135771     1.16   0.245    -.0108335    .0423876
+        educ |   .1613069   .0651264     2.48   0.013     .0336614    .2889524
+       black |   3.065368   .2865262    10.70   0.000     2.503787    3.626949
+      hispan |   .9836336    .425664     2.31   0.021     .1493476     1.81792
+     married |  -.8321133   .2903292    -2.87   0.004    -1.401148   -.2630786
+    nodegree |   .7072969   .3376683     2.09   0.036     .0454792    1.369115
+        re74 |  -.0000718   .0000287    -2.50   0.013    -.0001281   -.0000154
+        re75 |   .0000534   .0000463     1.15   0.249    -.0000374    .0001443
+       _cons |  -4.728649   1.017069    -4.65   0.000    -6.722068    -2.73523
+------------------------------------------------------------------------------
+
+. predict _ps, pr
+
+. 
+. twoway (kdensity _ps if treat == 1, lcolor(navy) lwidth(medthick)) ///
+>        (kdensity _ps if treat == 0, lcolor(cranberry) lwidth(medthick) lpatte
+> rn(dash)), ///
+>     legend(order(1 "Treated" 2 "Control") rows(1) position(6)) ///
+>     xtitle("Propensity score Pr(treat=1 | X)") ytitle("Density") ///
+>     title("Figure 2b. Propensity-score overlap (positivity diagnostic)")
+
+. graph export "_stata_lalonde_outputs_v5.2/figures/fig2b_ps_overlap.pdf", repl
+> ace
+file _stata_lalonde_outputs_v5.2/figures/fig2b_ps_overlap.pdf saved as PDF
+    format
+
+. graph export "_stata_lalonde_outputs_v5.2/figures/fig2b_ps_overlap.png", repl
+> ace width(1200)
+file _stata_lalonde_outputs_v5.2/figures/fig2b_ps_overlap.png written in PNG fo
+> rmat
+
+. drop _ps
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 4 : 诊断检验 (skill §Step 4)                                          
+>  *
+. *  - 横截面 → 跳过 xtserial/xttest3/dfuller/hausman                          
+>  *
+. *============================================================================
+> =*
+. di as text _n "==== Step 4: Diagnostic tests ===="
+
+==== Step 4: Diagnostic tests ====
+
+. 
+. * 4a. 锚定 OLS
+. reg re78 treat age educ black hispan married nodegree re74 re75
+
+      Source |       SS           df       MS      Number of obs   =       614
+-------------+----------------------------------   F(9, 604)       =     11.64
+       Model |  5.0554e+09         9   561713775   Prob > F        =    0.0000
+    Residual |  2.9157e+10       604  48273544.4   R-squared       =    0.1478
+-------------+----------------------------------   Adj R-squared   =    0.1351
+       Total |  3.4213e+10       613  55811818.5   Root MSE        =    6947.9
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244   781.2793     1.98   0.048     13.88986    3082.598
+         age |   12.97763   32.48891     0.40   0.690    -50.82731    76.78258
+        educ |   403.9412   158.9062     2.54   0.011     91.86538    716.0171
+       black |  -1240.644   768.7644    -1.61   0.107     -2750.42    269.1318
+      hispan |   498.8968   941.9425     0.53   0.597    -1350.984    2348.777
+     married |   406.6208   695.4723     0.58   0.559    -959.2168    1772.458
+    nodegree |   259.8174   847.4421     0.31   0.759    -1404.474    1924.108
+        re74 |   .2963774   .0582726     5.09   0.000     .1819358     .410819
+        re75 |   .2315259   .1046199     2.21   0.027      .026063    .4369888
+       _cons |   66.51451   2436.746     0.03   0.978    -4719.009    4852.038
+------------------------------------------------------------------------------
+
+. estimates store ols_anchor
+
+. 
+. * 4b. 异方差
+. di as text "Breusch-Pagan / Cook-Weisberg:"
+Breusch-Pagan / Cook-Weisberg:
+
+. estat hettest
+
+Breusch–Pagan/Cook–Weisberg test for heteroskedasticity 
+Assumption: Normal error terms
+Variable: Fitted values of re78
+
+H0: Constant variance
+
+    chi2(1) =  19.84
+Prob > chi2 = 0.0000
+
+. di as text "White's general test:"
+White's general test:
+
+. estat imtest, white
+
+White's test
+H0: Homoskedasticity
+Ha: Unrestricted heteroskedasticity
+
+   chi2(48) =  29.84
+Prob > chi2 = 0.9816
+
+Cameron & Trivedi's decomposition of IM-test
+
+--------------------------------------------------
+              Source |       chi2     df         p
+---------------------+----------------------------
+  Heteroskedasticity |      29.84     48    0.9816
+            Skewness |       9.21      9    0.4178
+            Kurtosis |       1.12      1    0.2907
+---------------------+----------------------------
+               Total |      40.17     58    0.9641
+--------------------------------------------------
+
+. 
+. * 4c. RESET + linktest
+. di as text "Ramsey RESET:"
+Ramsey RESET:
+
+. estat ovtest
+
+Ramsey RESET test for omitted variables
+Omitted: Powers of fitted values of re78
+
+H0: Model has no omitted variables
+
+F(3, 601) =   6.31
+ Prob > F = 0.0003
+
+. di as text "Linktest:"
+Linktest:
+
+. linktest
+
+      Source |       SS           df       MS      Number of obs   =       614
+-------------+----------------------------------   F(2, 611)       =     60.34
+       Model |  5.6427e+09         2  2.8213e+09   Prob > F        =    0.0000
+    Residual |  2.8570e+10       611  46759391.6   R-squared       =    0.1649
+-------------+----------------------------------   Adj R-squared   =    0.1622
+       Total |  3.4213e+10       613  55811818.5   Root MSE        =    6838.1
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+        _hat |  -.3007264   .3794323    -0.79   0.428    -1.045876    .4444234
+      _hatsq |   .0000777   .0000219     3.54   0.000     .0000346    .0001207
+       _cons |   4612.772     1482.3     3.11   0.002      1701.75    7523.794
+------------------------------------------------------------------------------
+
+. 
+. * 4d. 多重共线性
+. estat vif
+
+    Variable |       VIF       1/VIF  
+-------------+----------------------
+        educ |      2.22    0.451449
+    nodegree |      2.13    0.469808
+        re74 |      1.81    0.552640
+       black |      1.80    0.556302
+       treat |      1.63    0.611837
+        re75 |      1.51    0.662415
+     married |      1.49    0.669396
+         age |      1.31    0.764118
+      hispan |      1.17    0.856046
+-------------+----------------------
+    Mean VIF |      1.67
+
+. 
+. * 4e. 残差正态性
+. predict double resid_ols, resid
+
+. sktest resid_ols
+
+Skewness and kurtosis tests for normality
+                                                         ----- Joint test -----
+    Variable |       Obs   Pr(skewness)   Pr(kurtosis)   Adj chi2(2)  Prob>chi2
+-------------+-----------------------------------------------------------------
+   resid_ols |       614         0.0000         0.0000        163.57     0.0000
+
+. swilk resid_ols
+
+                   Shapiro–Wilk W test for normal data
+
+    Variable |        Obs       W           V         z       Prob>z
+-------------+------------------------------------------------------
+   resid_ols |        614    0.91569     34.140     8.564    0.00000
+
+. drop resid_ols
+
+. 
+. di as text "Decision:"
+Decision:
+
+. di as text "  Heteroskedasticity → use vce(robust) throughout"
+  Heteroskedasticity → use vce(robust) throughout
+
+. di as text "  Cross-section → no panel tests needed"
+  Cross-section → no panel tests needed
+
+. di as text "  VIF < 10 → no multicollinearity concern"
+  VIF < 10 → no multicollinearity concern
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 5 : 基线估计 (skill §Step 5)                                          
+>  *
+. *  - 5A Pattern A: M1→M5 渐进式控制集 (T2 ★ 中心表)                          
+> *
+. *  - 5B Pattern B: 设计赛马 (T3)                                             
+>  *
+. *============================================================================
+> =*
+. di as text _n "==== Step 5: Baseline estimation ===="
+
+==== Step 5: Baseline estimation ====
+
+. 
+. *---------------------------------------------------------------------*
+. * 5A. Pattern A — 渐进式控制集 M1→M5 (skill §5.A — 论文中心表)        *
+. *---------------------------------------------------------------------*
+. eststo clear
+
+. 
+. eststo M1: reg re78 treat, vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(1, 612)         =       0.88
+                                                Prob > F          =     0.3484
+                                                R-squared         =     0.0015
+                                                Root MSE          =     7471.1
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |  -635.0263    676.748    -0.94   0.348    -1964.056    694.0037
+       _cons |    6984.17   352.3291    19.82   0.000     6292.249     7676.09
+------------------------------------------------------------------------------
+
+. eststo M2: reg re78 treat age educ, vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(3, 610)         =       8.11
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0432
+                                                Root MSE          =     7325.4
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |  -480.7288   662.5158    -0.73   0.468    -1781.817    820.3598
+         age |   94.92602   31.30202     3.03   0.003     33.45323    156.3988
+        educ |   505.6071   117.6957     4.30   0.000     274.4691    736.7451
+       _cons |  -851.7419   1582.361    -0.54   0.591    -3959.279    2255.795
+------------------------------------------------------------------------------
+
+. eststo M3: reg re78 treat age educ black hispan, vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(5, 608)         =       7.25
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0556
+                                                Root MSE          =     7289.8
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   821.9536   733.2691     1.12   0.263     -618.094    2262.001
+         age |   91.07847   31.13171     2.93   0.004     29.93972    152.2172
+        educ |   505.5539   116.9854     4.32   0.000     275.8095    735.2984
+       black |  -1986.452   695.3603    -2.86   0.004    -3352.052   -620.8527
+      hispan |   471.1603   954.2781     0.49   0.622    -1402.921    2345.242
+       _cons |  -407.4974   1628.513    -0.25   0.802    -3605.691    2790.697
+------------------------------------------------------------------------------
+
+. eststo M4: reg re78 treat age educ black hispan married nodegree, vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(7, 606)         =       6.61
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0708
+                                                Root MSE          =       7243
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1163.922   741.2807     1.57   0.117    -291.8688    2619.713
+         age |   55.89528   34.20311     1.63   0.103    -11.27574    123.0663
+        educ |   525.5796   164.6488     3.19   0.001     202.2282    848.9311
+       black |  -1538.072   710.8367    -2.16   0.031    -2934.074   -142.0695
+      hispan |   635.5281   968.5713     0.66   0.512    -1266.636    2537.692
+     married |   2136.947    677.418     3.15   0.002     806.5746    3467.319
+    nodegree |  -36.47756   917.0222    -0.04   0.968    -1837.405     1764.45
+       _cons |  -814.6786   2610.429    -0.31   0.755    -5941.264    4311.907
+------------------------------------------------------------------------------
+
+. eststo M5: reg re78 treat age educ black hispan married nodegree re74 re75, /
+> //
+>     vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(9, 604)         =       9.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1478
+                                                Root MSE          =     6947.9
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244    740.576     2.09   0.037     93.82694    3002.661
+         age |   12.97763   31.70387     0.41   0.682    -49.28558    75.24085
+        educ |   403.9412   160.3946     2.52   0.012      88.9424    718.9401
+       black |  -1240.644   695.7661    -1.78   0.075    -2607.059    125.7704
+      hispan |   498.8968   952.8564     0.52   0.601    -1372.417    2370.211
+     married |   406.6208   658.5495     0.62   0.537    -886.7041    1699.946
+    nodegree |   259.8174   891.7856     0.29   0.771     -1491.56    2011.195
+        re74 |   .2963774   .0712699     4.16   0.000     .1564106    .4363443
+        re75 |   .2315259   .1194528     1.94   0.053    -.0030674    .4661192
+       _cons |   66.51451   2530.018     0.03   0.979    -4902.187    5035.216
+------------------------------------------------------------------------------
+
+. 
+. * T2: 多格式导出 (skill §export cookbook — esttab for tex/rtf, outreg2 for xl
+> sx/docx)
+. * LaTeX + RTF via esttab
+. foreach ext in tex rtf {
+  2.     esttab M1 M2 M3 M4 M5 using "_stata_lalonde_outputs_v5.2/tables/table2
+> _main.`ext'", ///
+>         replace se star(`AER_STAR') label ///
+>         `=cond("`ext'"=="tex", "booktabs", "")' ///
+>         keep(treat) ///
+>         mtitles("(1) Raw" "(2) +Demog" "(3) +Race" "(4) +Family" "(5) Full") 
+> ///
+>         `AER_STATS' ///
+>         addnotes("`AER_NOTES'" "Progressive covariate adjustment M1→M5.") ///
+>         title("Table 2. Progressive specifications — Lalonde NSW (treatment e
+> ffect on re78)")
+  3. }
+(output written to _stata_lalonde_outputs_v5.2/tables/table2_main.tex)
+(output written to _stata_lalonde_outputs_v5.2/tables/table2_main.rtf)
+
+. 
+. * Excel + Word via outreg2 (skill §: outreg2 for proper Office formatting)
+. foreach ext in xlsx docx {
+  2.     outreg2 using "_stata_lalonde_outputs_v5.2/tables/table2_main.`ext'", 
+> ///
+>         replace label dec(2) ///
+>         keep(treat) ///
+>         addtext(Specification, "M1 Raw, M2 +Demog, M3 +Race, M4 +Family, M5 F
+> ull")
+  3. }
+_stata_lalonde_outputs_v5.2/tables/table2_main.xlsx
+dir : seeout
+_stata_lalonde_outputs_v5.2/tables/table2_main.docx
+dir : seeout
+
+. 
+. di as text "Saved: tables/table2_main.{tex,rtf,xlsx,docx}"
+Saved: tables/table2_main.{tex,rtf,xlsx,docx}
+
+. 
+. *---------------------------------------------------------------------*
+. * 5B. Pattern B — 设计赛马 (skill §5.B — Table 3)                     *
+. *  OLS / RA / IPW / PSM / ebalance 横向对照                            *
+. *---------------------------------------------------------------------*
+. eststo clear
+
+. 
+. eststo OLS: reg re78 treat age educ black hispan married nodegree re74 re75, 
+> ///
+>     vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(9, 604)         =       9.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1478
+                                                Root MSE          =     6947.9
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244    740.576     2.09   0.037     93.82694    3002.661
+         age |   12.97763   31.70387     0.41   0.682    -49.28558    75.24085
+        educ |   403.9412   160.3946     2.52   0.012      88.9424    718.9401
+       black |  -1240.644   695.7661    -1.78   0.075    -2607.059    125.7704
+      hispan |   498.8968   952.8564     0.52   0.601    -1372.417    2370.211
+     married |   406.6208   658.5495     0.62   0.537    -886.7041    1699.946
+    nodegree |   259.8174   891.7856     0.29   0.771     -1491.56    2011.195
+        re74 |   .2963774   .0712699     4.16   0.000     .1564106    .4363443
+        re75 |   .2315259   .1194528     1.94   0.053    -.0030674    .4661192
+       _cons |   66.51451   2530.018     0.03   0.979    -4902.187    5035.216
+------------------------------------------------------------------------------
+
+. 
+. eststo RA: teffects ra ///
+>     (re78 age educ black hispan married nodegree re74 re75) ///
+>     (treat), atet vce(robust)
+
+Iteration 0:  EE criterion =  7.438e-24  
+Iteration 1:  EE criterion =  5.503e-25  
+
+Treatment-effects estimation                    Number of obs     =        614
+Estimator      : regression adjustment
+Outcome model  : linear
+Treatment model: none
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATET         |
+       treat |
+   (1 vs 0)  |   1647.583   808.9795     2.04   0.042     62.01251    3233.154
+-------------+----------------------------------------------------------------
+POmean       |
+       treat |
+          0  |    4701.56   590.9973     7.96   0.000     3543.227    5859.894
+------------------------------------------------------------------------------
+
+. 
+. eststo IPW: teffects ipw ///
+>     (re78) ///
+>     (treat age educ black hispan married nodegree re74 re75, logit), ///
+>     atet vce(robust)
+
+Iteration 0:  EE criterion =  9.329e-24  
+Iteration 1:  EE criterion =  4.524e-25  
+
+Treatment-effects estimation                    Number of obs     =        614
+Estimator      : inverse-probability weights
+Outcome model  : weighted mean
+Treatment model: logit
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATET         |
+       treat |
+   (1 vs 0)  |   1214.071   798.1546     1.52   0.128    -350.2832    2778.425
+-------------+----------------------------------------------------------------
+POmean       |
+       treat |
+          0  |   5135.072   583.7629     8.80   0.000     3990.918    6279.227
+------------------------------------------------------------------------------
+
+. 
+. eststo PSM: teffects psmatch ///
+>     (re78) ///
+>     (treat age educ black hispan married nodegree re74 re75, logit), ///
+>     atet nneighbor(4) vce(robust)
+
+Treatment-effects estimation                   Number of obs      =        614
+Estimator      : propensity-score matching     Matches: requested =          4
+Outcome model  : matching                                     min =          4
+Treatment model: logit                                        max =          6
+------------------------------------------------------------------------------
+             |              AI robust
+        re78 | Coefficient  std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+ATET         |
+       treat |
+   (1 vs 0)  |   1273.893   1016.984     1.25   0.210    -719.3588    3267.144
+------------------------------------------------------------------------------
+
+. 
+. * ebalance + weighted regression (skill §5.B + §5h)
+. capture ebalance treat age educ black hispan married nodegree re74 re75, ///
+>     targets(1) gen(eb_w)
+
+. if _rc == 0 {
+.     eststo EBAL: reg re78 treat [pweight=eb_w], vce(robust)
+(sum of wgt is 370.0000000000001)
+
+Linear regression                               Number of obs     =        614
+                                                F(1, 612)         =       2.37
+                                                Prob > F          =     0.1239
+                                                R-squared         =     0.0081
+                                                Root MSE          =     7060.7
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1271.826    825.417     1.54   0.124    -349.1669     2892.82
+       _cons |   5077.317   589.4584     8.61   0.000     3919.711    6234.924
+------------------------------------------------------------------------------
+. }
+
+. else {
+.     di as error "ebalance not installed / failed; skipping EBAL column"
+. }
+
+. capture drop eb_w _webal
+
+. 
+. * T3: 设计赛马表 (LaTeX/RTF/Excel/Word)
+. * 检查哪些估计器成功存储
+. local horserace_list "OLS RA IPW PSM"
+
+. local horserace_names "OLS RA IPW PSM"
+
+. capt confirm existence stored e(EBAL)
+
+. if _rc == 0 {
+.     local horserace_list "OLS RA IPW PSM EBAL"
+.     local horserace_names "OLS RA IPW PSM Entropy Bal."
+. }
+
+. 
+. * esttab for tex/rtf
+. foreach ext in tex rtf {
+  2.     esttab `horserace_list' ///
+>         using "_stata_lalonde_outputs_v5.2/tables/table3_horserace.`ext'", //
+> /
+>         replace se star(`AER_STAR') ///
+>         `=cond("`ext'"=="tex", "booktabs", "")' label ///
+>         rename(r1vs0.treat treat) keep(treat) ///
+>         mtitles(`horserace_names') ///
+>         `AER_STATS' ///
+>         addnotes("`AER_NOTES'" "All estimators target ATT except OLS (ATE).")
+>  ///
+>         title("Table 3. Design horse-race — Lalonde NSW ATT across estimators
+> ")
+  3. }
+(output written to _stata_lalonde_outputs_v5.2/tables/table3_horserace.tex)
+(output written to _stata_lalonde_outputs_v5.2/tables/table3_horserace.rtf)
+
+. 
+. * outreg2 for xlsx/docx
+. foreach ext in xlsx docx {
+  2.     outreg2 using "_stata_lalonde_outputs_v5.2/tables/table3_horserace.`ex
+> t'", ///
+>         replace label dec(2) keep(treat) ///
+>         addtext(Design, "OLS RA IPW PSM EBAL")
+  3. }
+_stata_lalonde_outputs_v5.2/tables/table3_horserace.xlsx
+dir : seeout
+_stata_lalonde_outputs_v5.2/tables/table3_horserace.docx
+dir : seeout
+
+. 
+. di as text "Saved: tables/table3_horserace.{tex,rtf,xlsx,docx}"
+Saved: tables/table3_horserace.{tex,rtf,xlsx,docx}
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 6 : 稳健性电池 (skill §Step 6)                                        
+>  *
+. *  - 6k Pattern H: 稳健性主表 TA1                                            
+> *
+. *  - 6j Oster δ 敏感性                                                       
+> *
+. *============================================================================
+> =*
+. di as text _n "==== Step 6: Robustness battery ===="
+
+==== Step 6: Robustness battery ====
+
+. 
+. *---------------------------------------------------------------------*
+. * 6k. Pattern H — 稳健性主表 (skill §6.k — Table A1)                   *
+. *---------------------------------------------------------------------*
+. eststo clear
+
+. 
+. * (1) Baseline (HC3 via vce(robust))
+. eststo h1: qui reg re78 treat age educ black hispan married nodegree re74 re7
+> 5, ///
+>     vce(robust)
+
+. 
+. * (2) iid SE
+. eststo h2: qui reg re78 treat age educ black hispan married nodegree re74 re7
+> 5
+
+. 
+. * (3) Winsor 1/99 outcome
+. eststo h3: qui reg re78_w1 treat age educ black hispan married nodegree re74_
+> w1 re75_w1, ///
+>     vce(robust)
+
+. 
+. * (4) Common support (PS in [0.05, 0.95])
+. preserve
+
+.     capture drop _ps_h
+
+.     qui logit treat age educ black hispan married nodegree re74 re75
+
+.     predict _ps_h, pr
+
+.     keep if inrange(_ps_h, 0.05, 0.95)
+(158 observations deleted)
+
+.     qui reg re78 treat age educ black hispan married nodegree re74 re75, vce(
+> robust)
+
+.     eststo h4
+
+. restore
+
+. 
+. * (5) Add age² + educ²
+. eststo h5: qui reg re78 treat age educ c.age#c.age c.educ#c.educ ///
+>     black hispan married nodegree re74 re75, vce(robust)
+
+. 
+. * (6) Add re74² + re75²
+. eststo h6: qui reg re78 treat age educ black hispan married nodegree ///
+>     re74 re75 c.re74#c.re74 c.re75#c.re75, vce(robust)
+
+. 
+. * (7) Drop re74=0 (unemployed in 1974)
+. eststo h7: qui reg re78 treat age educ black hispan married nodegree re74 re7
+> 5 ///
+>     if re74 > 0, vce(robust)
+
+. 
+. * (8) Earners only (re78 > 0)
+. eststo h8: qui reg re78 treat age educ black hispan married nodegree re74 re7
+> 5 ///
+>     if re78 > 0, vce(robust)
+
+. 
+. * (9) IHS outcome
+. eststo h9: qui reg ihs_re78 treat age educ black hispan married nodegree re74
+>  re75, ///
+>     vce(robust)
+
+. 
+. * (10) Log outcome
+. eststo h10: qui reg log_re78 treat age educ black hispan married nodegree re7
+> 4 re75, ///
+>     vce(robust)
+
+. 
+. * TA1: 多格式导出
+. foreach ext in tex rtf {
+  2.     esttab h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 ///
+>         using "_stata_lalonde_outputs_v5.2/tables/tableA1_robustness.`ext'", 
+> ///
+>         replace se star(`AER_STAR') ///
+>         `=cond("`ext'"=="tex", "booktabs", "")' ///
+>         keep(treat) b(%9.2f) ///
+>         mtitles("(1) Base" "(2) iid SE" "(3) Winsor" "(4) Cmn supp" ///
+>                 "(5) +age²+edu²" "(6) +re74²+75²" ///
+>                 "(7) Drop u74" "(8) Earners" "(9) IHS Y" "(10) Log Y") ///
+>         stats(N r2_a, labels("N" "Adj. R²")) label ///
+>         addnotes("`AER_NOTES'" "Column 2 reports iid SE; all others robust.")
+  3. }
+(output written to _stata_lalonde_outputs_v5.2/tables/tableA1_robustness.tex)
+(output written to _stata_lalonde_outputs_v5.2/tables/tableA1_robustness.rtf)
+
+. 
+. foreach ext in xlsx docx {
+  2.     outreg2 using "_stata_lalonde_outputs_v5.2/tables/tableA1_robustness.`
+> ext'", ///
+>         replace label dec(2) keep(treat) ///
+>         addtext(Specs, "Base iidSE Winsor CmnS +age2 +re742 Dropu74 Earn IHS 
+> Log")
+  3. }
+_stata_lalonde_outputs_v5.2/tables/tableA1_robustness.xlsx
+dir : seeout
+_stata_lalonde_outputs_v5.2/tables/tableA1_robustness.docx
+dir : seeout
+
+. 
+. di as text "Saved: tables/tableA1_robustness.{tex,rtf,xlsx,docx}"
+Saved: tables/tableA1_robustness.{tex,rtf,xlsx,docx}
+
+. 
+. *---------------------------------------------------------------------*
+. * 6j. Oster (2019) δ* (skill §6.j)                                    *
+. *---------------------------------------------------------------------*
+. reg re78 treat
+
+      Source |       SS           df       MS      Number of obs   =       614
+-------------+----------------------------------   F(1, 612)       =      0.93
+       Model |  52124752.5         1  52124752.5   Prob > F        =    0.3342
+    Residual |  3.4161e+10       612  55817843.2   R-squared       =    0.0015
+-------------+----------------------------------   Adj R-squared   =   -0.0001
+       Total |  3.4213e+10       613  55811818.5   Root MSE        =    7471.1
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |  -635.0263   657.1374    -0.97   0.334    -1925.544    655.4916
+       _cons |    6984.17   360.7097    19.36   0.000     6275.791    7692.549
+------------------------------------------------------------------------------
+
+. scalar bs_short = _b[treat]
+
+. scalar r2_short = e(r2)
+
+. 
+. reg re78 treat age educ black hispan married nodegree re74 re75
+
+      Source |       SS           df       MS      Number of obs   =       614
+-------------+----------------------------------   F(9, 604)       =     11.64
+       Model |  5.0554e+09         9   561713775   Prob > F        =    0.0000
+    Residual |  2.9157e+10       604  48273544.4   R-squared       =    0.1478
+-------------+----------------------------------   Adj R-squared   =    0.1351
+       Total |  3.4213e+10       613  55811818.5   Root MSE        =    6947.9
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244   781.2793     1.98   0.048     13.88986    3082.598
+         age |   12.97763   32.48891     0.40   0.690    -50.82731    76.78258
+        educ |   403.9412   158.9062     2.54   0.011     91.86538    716.0171
+       black |  -1240.644   768.7644    -1.61   0.107     -2750.42    269.1318
+      hispan |   498.8968   941.9425     0.53   0.597    -1350.984    2348.777
+     married |   406.6208   695.4723     0.58   0.559    -959.2168    1772.458
+    nodegree |   259.8174   847.4421     0.31   0.759    -1404.474    1924.108
+        re74 |   .2963774   .0582726     5.09   0.000     .1819358     .410819
+        re75 |   .2315259   .1046199     2.21   0.027      .026063    .4369888
+       _cons |   66.51451   2436.746     0.03   0.978    -4719.009    4852.038
+------------------------------------------------------------------------------
+
+. scalar bs_full  = _b[treat]
+
+. scalar r2_full  = e(r2)
+
+. 
+. di as text _n "Oster δ inputs:"
+
+Oster δ inputs:
+
+. di as text "  beta_short = " %12.4f bs_short "  R²_short = " %6.4f r2_short
+  beta_short =    -635.0263  R²_short = 0.0015
+
+. di as text "  beta_full  = " %12.4f bs_full  "  R²_full  = " %6.4f r2_full
+  beta_full  =    1548.2438  R²_full  = 0.1478
+
+. 
+. local rmax_val = 1.3 * r2_full
+
+. psacalc delta treat, mcontrol(age educ black hispan married nodegree re74 re7
+> 5) ///
+>     rmax(`rmax_val')
+
+                 ---- Bound Estimate ----
+-------------+----------------------------------------------------------------
+delta        |             .
+-------------+----------------------------------------------------------------
+
+                 ---- Inputs from Regressions ----
+             |      Coeff.                      R-Squared
+-------------+----------------------------------------------------------------
+Uncontrolled |     1548.24375                   0.148
+Controlled   |     1548.24375                   0.148
+-------------+----------------------------------------------------------------
+
+                 ---- Other Inputs ----
+-------------+----------------------------------------------------------------
+R_max        |   0.192
+Beta         |    0.000000
+Unr. Controls|   age educ black hispan married nodegree re74 re75
+-------------+----------------------------------------------------------------
+
+. 
+. psacalc beta treat, mcontrol(age educ black hispan married nodegree re74 re75
+> ) ///
+>     rmax(`rmax_val') delta(1)
+
+                 ---- Treatment Effect Estimate ----
+             |     Estimate           Sq. difference      Bias changes
+             |                      from controlled beta    direction
+-------------+----------------------------------------------------------------
+Beta         |             .                    .             Yes
+Alt. sol. 1  |             .                    .             Yes
+Alt. sol. 2  |                                                
+-------------+----------------------------------------------------------------
+
+                 ---- Inputs from Regressions ----
+             |      Coeff.            R-Squared
+-------------+----------------------------------------------------------------
+Uncontrolled |     1548.24375         0.148
+Controlled   |     1548.24375         0.148
+-------------+----------------------------------------------------------------
+
+                 ---- Other Inputs ----
+-------------+----------------------------------------------------------------
+R_max        |   0.192
+Delta        |   1.000
+Unr. Controls|   age educ black hispan married nodegree re74 re75
+-------------+----------------------------------------------------------------
+
+. 
+. di as text "Interpretation: if |δ*| > 1, unobservables would need to be stron
+> ger than"
+Interpretation: if |δ*| > 1, unobservables would need to be stronger than
+
+. di as text "  observables to nullify the result — considered robust."
+  observables to nullify the result — considered robust.
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 7 : 异质性分析 — T4 (skill §Step 7)                                   
+> *
+. *  - 7a treat × black 交互                                                   
+> *
+. *  - 7b treat × educ 交互                                                    
+> *
+. *  - 7c 子组估计 + Wald 检验                                                 
+>  *
+. *============================================================================
+> =*
+. di as text _n "==== Step 7: Heterogeneity analysis (Table 4) ===="
+
+==== Step 7: Heterogeneity analysis (Table 4) ====
+
+. 
+. * 7a. treat × black 交互
+. reg re78 i.treat##i.black age educ hispan married nodegree re74 re75, vce(rob
+> ust)
+
+Linear regression                               Number of obs     =        614
+                                                F(10, 603)        =       8.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1478
+                                                Root MSE          =     6953.7
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     1.treat |    1480.43   1291.072     1.15   0.252    -1055.113    4015.974
+     1.black |  -1265.877   781.4109    -1.62   0.106    -2800.495    268.7401
+             |
+ treat#black |
+        1 1  |   98.61625   1586.931     0.06   0.950    -3017.966    3215.199
+             |
+         age |   12.96166   31.71394     0.41   0.683    -49.32153    75.24485
+        educ |   403.8624   160.4611     2.52   0.012     88.73188    718.9929
+      hispan |   504.6252   953.6455     0.53   0.597    -1368.245    2377.495
+     married |   404.1689   660.1748     0.61   0.541    -892.3523     1700.69
+    nodegree |   257.9385   893.8831     0.29   0.773    -1497.564    2013.441
+        re74 |   .2961322   .0716963     4.13   0.000     .1553275    .4369369
+        re75 |   .2317237   .1197365     1.94   0.053    -.0034276    .4668749
+       _cons |   75.34074   2531.489     0.03   0.976    -4896.266    5046.947
+------------------------------------------------------------------------------
+
+. margins, dydx(treat) at(black=(0 1))
+
+Average marginal effects                                   Number of obs = 614
+Model VCE: Robust
+
+Expression: Linear prediction, predict()
+dy/dx wrt:  1.treat
+1._at: black = 0
+2._at: black = 1
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+0.treat      |  (base outcome)
+-------------+----------------------------------------------------------------
+1.treat      |
+         _at |
+          1  |    1480.43   1291.072     1.15   0.252    -1055.113    4015.974
+          2  |   1579.047   910.0605     1.74   0.083    -208.2266     3366.32
+------------------------------------------------------------------------------
+Note: dy/dx for factor levels is the discrete change from the base level.
+
+. marginsplot, title("Marginal effect of treat by race") ///
+>     ytitle("dY/d(treat)") xtitle("Race = Black")
+
+Variables that uniquely identify margins: black
+
+. cap graph export "_stata_lalonde_outputs_v5.2/figures/het_by_black.pdf", repl
+> ace
+
+. cap graph export "_stata_lalonde_outputs_v5.2/figures/het_by_black.png", repl
+> ace width(1200)
+
+. 
+. * 7b. treat × educ 交互
+. reg re78 c.treat##c.educ age black hispan married nodegree re74 re75, vce(rob
+> ust)
+
+Linear regression                               Number of obs     =        614
+                                                F(10, 603)        =       9.02
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1492
+                                                Root MSE          =     6947.9
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |  -1383.121   2826.004    -0.49   0.625    -6933.127    4166.886
+        educ |   359.8915   168.3212     2.14   0.033     29.32447    690.4586
+             |
+     c.treat#|
+      c.educ |   283.0379   283.2105     1.00   0.318    -273.1608    839.2365
+             |
+         age |   11.74524   31.73026     0.37   0.711    -50.57001    74.06048
+       black |  -1253.383   694.4072    -1.80   0.072    -2617.134    110.3671
+      hispan |   448.9168   953.0282     0.47   0.638    -1422.741    2320.575
+     married |   376.2224   659.0959     0.57   0.568    -918.1799    1670.625
+    nodegree |   326.2887   891.6848     0.37   0.715    -1424.896    2077.474
+        re74 |   .2983768   .0713227     4.18   0.000     .1583057    .4384479
+        re75 |   .2325559   .1199542     1.94   0.053    -.0030228    .4681347
+       _cons |   523.7643   2581.643     0.20   0.839     -4546.34    5593.868
+------------------------------------------------------------------------------
+
+. margins, dydx(treat) at(educ=(6(2)16))
+
+Average marginal effects                                   Number of obs = 614
+Model VCE: Robust
+
+Expression: Linear prediction, predict()
+dy/dx wrt:  treat
+1._at: educ =  6
+2._at: educ =  8
+3._at: educ = 10
+4._at: educ = 12
+5._at: educ = 14
+6._at: educ = 16
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+treat        |
+         _at |
+          1  |   315.1066   1257.679     0.25   0.802    -2154.856    2785.069
+          2  |   881.1824   854.5392     1.03   0.303    -797.0521    2559.417
+          3  |   1447.258   721.3768     2.01   0.045     30.54202    2863.974
+          4  |   2013.334   975.8058     2.06   0.040     96.94309    3929.725
+          5  |    2579.41   1423.262     1.81   0.070     -215.743    5374.562
+          6  |   3145.485   1934.119     1.63   0.104    -652.9431    6943.914
+------------------------------------------------------------------------------
+
+. marginsplot, title("Marginal effect of treat by education") ///
+>     ytitle("dY/d(treat)") xtitle("Education (years)")
+
+Variables that uniquely identify margins: educ
+
+. cap graph export "_stata_lalonde_outputs_v5.2/figures/het_by_educ.pdf", repla
+> ce
+
+. cap graph export "_stata_lalonde_outputs_v5.2/figures/het_by_educ.png", repla
+> ce width(1200)
+
+. 
+. * 7c. 子组估计 (skill §7b) + Wald 检验
+. eststo clear
+
+. eststo all:    reg re78 treat age educ black hispan married nodegree re74 re7
+> 5, vce(robust)
+
+Linear regression                               Number of obs     =        614
+                                                F(9, 604)         =       9.96
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.1478
+                                                Root MSE          =     6947.9
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1548.244    740.576     2.09   0.037     93.82694    3002.661
+         age |   12.97763   31.70387     0.41   0.682    -49.28558    75.24085
+        educ |   403.9412   160.3946     2.52   0.012      88.9424    718.9401
+       black |  -1240.644   695.7661    -1.78   0.075    -2607.059    125.7704
+      hispan |   498.8968   952.8564     0.52   0.601    -1372.417    2370.211
+     married |   406.6208   658.5495     0.62   0.537    -886.7041    1699.946
+    nodegree |   259.8174   891.7856     0.29   0.771     -1491.56    2011.195
+        re74 |   .2963774   .0712699     4.16   0.000     .1564106    .4363443
+        re75 |   .2315259   .1194528     1.94   0.053    -.0030674    .4661192
+       _cons |   66.51451   2530.018     0.03   0.979    -4902.187    5035.216
+------------------------------------------------------------------------------
+
+. eststo black:  reg re78 treat age educ hispan married nodegree re74 re75 if b
+> lack == 1, ///
+>     vce(robust)
+note: hispan omitted because of collinearity.
+
+Linear regression                               Number of obs     =        243
+                                                F(7, 235)         =       2.18
+                                                Prob > F          =     0.0365
+                                                R-squared         =     0.0622
+                                                Root MSE          =     7388.1
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1371.454   923.9847     1.48   0.139    -448.8981    3191.805
+         age |   40.84492   57.24776     0.71   0.476    -71.93946    153.6293
+        educ |   537.2477   250.0075     2.15   0.033     44.70544     1029.79
+      hispan |          0  (omitted)
+     married |   427.4812   1267.987     0.34   0.736    -2070.593    2925.556
+    nodegree |  -356.5465   1484.013    -0.24   0.810    -3280.216    2567.123
+        re74 |   .0804512   .1846288     0.44   0.663    -.2832878    .4441902
+        re75 |   .1593685   .1975829     0.81   0.421    -.2298916    .5486286
+       _cons |  -2069.691   4031.052    -0.51   0.608    -10011.31    5871.924
+------------------------------------------------------------------------------
+
+. eststo nonblk: reg re78 treat age educ hispan married nodegree re74 re75 if b
+> lack == 0, ///
+>     vce(robust)
+
+Linear regression                               Number of obs     =        371
+                                                F(8, 362)         =      11.46
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.2157
+                                                Root MSE          =     6588.1
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1806.983   1319.453     1.37   0.172    -787.7726    4401.738
+         age |  -11.73728   38.54534    -0.30   0.761    -87.53819    64.06364
+        educ |   358.0948    212.306     1.69   0.093    -59.41317    775.6028
+      hispan |   328.8384   964.5673     0.34   0.733    -1568.021    2225.697
+     married |   116.8449   780.3119     0.15   0.881    -1417.669    1651.359
+    nodegree |   705.5873   1118.708     0.63   0.529    -1494.396    2905.571
+        re74 |   .3823756   .0783561     4.88   0.000     .2282853    .5364659
+        re75 |   .3496738   .1341524     2.61   0.010     .0858578    .6134897
+       _cons |   334.0954   3328.653     0.10   0.920    -6211.829     6880.02
+------------------------------------------------------------------------------
+
+. eststo young:  reg re78 treat age educ black hispan married nodegree re74 re7
+> 5 if age < 30, ///
+>     vce(robust)
+
+Linear regression                               Number of obs     =        427
+                                                F(9, 417)         =       3.27
+                                                Prob > F          =     0.0007
+                                                R-squared         =     0.0713
+                                                Root MSE          =     6728.3
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   709.2684   789.0737     0.90   0.369    -841.7894    2260.326
+         age |   100.2429    129.331     0.78   0.439    -153.9792    354.4649
+        educ |   308.2238   247.8037     1.24   0.214    -178.8763     795.324
+       black |  -1109.152   789.7797    -1.40   0.161    -2661.598    443.2932
+      hispan |   370.3678   993.3926     0.37   0.709    -1582.313    2323.049
+     married |   -597.871    876.373    -0.68   0.495     -2320.53    1124.788
+    nodegree |   442.7598   1165.849     0.38   0.704    -1848.913    2734.433
+        re74 |    .064802   .1144522     0.57   0.572    -.1601731    .2897771
+        re75 |   .4716582   .1476011     3.20   0.002     .1815233    .7617932
+       _cons |  -270.0146   4430.372    -0.06   0.951     -8978.66    8438.631
+------------------------------------------------------------------------------
+
+. eststo old:    reg re78 treat age educ black hispan married nodegree re74 re7
+> 5 if age >= 30, ///
+>     vce(robust)
+
+Linear regression                               Number of obs     =        187
+                                                F(9, 177)         =      16.19
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.3310
+                                                Root MSE          =     7092.4
+
+------------------------------------------------------------------------------
+             |               Robust
+        re78 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   3865.101   1598.888     2.42   0.017     709.7633    7020.439
+         age |  -140.3625   67.26674    -2.09   0.038    -273.1105   -7.614447
+        educ |   225.8653   225.6836     1.00   0.318    -219.5117    671.2423
+       black |  -1427.811   1411.312    -1.01   0.313    -4212.976    1357.353
+      hispan |   433.3783   2555.134     0.17   0.866     -4609.07    5475.826
+     married |   2301.308   1036.758     2.22   0.028     255.3112    4347.305
+    nodegree |  -1849.433   1625.517    -1.14   0.257    -5057.323    1358.456
+        re74 |   .4909826   .0921589     5.33   0.000      .309111    .6728542
+        re75 |  -.0121416   .1806326    -0.07   0.946    -.3686124    .3443291
+       _cons |   7385.066   4305.572     1.72   0.088    -1111.795    15881.93
+------------------------------------------------------------------------------
+
+. 
+. * T4: 异质性表
+. foreach ext in tex rtf {
+  2.     esttab all black nonblk young old ///
+>         using "_stata_lalonde_outputs_v5.2/tables/table4_heterogeneity.`ext'"
+> , ///
+>         replace se star(`AER_STAR') ///
+>         `=cond("`ext'"=="tex", "booktabs", "")' ///
+>         keep(treat) ///
+>         mtitles("All" "Black" "Non-Black" "Age<30" "Age≥30") ///
+>         `AER_STATS' ///
+>         addnotes("`AER_NOTES'" "Subgroup estimates of ATT.") ///
+>         title("Table 4. Heterogeneity — treatment effect by subgroup")
+  3. }
+(output written to _stata_lalonde_outputs_v5.2/tables/table4_heterogeneity.tex)
+(output written to _stata_lalonde_outputs_v5.2/tables/table4_heterogeneity.rtf)
+
+. 
+. foreach ext in xlsx docx {
+  2.     outreg2 using "_stata_lalonde_outputs_v5.2/tables/table4_heterogeneity
+> .`ext'", ///
+>         replace label dec(2) keep(treat) ///
+>         addtext(Subgroup, "All Black Non-Blk Age<30 Age≥30")
+  3. }
+_stata_lalonde_outputs_v5.2/tables/table4_heterogeneity.xlsx
+dir : seeout
+_stata_lalonde_outputs_v5.2/tables/table4_heterogeneity.docx
+dir : seeout
+
+. 
+. * Wald 检验 (skill §7b — suest for cross-subgroup equality)
+. eststo clear
+
+. eststo m_black: reg re78 treat age educ married nodegree re74 re75 if black =
+> = 1
+
+      Source |       SS           df       MS      Number of obs   =       243
+-------------+----------------------------------   F(7, 235)       =      2.23
+       Model |   851248814         7   121606973   Prob > F        =    0.0328
+    Residual |  1.2827e+10       235  54584418.6   R-squared       =    0.0622
+-------------+----------------------------------   Adj R-squared   =    0.0343
+       Total |  1.3679e+10       242  56523087.5   Root MSE        =    7388.1
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1371.454   1012.392     1.35   0.177    -623.0696    3365.977
+         age |   40.84492   59.61105     0.69   0.494    -76.59541    158.2853
+        educ |   537.2477   279.0327     1.93   0.055    -12.47743    1086.973
+     married |   427.4812   1301.989     0.33   0.743    -2137.581    2992.543
+    nodegree |  -356.5465   1408.636    -0.25   0.800    -3131.715    2418.622
+        re74 |   .0804512   .1223587     0.66   0.512    -.1606089    .3215113
+        re75 |   .1593685   .1969258     0.81   0.419     -.228597    .5473339
+       _cons |  -2069.691   4114.615    -0.50   0.615    -10175.93    6036.553
+------------------------------------------------------------------------------
+
+. eststo m_other: reg re78 treat age educ hispan married nodegree re74 re75 if 
+> black == 0
+
+      Source |       SS           df       MS      Number of obs   =       371
+-------------+----------------------------------   F(8, 362)       =     12.45
+       Model |  4.3214e+09         8   540169800   Prob > F        =    0.0000
+    Residual |  1.5712e+10       362  43403276.6   R-squared       =    0.2157
+-------------+----------------------------------   Adj R-squared   =    0.1984
+       Total |  2.0033e+10       370  54144174.4   Root MSE        =    6588.1
+
+------------------------------------------------------------------------------
+        re78 | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       treat |   1806.983    1317.63     1.37   0.171    -784.1879    4398.153
+         age |  -11.73728   38.23924    -0.31   0.759    -86.93622    63.46166
+        educ |   358.0948   192.6245     1.86   0.064    -20.70868    736.8983
+      hispan |   328.8384   909.7658     0.36   0.718    -1460.251    2117.928
+     married |   116.8449    813.731     0.14   0.886    -1483.389    1717.079
+    nodegree |   705.5873   1053.201     0.67   0.503    -1365.574    2776.749
+        re74 |   .3823756   .0660608     5.79   0.000     .2524645    .5122867
+        re75 |   .3496738   .1234796     2.83   0.005     .1068463    .5925012
+       _cons |   334.0954   2991.429     0.11   0.911    -5548.666    6216.857
+------------------------------------------------------------------------------
+
+. capture suest m_black m_other, vce(robust)
+
+. if _rc == 0 {
+.     test [m_black_mean]treat = [m_other_mean]treat
+
+ ( 1)  [m_black_mean]treat - [m_other_mean]treat = 0
+
+           chi2(  1) =    0.08
+         Prob > chi2 =    0.7842
+.     di as text "Wald p-value for black vs non-black equality: " %6.4f r(p)
+Wald p-value for black vs non-black equality: 0.7842
+. }
+
+. else di as error "suest failed — cannot compute cross-group Wald test"
+
+. 
+. 
+. *============================================================================
+> =*
+. * Step 8 : 出版级表格 & 图 (skill §Step 8)                                   
+>  *
+. *  - F3: Coefplot 跨规范                                                     
+>  *
+. *  - F4: 规范曲线 (spec curve)                                               
+>  *
+. *  - 复现戳 result.json                                                      
+>  *
+. *============================================================================
+> =*
+. di as text _n "==== Step 8: Publication tables & figures ===="
+
+==== Step 8: Publication tables & figures ====
+
+. 
+. *---------------------------------------------------------------------*
+. * F3: Coefplot — M1→M5 (skill §8f — Figure 3)                         *
+. *---------------------------------------------------------------------*
+. * Re-estimate M1→M5 (cleared by earlier eststo clear)
+. eststo clear
+
+. eststo M1: qui reg re78 treat, vce(robust)
+
+. eststo M2: qui reg re78 treat age educ, vce(robust)
+
+. eststo M3: qui reg re78 treat age educ black hispan, vce(robust)
+
+. eststo M4: qui reg re78 treat age educ black hispan married nodegree, vce(rob
+> ust)
+
+. eststo M5: qui reg re78 treat age educ black hispan married nodegree re74 re7
+> 5, vce(robust)
+
+. 
+. coefplot M1 M2 M3 M4 M5, keep(treat) ///
+>     vertical yline(0, lpattern(dash) lcolor(gs8)) ///
+>     ciopts(recast(rcap)) levels(95) ///
+>     ylabel(, angle(0)) ///
+>     xtitle("Specification") ytitle("β̂(treat) — 95% CI") ///
+>     title("Figure 3. Coefficient stability across specifications M1→M5") ///
+>     scheme(s2color)
+
+. graph export "_stata_lalonde_outputs_v5.2/figures/fig3_coefplot.pdf", replace
+file _stata_lalonde_outputs_v5.2/figures/fig3_coefplot.pdf saved as PDF
+    format
+
+. graph export "_stata_lalonde_outputs_v5.2/figures/fig3_coefplot.png", replace
+>  width(1200)
+file _stata_lalonde_outputs_v5.2/figures/fig3_coefplot.png written in PNG forma
+> t
+
+. di as text "Saved: figures/fig3_coefplot.{pdf,png}"
+Saved: figures/fig3_coefplot.{pdf,png}
+
+. 
+. *---------------------------------------------------------------------*
+. * F4: 规范曲线 (skill §6.l — Figure 5/spec curve)                      *
+. *---------------------------------------------------------------------*
+. capture frame drop spec
+
+. frame create spec
+
+. frame spec: g double spec_id = .
+
+. frame spec: g double b = .
+
+. frame spec: g double se = .
+
+. frame spec: g double lo = .
+
+. frame spec: g double hi = .
+
+. frame spec: g str30 label = ""
+
+. local id 0
+
+. local controls_list "treat treat age educ treat age educ black hispan treat a
+> ge educ black hispan married nodegree"
+
+. local n_controls : word count `controls_list'
+
+. local n_models = `n_controls' / 4
+
+. 
+. forvalues m = 1/`n_models' {
+  2.     local offset = (`m' - 1) * 4 + 1
+  3.     local spec : word `offset' of `controls_list'
+  4.     if `m' == 1 local spec_vars "treat"
+  5.     else if `m' == 2 local spec_vars "treat age educ"
+  6.     else if `m' == 3 local spec_vars "treat age educ black hispan"
+  7.     else if `m' == 4 local spec_vars "treat age educ black hispan married 
+> nodegree"
+  8.     else if `m' == 5 local spec_vars "treat age educ black hispan married 
+> nodegree re74 re75"
+  9. 
+.     foreach se_type in "robust" "" "hc3" {
+ 10.         if "`se_type'" == "" {
+ 11.             capture qui reg re78 `spec_vars'
+ 12.         }
+ 13.         else {
+ 14.             capture qui reg re78 `spec_vars', vce(`se_type')
+ 15.         }
+ 16.         if _rc == 0 {
+ 17.             local ++id
+ 18.             local b = _b[treat]
+ 19.             local se = _se[treat]
+ 20.             local lo = `b' - 1.96*`se'
+ 21.             local hi = `b' + 1.96*`se'
+ 22.             frame post spec (`id') (`b') (`se') (`lo') (`hi') ("M`m'/se=`s
+> e_type'")
+ 23.         }
+ 24.     }
+ 25. }
+
+. 
+. frame change spec
+
+. sort b
+
+. gen rank = _n
+
+. twoway (rcap lo hi rank, lcolor(gs8)) ///
+>        (scatter b rank, mcolor(navy) msymbol(Oh)), ///
+>     yline(0, lpattern(dash) lcolor(gs10)) ///
+>     xtitle("Specification rank") ytitle("β̂(treat) — 95% CI") ///
+>     title("Figure 4. Specification curve — treatment effect across 15 specs")
+>  ///
+>     legend(off) scheme(s2color)
+
+. graph export "_stata_lalonde_outputs_v5.2/figures/fig4_spec_curve.pdf", repla
+> ce
+file _stata_lalonde_outputs_v5.2/figures/fig4_spec_curve.pdf saved as PDF
+    format
+
+. graph export "_stata_lalonde_outputs_v5.2/figures/fig4_spec_curve.png", repla
+> ce width(1200)
+(file _stata_lalonde_outputs_v5.2/figures/fig4_spec_curve.png not found)
+file _stata_lalonde_outputs_v5.2/figures/fig4_spec_curve.png written in PNG for
+> mat
+
+. di as text "Saved: figures/fig4_spec_curve.{pdf,png}"
+Saved: figures/fig4_spec_curve.{pdf,png}
+
+. frame change default
+
+. 
+. *---------------------------------------------------------------------*
+. * 8l. 复现戳 result.json (skill §8l)                                   *
+. *---------------------------------------------------------------------*
+. qui reg re78 treat age educ black hispan married nodegree re74 re75, vce(robu
+> st)
+
+. local _b  = _b[treat]
+
+. local _se = _se[treat]
+
+. local _lo = `_b' - 1.96 * `_se'
+
+. local _hi = `_b' + 1.96 * `_se'
+
+. local _n  = e(N)
+
+. 
+. file open _f using "_stata_lalonde_outputs_v5.2/artifacts/result.json", write
+>  replace
+(file _stata_lalonde_outputs_v5.2/artifacts/result.json not found)
+
+. file write _f "{" _n
+
+. file write _f `"  "stata_version": "`c(stata_version)'", "' _n
+
+. file write _f `"  "current_date": "`c(current_date)' `c(current_time)'", "' _
+> n
+
+. file write _f `"  "seed": 7, "' _n
+
+. file write _f `"  "n_obs": `_n', "' _n
+
+. file write _f `"  "estimand": "ATT (selection on observables)", "' _n
+
+. file write _f `"  "estimator": "OLS with vce(robust), full covariate set", "'
+>  _n
+
+. file write _f `"  "headline_estimate": `_b', "' _n
+
+. file write _f `"  "headline_se": `_se', "' _n
+
+. file write _f `"  "headline_ci95_lo": `_lo', "' _n
+
+. file write _f `"  "headline_ci95_hi": `_hi', "' _n
+
+. file write _f `"  "pre_registration": "artifacts/pap.json + artifacts/strateg
+> y.md", "' _n
+
+. file write _f `"  "data_contract": "artifacts/data_contract.json", "' _n
+
+. file write _f `"  "sample_log": "artifacts/sample_construction.json", "' _n
+
+. file write _f `"  "robustness_master": "tables/tableA1_robustness.tex", "' _n
+
+. file write _f `"  "spec_curve": "figures/fig4_spec_curve.pdf", "' _n
+
+. file write _f `"  "love_plot": "figures/fig2_love_plot.pdf", "' _n
+
+. file write _f `"  "ps_overlap": "figures/fig2b_ps_overlap.pdf", "' _n
+
+. file write _f `"  "frozen_at": "2026-05-02""' _n
+
+. file write _f "}" _n
+
+. file close _f
+
+. di as result "β̂(treat) = $" %8.0f `_b' "  (robust SE = $" %6.0f `_se' ///
+>     ", 95% CI [$" %7.0f `_lo' ", $" %7.0f `_hi' "])"
+β̂(treat) = $    1548  (robust SE = $   741, 95% CI [$     97, $   3000])
+
+. di as text "Saved: artifacts/result.json"
+Saved: artifacts/result.json
+
+. 
+. *---------------------------------------------------------------------*
+. * 管线完成报告                                                          *
+. *---------------------------------------------------------------------*
+. di as text _n(2) "==== Pipeline complete ===="
+
+
+==== Pipeline complete ====
+
+. di as text "Output: _stata_lalonde_outputs_v5.2/"
+Output: _stata_lalonde_outputs_v5.2/
+
+. di as text "  Tables:"
+  Tables:
+
+. di as text "    table1_full.{tex,rtf,xlsx,docx}       — Summary stats (T1)"
+    table1_full.{tex,rtf,xlsx,docx}       — Summary stats (T1)
+
+. di as text "    table1_balance.{tex,xlsx}              — Balance table (T1)"
+    table1_balance.{tex,xlsx}              — Balance table (T1)
+
+. di as text "    table2_main.{tex,rtf,xlsx,docx}        ★ Progressive controls
+>  M1→M5 (T2)"
+    table2_main.{tex,rtf,xlsx,docx}        ★ Progressive controls M1→M5 (T2)
+
+. di as text "    table3_horserace.{tex,rtf,xlsx,docx}   — Design horse-race (T
+> 3)"
+    table3_horserace.{tex,rtf,xlsx,docx}   — Design horse-race (T3)
+
+. di as text "    table4_heterogeneity.{tex,rtf,xlsx,docx} — Subgroup het (T4)"
+    table4_heterogeneity.{tex,rtf,xlsx,docx} — Subgroup het (T4)
+
+. di as text "    tableA1_robustness.{tex,rtf,xlsx,docx} — Robustness master (T
+> A1)"
+    tableA1_robustness.{tex,rtf,xlsx,docx} — Robustness master (TA1)
+
+. di as text "  Figures:"
+  Figures:
+
+. di as text "    fig1_kde_re78.{pdf,png}                — Earnings density (F1
+> )"
+    fig1_kde_re78.{pdf,png}                — Earnings density (F1)
+
+. di as text "    fig2_love_plot.{pdf,png}               — Love plot (F2)"
+    fig2_love_plot.{pdf,png}               — Love plot (F2)
+
+. di as text "    fig2b_ps_overlap.{pdf,png}             — PS overlap"
+    fig2b_ps_overlap.{pdf,png}             — PS overlap
+
+. di as text "    fig3_coefplot.{pdf,png}                — Coefplot M1→M5 (F3)"
+    fig3_coefplot.{pdf,png}                — Coefplot M1→M5 (F3)
+
+. di as text "    fig4_spec_curve.{pdf,png}              — Spec curve (F4)"
+    fig4_spec_curve.{pdf,png}              — Spec curve (F4)
+
+. di as text "  Artifacts:"
+  Artifacts:
+
+. di as text "    pap.json / strategy.md / result.json   — PAP / strategy / sta
+> mp"
+    pap.json / strategy.md / result.json   — PAP / strategy / stamp
+
+. 
+. log close pipelog
+      name:  pipelog
+       log:  /Users/brycewang/Documents/GitHub/Awesome-Agent-Skills-for-Empiric
+> al-Research/demo-notebooks/_stata_lalonde_outputs_v5.2/logs/lalonde_pipeline.
+> log
+  log type:  text
+ closed on:   3 May 2026, 00:08:18
+-------------------------------------------------------------------------------

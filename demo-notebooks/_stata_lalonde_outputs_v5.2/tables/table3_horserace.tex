@@ -1,0 +1,21 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Table 3. Design horse-race — Lalonde NSW ATT across estimators}
+\begin{tabular}{l*{5}{c}}
+\toprule
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}\\
+                    &\multicolumn{1}{c}{OLS}&\multicolumn{1}{c}{RA}&\multicolumn{1}{c}{IPW}&\multicolumn{1}{c}{PSM}&\multicolumn{1}{c}{Entropy}\\
+\midrule
+main                &                     &                     &                     &                     &                     \\
+NSW 职业培训 (0/1)  &      1548.2\sym{**} &      1647.6\sym{**} &      1214.1         &      1273.9         &      1271.8         \\
+                    &     (740.6)         &     (809.0)         &     (798.2)         &    (1017.0)         &     (825.4)         \\
+\midrule
+N                   &         614         &         614         &         614         &         614         &         614         \\
+Adj. R²             &       0.135         &                     &                     &                     &     0.00645         \\
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{6}{l}{\footnotesize Robust standard errors in parentheses. * p<0.10, ** p<0.05, *** p<0.01.}\\
+\multicolumn{6}{l}{\footnotesize All estimators target ATT except OLS (ATE).}\\
+\multicolumn{6}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

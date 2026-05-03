@@ -1,0 +1,16 @@
+{
+  "design": "selection on observables (Lalonde NSW)", 
+  "population": "Lalonde NSW treated + PSID comparison, 1976-78", 
+  "outcome": "re78 (1978 real earnings, USD)", 
+  "treatment": "treat (NSW assignment 0/1)", 
+  "estimand": "ATT", 
+  "n_treated_planned": 185, 
+  "n_control_planned": 429, 
+  "alpha": 0.05, 
+  "power_target": 0.80, 
+  "mde_cohens_d": .246, 
+  "mde_in_dollars": 1846.71216, 
+  "sd_re78": 7506.96, 
+  "frozen_at": "2026-05-02", 
+  "stata_command": "power twomeans 0, n1(185) n2(429) sd1(1) sd2(1) alpha(0.05) power(0.80)"
+}

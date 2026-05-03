@@ -1,0 +1,40 @@
+\begin{table}[htbp]
+\centering
+\caption{Table 2. Effect of NSW job training on 1978 earnings}
+\begin{tabular}{lccc}
+\hline\hline
+ & (1) OLS (no controls) & (2) OLS (full controls) & (3) IV-2SLS \\
+\hline
+Intercept & 6984.170*** & -1174.130 & 295.630 \\
+ & (352.329) & (2540.349) & (3280.766) \\
+Job training (NSW) & -635.026 & 1548.244** & -5955.471 \\
+ & (676.748) & (740.576) & (4072.115) \\
+age &  & 12.978 & 65.533* \\
+ &  & (31.704) & (36.238) \\
+educ &  & 403.941** & 655.990*** \\
+ &  & (160.395) & (183.652) \\
+married &  & 406.621 & 1354.891* \\
+ &  & (658.549) & (796.593) \\
+nodegree &  & 259.817 & 697.551 \\
+ &  & (891.786) & (1015.016) \\
+re74 &  & 0.296*** &  \\
+ &  & (0.071) &  \\
+re75 &  & 0.232* &  \\
+ &  & (0.119) &  \\
+race\_hispan &  & 1739.541* & -1025.507 \\
+ &  & (1023.763) & (2129.765) \\
+race\_white &  & 1240.644* & -2299.665 \\
+ &  & (695.766) & (2284.319) \\
+\hline
+First-stage F &  &  & 14.21 \\
+Hansen J p-value &  &  & 0.029 \\
+\hline
+N & 614 & 614 & 614 \\
+R$^2$ & 0.002 & 0.148 & -0.047 \\
+DV mean &  &  &  \\
+First-stage F &  &  &  \\
+\hline\hline
+\multicolumn{4}{l}{\footnotesize Standard errors in parentheses} \\
+\multicolumn{4}{l}{\footnotesize *** p<0.01, ** p<0.05, * p<0.10} \\
+\end{tabular}
+\end{table}

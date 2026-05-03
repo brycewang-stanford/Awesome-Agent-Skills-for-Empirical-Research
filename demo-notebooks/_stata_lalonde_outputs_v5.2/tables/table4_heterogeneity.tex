@@ -1,0 +1,20 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Table 4. Heterogeneity — treatment effect by subgroup}
+\begin{tabular}{l*{5}{c}}
+\toprule
+            &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}\\
+            &\multicolumn{1}{c}{All}&\multicolumn{1}{c}{Black}&\multicolumn{1}{c}{Non-Black}&\multicolumn{1}{c}{Age<30}&\multicolumn{1}{c}{Age≥30}\\
+\midrule
+treat       &      1548.2\sym{**} &      1371.5         &      1807.0         &       709.3         &      3865.1\sym{**} \\
+            &     (740.6)         &     (924.0)         &    (1319.5)         &     (789.1)         &    (1598.9)         \\
+\midrule
+N           &         614         &         243         &         371         &         427         &         187         \\
+Adj. R²     &       0.135         &      0.0343         &       0.198         &      0.0513         &       0.297         \\
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{6}{l}{\footnotesize Robust standard errors in parentheses. * p<0.10, ** p<0.05, *** p<0.01.}\\
+\multicolumn{6}{l}{\footnotesize Subgroup estimates of ATT.}\\
+\multicolumn{6}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

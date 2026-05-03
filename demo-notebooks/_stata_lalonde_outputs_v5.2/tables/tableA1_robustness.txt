@@ -1,0 +1,13 @@
+		(1)
+VARIABLES	LABELS	log_re78
+		
+treat	NSW 职业培训 (0/1)	0.89**
+		(0.40)
+Constant	Constant	6.22***
+		(1.36)
+		
+Observations		614
+R-squared		0.08
+Specs		Base iidSE Winsor CmnS +age2 +re742 Dropu74 Earn IHS Log
+Robust standard errors in parentheses		
+*** p<0.01, ** p<0.05, * p<0.1		

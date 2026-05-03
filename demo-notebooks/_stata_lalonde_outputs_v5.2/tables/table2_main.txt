@@ -1,0 +1,15 @@
+		(1)
+VARIABLES	LABELS	1978 年收入 (美元)
+		
+treat	NSW 职业培训 (0/1)	1,548.24**
+		(740.58)
+Constant	Constant	66.51
+		(2,530.02)
+		
+Observations		614
+R-squared		0.15
+Specification		M1 Raw
+M2 +Demog		M3 +Race
+M4 +Family		M5 Full
+Robust standard errors in parentheses		
+*** p<0.01, ** p<0.05, * p<0.1		

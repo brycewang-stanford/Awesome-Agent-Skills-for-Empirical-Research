@@ -1,0 +1,19 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{10}{c}}
+\toprule
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}&\multicolumn{1}{c}{(7)}&\multicolumn{1}{c}{(8)}&\multicolumn{1}{c}{(9)}&\multicolumn{1}{c}{(10)}\\
+                    &\multicolumn{1}{c}{(1) Base}&\multicolumn{1}{c}{(2) iid SE}&\multicolumn{1}{c}{(3) Winsor}&\multicolumn{1}{c}{(4) Cmn supp}&\multicolumn{1}{c}{(5) +age²+edu²}&\multicolumn{1}{c}{(6) +re74²+75²}&\multicolumn{1}{c}{(7) Drop u74}&\multicolumn{1}{c}{(8) Earners}&\multicolumn{1}{c}{(9) IHS Y}&\multicolumn{1}{c}{(10) Log Y}\\
+\midrule
+NSW 职业培训 (0/1)  &     1548.24\sym{**} &     1548.24\sym{**} &     1325.34\sym{*}  &     1389.67\sym{*}  &     1517.06\sym{**} &     1235.72\sym{*}  &    -1293.62         &     1093.49         &        0.94\sym{**} &        0.89\sym{**} \\
+                    &    (740.58)         &    (781.28)         &    (698.29)         &    (752.05)         &    (745.88)         &    (705.93)         &   (1122.59)         &    (833.14)         &      (0.43)         &      (0.40)         \\
+\midrule
+N                   &      614.00         &      614.00         &      614.00         &      456.00         &      614.00         &      614.00         &      371.00         &      471.00         &      614.00         &      614.00         \\
+Adj. R²             &        0.14         &        0.14         &        0.15         &        0.04         &        0.14         &        0.17         &        0.22         &        0.15         &        0.07         &        0.07         \\
+\bottomrule
+\multicolumn{11}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{11}{l}{\footnotesize Robust standard errors in parentheses. * p<0.10, ** p<0.05, *** p<0.01.}\\
+\multicolumn{11}{l}{\footnotesize Column 2 reports iid SE; all others robust.}\\
+\multicolumn{11}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+}

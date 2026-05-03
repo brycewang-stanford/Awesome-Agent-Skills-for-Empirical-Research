@@ -1,0 +1,21 @@
+{\rtf1\fs24
+\trowd\trgaph75\trleft-75\intbl\trqc\clbrdrt\brdrs\cellx3312\clbrdrt\brdrs\cellx6768
+\ql \cell\qc (1)\cell\row
+\trowd\trgaph75\trleft-75\trqc\cellx3312\cellx6768
+\trowd\trgaph75\trleft-75\trqc\clbrdrb\brdrs\cellx3312\clbrdrb\brdrs\cellx6768
+\ql VARIABLES\cell\qc 1978 年收入 (美元)\cell\row
+\trowd\trgaph75\trleft-75\trqc\cellx3312\cellx6768
+\ql \cell\qc \cell\row
+\ql NSW 职业培训 (0/1)\cell\qc 1,271.83\cell\row
+\ql \cell\qc (825.42)\cell\row
+\ql Constant\cell\qc 5,077.32***\cell\row
+\ql \cell\qc (589.46)\cell\row
+\ql \cell\qc \cell\row
+\ql Observations\cell\qc 614\cell\row
+\ql R-squared\cell\qc 0.01\cell\row
+\trowd\trgaph75\trleft-75\trqc\trbrdrb\brdrs\clbrdrb\brdrs\cellx3312\clbrdrb\brdrs\cellx6768
+\ql Design\cell\qc OLS RA IPW PSM EBAL\cell\row
+\pard\qc
+Robust standard errors in parentheses\par
+*** p<0.01, ** p<0.05, * p<0.1\par
+}

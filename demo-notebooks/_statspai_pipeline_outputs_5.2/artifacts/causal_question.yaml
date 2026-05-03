@@ -1,0 +1,21 @@
+question:
+  treatment: "treat"
+  outcome: "re78"
+  population: "low-income males in the US National Supported Work demonstration, 1970s"
+  estimand: "ATT"
+  design: "auto"
+  time_structure: "cross_section"
+  time: null
+  id: null
+  covariates:
+    - "age"
+    - "educ"
+    - "married"
+    - "nodegree"
+    - "re74"
+    - "re75"
+  instruments: []
+  running_variable: null
+  cutoff: null
+  cohort: null
+  notes: ""

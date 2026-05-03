@@ -1,0 +1,20 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Table 2. Progressive specifications — Lalonde NSW (treatment effect on re78)}
+\begin{tabular}{l*{5}{c}}
+\toprule
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}\\
+                    &\multicolumn{1}{c}{(1) Raw}&\multicolumn{1}{c}{(2) +Demog}&\multicolumn{1}{c}{(3) +Race}&\multicolumn{1}{c}{(4) +Family}&\multicolumn{1}{c}{(5) Full}\\
+\midrule
+NSW 职业培训 (0/1)  &      -635.0         &      -480.7         &       822.0         &      1163.9         &      1548.2\sym{**} \\
+                    &     (676.7)         &     (662.5)         &     (733.3)         &     (741.3)         &     (740.6)         \\
+\midrule
+N                   &         614         &         614         &         614         &         614         &         614         \\
+Adj. R²             &   -0.000108         &      0.0385         &      0.0478         &      0.0600         &       0.135         \\
+\bottomrule
+\multicolumn{6}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{6}{l}{\footnotesize Robust standard errors in parentheses. * p<0.10, ** p<0.05, *** p<0.01.}\\
+\multicolumn{6}{l}{\footnotesize Progressive covariate adjustment M1→M5.}\\
+\multicolumn{6}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

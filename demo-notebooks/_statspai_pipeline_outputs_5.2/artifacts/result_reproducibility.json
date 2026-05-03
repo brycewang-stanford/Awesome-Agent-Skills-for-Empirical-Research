@@ -1,0 +1,15 @@
+{
+  "statspai": "1.12.2",
+  "seed": 42,
+  "n_obs": 614,
+  "n_treated": 185,
+  "n_control": 429,
+  "y_mean_ctrl": 6984.169742307692,
+  "y_mean_treated": 6349.143530270271,
+  "estimand": "ATT",
+  "estimate_ols": 1548.2438019996014,
+  "pre_registration": "artifacts/empirical_strategy.md",
+  "data_contract": "artifacts/data_contract.json",
+  "sample_log": "artifacts/sample_construction.json",
+  "estimate_iv": -5955.470607971656
+}

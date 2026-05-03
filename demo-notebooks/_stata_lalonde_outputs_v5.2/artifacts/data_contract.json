@@ -1,0 +1,11 @@
+{
+  "n_obs": 614, 
+  "n_missing_y": 0, 
+  "n_missing_treat": 0, 
+  "n_missing_X": 0, 
+  "y_range": [0, 1], 
+  "treatment_share": .3013029315960912, 
+  "treatment_levels": [0, 1], 
+  "design": "cross-sectional selection-on-observables", 
+  "panel_balanced": null 
+}

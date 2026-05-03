@@ -1,0 +1,23 @@
+\begin{table}
+\centering
+\begin{talltblr}[         %% tabularray outer open
+caption={Table 5: Robustness — Alternative Specifications},
+note{}={* p \num{< 0.1}, ** p \num{< 0.05}, *** p \num{< 0.01}},
+note{ }={Column (1): baseline OLS with HC SE. (2): dropping zero-earners. (3): log(re78+1) outcome. (4): OLS with iid SE.},
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]Q[]},
+hline{2}={1-5}{solid, black, 0.05em},
+hline{4}={1-5}{solid, black, 0.05em},
+hline{1}={1-5}{solid, black, 0.08em},
+hline{6}={1-5}{solid, black, 0.08em},
+column{2-5}={}{halign=c},
+column{1}={}{halign=l},
+}                     %% tabularray inner close
+& (1) & (2) & (3) & (4) \\
+Treatment (NSW Program) & \num{1548.244}** & \num{1093.492} & \num{0.982}** & \num{1548.244}** \\
+& (\num{740.576}) & (\num{833.141}) & (\num{0.419}) & (\num{781.279}) \\
+Num.Obs. & \num{614} & \num{471} & \num{614} & \num{614} \\
+R2 & \num{0.148} & \num{0.168} & \num{0.062} & \num{0.148} \\
+\end{talltblr}
+\end{table}
