@@ -64,6 +64,14 @@
 ## 🆕 更新日志
 
 <details open>
+<summary><b>2026-05-04：🤝 首个社区 PR 收录 —— humanize-chinese vendor 进 skills/49</b></summary>
+
+- **🇨🇳 [skills/49-voidborne-d-humanize-chinese](skills/49-voidborne-d-humanize-chinese/)**：由 [@voidborne-d](https://github.com/voidborne-d) 通过 [PR #5](https://github.com/brycewang-stanford/Awesome-Agent-Skills-for-Empirical-Research/pull/5) 贡献，按 `LICENSE + README-original.md + SKILL.md` 三件套 vendor 进仓库。**同时提供 SKILL.md 和独立 Python CLI**：17 类中文 AI 模式检测 + 7 风格改写器（academic / novel / blog / 小红书 / 微信 等）+ LR ensemble 程序化打分，长度 ≥1500 字自动切长篇 LR，HC3 100 短问答基准 95% 正确分离。**License: MIT (Non-Commercial)** —— 非标准修改版 MIT，明确禁商用（SaaS / 付费 API / 商业产品集成），下游使用请注意。
+- **🤝 欢迎社区 PR**：本仓库长期开放收录有价值的实证研究类 Skill / Agent / 工具。无论是你自己开发的还是发现的好工具，欢迎提 PR —— 我们会**继续保持收录**，认真审查每一条贡献，让这份清单成为社区共建的资产。流程参见 [Contributing](#contributing)。
+
+</details>
+
+<details>
 <summary><b>2026-04-28：🛡️ 全仓 52 个 Skill 完成系统性安全扫描 —— 52/52 全部 CLEAN，零 FLAGGED</b></summary>
 
 - **🛡️ [SECURITY-SCAN-REPORT.md](SECURITY-SCAN-REPORT.md)**：对仓库内 **52 个 Skill / 2,940+ 文件**完成系统性安全审查，**未发现任何恶意 prompt、病毒、木马或其他恶意内容**。结论先行：可以放心使用本仓库内任意 Skill。
