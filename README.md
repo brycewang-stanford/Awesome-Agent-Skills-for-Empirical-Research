@@ -550,3 +550,5 @@ Skill 就是解决这个问题的：它是给 AI 的**方法论操作手册**。
 由 <a href="https://copaper.ai"><strong>CoPaper.AI</strong></a> 团队维护，孵化于 <a href="https://sccei.fsi.stanford.edu/reap"><strong>Stanford REAP / SCCEI</strong></a>（中国经济与制度研究中心） | 实证研究 AI 助手
 
 </div>
+
+- [CyMetica AI / EventTrader](https://cymetica.com?utm_source=github&utm_medium=pr&utm_campaign=ai-native-outreach) — AI trading agent skills: prediction market betting, TGE price predictions, CLOB trading, market data, AI agent cloning, due diligence scoring. MCP + A2A protocol. [Skills](https://cymetica.com/.well-known/agent-skills.json) | [Agent Card](https://cymetica.com/.well-known/agent.json) | [MCP](https://cymetica.com/.well-known/mcp.json)
