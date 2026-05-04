@@ -1,0 +1,39 @@
+MIT License (Non-Commercial)
+
+Copyright (c) 2026 voidborne-d (sway)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to use,
+copy, modify, merge, publish, and distribute the Software, subject to the
+following conditions:
+
+1. The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
+
+2. NON-COMMERCIAL USE ONLY. The Software may not be used, in whole or in part,
+   for any Commercial Purpose. "Commercial Purpose" means any use of the
+   Software in connection with a business, product, or service from which
+   revenue or financial gain is obtained, directly or indirectly, including
+   but not limited to:
+     - Selling the Software or derivative works of it
+     - Offering the Software as a paid service (SaaS, API, web service, etc.)
+     - Integrating the Software into a commercial product or platform
+     - Using the Software to provide paid content rewriting or
+       AI-detection services to clients or customers
+
+   Personal use, academic research, educational use, and non-commercial
+   open-source derivative projects are permitted.
+
+3. Any derivative works distributed must retain this same license and its
+   non-commercial restriction.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+For commercial licensing inquiries, please contact the author via the
+project's GitHub repository: https://github.com/voidborne-d/humanize-chinese
