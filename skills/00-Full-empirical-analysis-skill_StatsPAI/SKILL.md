@@ -197,6 +197,93 @@ sp.cite(M3, "training", output="latex")  # → "$1.239^{***}$ ($0.153$)"
 
 ---
 
+## Notebook setup — CJK fonts + retina DPI
+
+Run **once at the top of every analysis script / notebook**, *before* any matplotlib-backed plot (`sp.regtable.to_*` exporters do not need this — only `.savefig` / `sp.coefplot` / `sp.binscatter` / `sp.cate_plot` / etc.). Two failures it fixes in one shot:
+
+1. **CJK labels render as ▢▢▢ tofu** — the matplotlib default `DejaVu Sans` carries no Chinese / Japanese / Korean glyphs, so `ax.set_title("教育回报")` silently degrades into squares.
+2. **Plots look fuzzy on hi-DPI displays** — matplotlib's default `figure.dpi=100` is half the density of a Retina / 4K screen.
+
+### Drop-in snippet
+
+```python
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+def setup_plot(retina: bool = True) -> None:
+    """One-shot matplotlib boilerplate: CJK font fallback + retina DPI.
+
+    Idempotent — safe to call multiple times. Call BEFORE any plotting.
+    """
+    # 1. CJK font fallback chain — covers macOS / Windows / Linux in one list.
+    #    matplotlib uses the first available font; later names are fallbacks,
+    #    so listing all three platforms is harmless on any single host.
+    mpl.rcParams["font.sans-serif"] = [
+        "PingFang SC", "Heiti SC", "Hiragino Sans GB",   # macOS
+        "Microsoft YaHei", "SimHei", "SimSun",           # Windows
+        "Noto Sans CJK SC", "Source Han Sans SC",        # Linux / Adobe
+        "WenQuanYi Micro Hei",                           # Linux fallback
+        "Arial Unicode MS",                              # universal fallback
+        "DejaVu Sans",                                   # last-resort Latin
+    ]
+    mpl.rcParams["axes.unicode_minus"] = False          # 修复中文字体下负号渲染成 □
+
+    # 2. Retina-grade DPI. figure.dpi controls on-screen / inline rendering;
+    #    savefig.dpi controls .png exports. Set both — they are independent.
+    if retina:
+        mpl.rcParams["figure.dpi"]  = 144   # 2× default — sharp on Retina/HiDPI
+        mpl.rcParams["savefig.dpi"] = 300   # publication-grade PNG (AER house norm)
+        # Jupyter inline retina backend (no-op outside IPython):
+        try:
+            from IPython import get_ipython
+            ipy = get_ipython()
+            if ipy is not None:
+                ipy.run_line_magic("config", "InlineBackend.figure_format = 'retina'")
+        except Exception:
+            pass
+
+setup_plot()                                            # call once at the top
+```
+
+### Smoke test (5 seconds, run once after `setup_plot()`)
+
+```python
+fig, ax = plt.subplots(figsize=(4, 2.5))
+ax.plot([0, 1, 2], [-1, 0, 1])
+ax.set_title("中文标题测试 — Card (1995) 教育回报")
+ax.set_xlabel("受教育年数 (years)")
+fig.tight_layout()
+fig.savefig("figures/_font_smoke_test.png", dpi=300)    # delete after verifying
+```
+
+If the saved PNG shows Chinese characters cleanly *and* the y-axis tick `-1` is a real minus sign (not a square), the setup is good. Otherwise see troubleshooting below.
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| Title still shows ▢▢▢ tofu after `setup_plot()` | Host has none of the listed fonts. Install one — **macOS**: pre-installed (no action). **Linux**: `sudo apt install fonts-noto-cjk` (Debian/Ubuntu) or `sudo dnf install google-noto-sans-cjk-fonts` (Fedora/RHEL). **Windows**: pre-installed. Then clear matplotlib's font cache: `rm -rf ~/.cache/matplotlib` (Linux/macOS) / `%LOCALAPPDATA%\matplotlib` (Windows), and restart the Python / Jupyter kernel. |
+| Negative numbers render as ▢ | `axes.unicode_minus = False` was overridden by a later `plt.style.use(...)` or `mpl.rcParams.update(...)`. Re-call `setup_plot()` after any style change. |
+| Plot blurry inside VSCode `.ipynb` | VSCode's notebook UI ignores `figure.dpi` for inline rendering. Either switch the cell output to "Open in Image Viewer", or use `%matplotlib inline` *before* `setup_plot()`. The saved `.png` (driven by `savefig.dpi=300`) is sharp regardless. |
+| `sp.<plot>(...)` output still shows tofu | The `sp.*` plotters honor global `rcParams`, so this only happens when `setup_plot()` was called *after* the plot was drawn. Move the call to the very top of the script. |
+| Need to verify which font matplotlib picked | `mpl.font_manager.findfont(mpl.font_manager.FontProperties(family=mpl.rcParams["font.sans-serif"]))` returns the resolved file path — if it ends in `DejaVuSans.ttf` despite Chinese labels, no CJK font is installed. |
+
+### Persist as project default (optional)
+
+Drop the same rcParams into a project-level `matplotlibrc` next to `pyproject.toml` so co-authors and CI runners pick it up without calling `setup_plot()`:
+
+```
+# matplotlibrc — committed to the repo
+font.sans-serif: PingFang SC, Heiti SC, Microsoft YaHei, SimHei, Noto Sans CJK SC, Arial Unicode MS, DejaVu Sans
+axes.unicode_minus: False
+figure.dpi: 144
+savefig.dpi: 300
+```
+
+The `setup_plot()` function above is the in-script fallback when a project `matplotlibrc` is not present.
+
+---
+
 ## Step −1 — Pre-Analysis Plan (pre-data; AEA RCT Registry style)
 
 `sp.power(design, n=..., effect_size=..., power_target=...)` is a unified dispatcher — leave one argument `None` to solve for it (sample size, MDE, or power). Convenience wrappers: `sp.power_rct`, `sp.power_did`, `sp.power_rd`, `sp.power_iv`, `sp.power_cluster_rct`, `sp.power_ols`.
