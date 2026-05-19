@@ -550,3 +550,15 @@ If this list helps you, please give it a Star so more researchers can find it.
 Maintained by <a href="https://copaper.ai"><strong>CoPaper.AI</strong></a>, incubated at <a href="https://sccei.fsi.stanford.edu/reap"><strong>Stanford REAP / SCCEI</strong></a> | AI Assistant for Empirical Research
 
 </div>
+
+---
+
+## ⭐ Star History
+
+<a href="https://www.star-history.com/#brycewang-stanford/Awesome-Agent-Skills-for-Empirical-Research&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=brycewang-stanford/Awesome-Agent-Skills-for-Empirical-Research&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=brycewang-stanford/Awesome-Agent-Skills-for-Empirical-Research&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=brycewang-stanford/Awesome-Agent-Skills-for-Empirical-Research&type=Date" />
+ </picture>
+</a>

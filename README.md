@@ -559,3 +559,15 @@ Skill 就是解决这个问题的：它是给 AI 的**方法论操作手册**。
 由 <a href="https://copaper.ai"><strong>CoPaper.AI</strong></a> 团队维护，孵化于 <a href="https://sccei.fsi.stanford.edu/reap"><strong>Stanford REAP / SCCEI</strong></a>（中国经济与制度研究中心） | 实证研究 AI 助手
 
 </div>
+
+---
+
+## ⭐ Star History
+
+<a href="https://www.star-history.com/#brycewang-stanford/Awesome-Agent-Skills-for-Empirical-Research&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=brycewang-stanford/Awesome-Agent-Skills-for-Empirical-Research&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=brycewang-stanford/Awesome-Agent-Skills-for-Empirical-Research&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=brycewang-stanford/Awesome-Agent-Skills-for-Empirical-Research&type=Date" />
+ </picture>
+</a>
