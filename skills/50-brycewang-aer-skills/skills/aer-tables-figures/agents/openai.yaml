@@ -1,0 +1,4 @@
+interface:
+  display_name: "AER Tables and Figures"
+  short_description: "Format AER tables and figures"
+  default_prompt: "Use $aer-tables-figures to audit these tables and figures for AER house style."

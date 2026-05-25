@@ -1,0 +1,4 @@
+interface:
+  display_name: "AER Topic Selection"
+  short_description: "Evaluate AER topic and venue fit"
+  default_prompt: "Use $aer-topic-selection to evaluate whether this research idea fits AER, AER: Insights, or an AEJ."

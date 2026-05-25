@@ -1,0 +1,4 @@
+interface:
+  display_name: "AER Introduction"
+  short_description: "Draft AER introductions and abstracts"
+  default_prompt: "Use $aer-introduction to rewrite this introduction and compress the abstract to the AEA 100-word limit."

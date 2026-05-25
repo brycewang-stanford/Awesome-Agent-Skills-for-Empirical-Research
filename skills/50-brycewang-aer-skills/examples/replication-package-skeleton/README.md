@@ -1,0 +1,136 @@
+# Replication Package — [PAPER TITLE]
+
+This is a **skeleton** README following the AEA Data Editor's template.
+Authors should replace every `[BRACKETED]` placeholder.
+
+---
+
+## Overview
+
+The code in this replication package reproduces all tables and figures
+in [Author(s)] ([Year]), "[Paper title]", *[Journal]*, [Volume(Issue)],
+[Pages]. The pipeline cleans [N] raw data sources into a single
+analytic file, then runs the main, robustness, and heterogeneity
+analyses. Total runtime is approximately [N] minutes on a 2024-class
+laptop.
+
+## Data Availability and Provenance Statement
+
+### Summary of Availability
+
+- [ ] All data **are** publicly available.
+- [ ] Some data **cannot be** made publicly available (see Section [...]).
+- [ ] **No** data can be made publicly available (see Section [...]).
+
+### Details on Each Dataset
+
+#### Dataset 1 — [Source Name]
+
+- **Source.** [Agency / paper / repository] — [URL]
+- **Citation.** [Author(s)], [Year]. [Dataset title]. [Repository]. [DOI / accession]
+- **License.** [Public domain / CC-BY / Restricted]
+- **Date accessed.** [YYYY-MM-DD]
+- **Provided in this package?** Yes / No
+- **If not provided, how to obtain.** [Step-by-step instructions]
+- **Used in:** Tables 1-3, Figure 2, Appendix Tables A.1-A.3
+
+#### Dataset 2 — [...]
+
+*(repeat for every dataset)*
+
+## Dataset List
+
+| File | Description | Source | Notes |
+|------|-------------|--------|-------|
+| `data/raw/source1.csv` | Wage data, ZIP-year panel, 2010-2024 | [Source] | Provided |
+| `data/raw/source2.dta` | Broadband coverage, ZIP-year panel | FCC Form 477 | Provided |
+| `data/raw/source3.csv` | Commuting zone definitions | USDA ERS | Provided |
+| `data/intermediate/analytic.dta` | Cleaned analytic file | — | Built by `01_clean.do` |
+
+## Computational Requirements
+
+### Software
+
+- **Stata 18.0 MP** (or higher). Older Stata 17 should work with minor
+  syntax adjustments to `csdid` calls.
+- Stata packages: `reghdfe` (6.12.3), `csdid` (1.7.1), `did_imputation`
+  (1.4), `bacondecomp` (1.0.2), `honestdid` (1.2.2), `rdrobust` (9.2.0),
+  `rddensity` (3.0.0), `estout` (3.31), `coefplot` (1.8.7),
+  `weakivtest` (1.0.7), `boottest` (4.4.3).
+- All package versions are pinned via `code/00_install_packages.do`.
+
+### Hardware
+
+- Tested on a 2024 MacBook Pro (M3, 16 GB RAM) and on Ubuntu 22.04
+  (Intel Xeon, 32 GB RAM).
+- Peak memory usage: ~6 GB during `02_descriptives.do` (bootstrap CIs).
+- Total runtime: 27 minutes.
+
+### Random Seed
+
+The seed `20260101` is set in `code/00_globals.do` and used for all
+bootstrap, permutation, and synthetic-control procedures.
+
+## Description of Programs / Code
+
+Programs are run from the master script `run_all.do`. Each numbered
+script handles one stage:
+
+| Script | Purpose | Runtime |
+|--------|---------|---------|
+| `code/00_globals.do` | Set project paths, seed, display options | <1s |
+| `code/00_install_packages.do` | Install and pin all user-written packages | 2 min |
+| `code/01_clean.do` | Merge raw sources into `data/intermediate/analytic.dta` | 4 min |
+| `code/02_descriptives.do` | Summary statistics and balance tables | 3 min |
+| `code/03_main_did.do` | Main DiD specifications | 6 min |
+| `code/04_robustness.do` | Robustness checks | 5 min |
+| `code/05_heterogeneity.do` | Subgroup and event-study analysis | 3 min |
+| `code/06_tables.do` | Emit publication-ready `.tex` tables | 1 min |
+| `code/07_figures.do` | Emit publication-ready `.pdf` figures | 3 min |
+
+## Instructions to Replicators
+
+1. **Download** the entire archive from openICPSR and unzip to a
+   working directory.
+2. **Open Stata 18** and change directory:
+   ```
+   cd "/path/to/replication-package"
+   ```
+3. **Install dependencies** (one-time setup, ~2 minutes):
+   ```
+   do code/00_install_packages.do
+   ```
+4. **Edit** the `global project` line in `code/00_globals.do` so `$project` points to the
+   absolute path of your working directory.
+5. **Run the full pipeline**:
+   ```
+   do run_all.do
+   ```
+6. **Outputs** are written to `output/tables/*.tex` and `output/figures/*.pdf`.
+   Logs are written to `logs/run_all.log`.
+
+## List of Tables, Figures, and Programs
+
+| Exhibit in Paper | Script | Line(s) | Output File |
+|------------------|--------|---------|-------------|
+| Table 1 | `code/02_descriptives.do` | 14-58 | `output/tables/tab1_summary.tex` |
+| Table 2 | `code/03_main_did.do` | 47-89 | `output/tables/tab2_main_twfe.tex` |
+| Table 3 | `code/03_main_did.do` | 102-156 | `output/tables/tab3_main_csdid.tex` |
+| Table 4 | `code/04_robustness.do` | 18-71 | `output/tables/tab4_robustness.tex` |
+| Table 5 | `code/04_robustness.do` | 88-135 | `output/tables/tab5_bartik.tex` |
+| Figure 1 | `code/02_descriptives.do` | 142-178 | `output/figures/fig1_map.pdf` |
+| Figure 2 | `code/03_main_did.do` | 167-195 | `output/figures/fig2_event_study.pdf` |
+| Figure 3 | `code/05_heterogeneity.do` | 88-122 | `output/figures/fig3_occupation_heatmap.pdf` |
+| Appendix Table A.1 | `code/02_descriptives.do` | 195-220 | `output/tables/tabA1_balance.tex` |
+| Appendix Figure A.6 | `code/03_main_did.do` | 220-248 | `output/figures/figA6_honest_did.pdf` |
+
+*(extend for every published exhibit)*
+
+## References
+
+[Author(s)] ([Year]). "[Paper title]." *[Journal]* [Vol(Issue)]:
+[pages]. https://doi.org/[DOI]
+
+[Repository citation]. [Year]. "Data and Code for: [Paper title]."
+Inter-university Consortium for Political and Social Research.
+https://doi.org/[deposit DOI]

@@ -1,0 +1,4 @@
+interface:
+  display_name: "AER Workflow"
+  short_description: "Route AER manuscript workflows"
+  default_prompt: "Use $aer-workflow to tell me which AER skill should handle this manuscript next."

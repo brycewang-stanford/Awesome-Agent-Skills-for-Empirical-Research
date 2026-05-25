@@ -1,0 +1,4 @@
+interface:
+  display_name: "AER Replication"
+  short_description: "Prepare AEA replication deposits"
+  default_prompt: "Use $aer-replication to audit this replication package before the AEA Data Editor review."

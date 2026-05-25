@@ -1,0 +1,4 @@
+interface:
+  display_name: "AER Robustness"
+  short_description: "Plan AER robustness and placebo checks"
+  default_prompt: "Use $aer-robustness to plan the robustness, heterogeneity, mechanism, and placebo checks this manuscript needs."

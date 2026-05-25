@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "aer-skills",
+  "version": "1.0.0",
+  "description": "An opinionated agent skill stack for top-5 economics manuscripts targeted at AER, AER: Insights, and AEJ.",
+  "owner": {
+    "name": "Bryce Wang",
+    "email": "brycew6m@stanford.edu"
+  },
+  "metadata": {
+    "pluginRoot": "./"
+  },
+  "plugins": [
+    {
+      "name": "aer-skills",
+      "version": "1.0.0",
+      "source": "./",
+      "description": "Full nine-skill bundle covering the AER manuscript lifecycle: topic selection, identification, robustness, introduction, tables/figures, replication, submission, rebuttal, and the workflow router. Ships with Stata, R, and Python templates plus replication-package skeleton and classic-paper exemplars.",
+      "author": {
+        "name": "Bryce Wang",
+        "email": "brycew6m@stanford.edu"
+      },
+      "license": "MIT",
+      "homepage": "https://github.com/brycewang-stanford/AER-skills",
+      "repository": "https://github.com/brycewang-stanford/AER-skills",
+      "keywords": [
+        "economics",
+        "aer",
+        "causal-inference",
+        "difference-in-differences",
+        "instrumental-variables",
+        "regression-discontinuity",
+        "synthetic-control",
+        "replication",
+        "academic-writing"
+      ],
+      "category": "academic",
+      "skills": [
+        "skills/aer-workflow",
+        "skills/aer-topic-selection",
+        "skills/aer-identification",
+        "skills/aer-robustness",
+        "skills/aer-introduction",
+        "skills/aer-tables-figures",
+        "skills/aer-replication",
+        "skills/aer-submission",
+        "skills/aer-rebuttal"
+      ]
+    }
+  ]
+}

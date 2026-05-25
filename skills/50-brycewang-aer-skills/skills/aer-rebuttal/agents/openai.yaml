@@ -1,0 +1,4 @@
+interface:
+  display_name: "AER Rebuttal"
+  short_description: "Draft AER R&R response letters"
+  default_prompt: "Use $aer-rebuttal to triage these referee reports and draft a point-by-point response plan."

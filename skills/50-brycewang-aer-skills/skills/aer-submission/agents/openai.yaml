@@ -1,0 +1,4 @@
+interface:
+  display_name: "AER Submission"
+  short_description: "Audit AEA journal submissions"
+  default_prompt: "Use $aer-submission to run a final pre-submission audit for this AER-family manuscript."
