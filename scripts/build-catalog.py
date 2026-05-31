@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILLS_DIR = ROOT / "skills"
 DEFAULT_JSON = ROOT / "catalog" / "skills.json"
 DEFAULT_MARKDOWN = ROOT / "docs" / "SKILL_CATALOG.md"
+DEFAULT_PROVENANCE = ROOT / "catalog" / "provenance.json"
 
 
 @dataclass(frozen=True)
@@ -143,6 +144,7 @@ def iter_skill_files() -> list[Path]:
 
 
 def collection_records(entries: Iterable[SkillEntry]) -> list[dict[str, object]]:
+    provenance = load_provenance()
     by_collection: dict[str, list[SkillEntry]] = {}
     for entry in entries:
         by_collection.setdefault(entry.collection, []).append(entry)
@@ -155,27 +157,39 @@ def collection_records(entries: Iterable[SkillEntry]) -> list[dict[str, object]]
             (item for item in skill_entries if Path(item.path).parent == Path("skills") / collection),
             skill_entries[0],
         )
-        records.append(
-            {
-                "id": collection,
-                "path": rel(collection_path),
-                "skill_count": len(skill_entries),
-                "primary_skill": {
-                    "name": primary.name,
-                    "path": primary.path,
-                    "description": primary.description,
-                },
-                "has_readme": any(
-                    (collection_path / name).exists()
-                    for name in ("README.md", "README-original.md", "CLAUDE.md")
-                ),
-                "has_license": any(
-                    (collection_path / name).exists()
-                    for name in ("LICENSE", "LICENSE.md", "COPYING")
-                ),
-            }
-        )
+        record = {
+            "id": collection,
+            "path": rel(collection_path),
+            "skill_count": len(skill_entries),
+            "primary_skill": {
+                "name": primary.name,
+                "path": primary.path,
+                "description": primary.description,
+            },
+            "has_readme": any(
+                (collection_path / name).exists()
+                for name in ("README.md", "README-original.md", "CLAUDE.md")
+            ),
+            "has_license": any(
+                (collection_path / name).exists()
+                for name in ("LICENSE", "LICENSE.md", "COPYING")
+            ),
+        }
+        if collection in provenance:
+            record["source_url"] = provenance[collection].get("source_url")
+            record["license"] = provenance[collection].get("license")
+            record["commercial_use"] = provenance[collection].get("commercial_use")
+            record["source_confidence"] = provenance[collection].get("source_confidence")
+            record["sync"] = provenance[collection].get("sync")
+        records.append(record)
     return records
+
+
+def load_provenance(path: Path = DEFAULT_PROVENANCE) -> dict[str, dict[str, object]]:
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {record["id"]: record for record in data.get("collections", [])}
 
 
 def build_payload() -> dict[str, object]:
@@ -242,18 +256,24 @@ def render_markdown(payload: dict[str, object]) -> str:
         "",
         "## Top-Level Collections",
         "",
-        "| # | Collection | Skills | Primary skill | Description |",
-        "|---:|---|---:|---|---|",
+        "| # | Collection | Skills | License | Source | Primary skill | Description |",
+        "|---:|---|---:|---|---|---|---|",
     ]
 
     for index, collection in enumerate(collections, start=1):
         primary = collection["primary_skill"]
         lines.append(
-            "| {index} | [`{collection_id}`](../{path}/) | {count} | [`{name}`](../{skill_path}) | {description} |".format(
+            "| {index} | [`{collection_id}`](../{path}/) | {count} | {license} | {source} | [`{name}`](../{skill_path}) | {description} |".format(
                 index=index,
                 collection_id=markdown_escape(collection["id"]),
                 path=collection["path"],
                 count=collection["skill_count"],
+                license=markdown_escape(collection.get("license", "")),
+                source=(
+                    f"[source]({collection['source_url']})"
+                    if collection.get("source_url")
+                    else ""
+                ),
                 name=markdown_escape(primary["name"]),
                 skill_path=primary["path"],
                 description=markdown_escape(first_sentence(primary["description"])),

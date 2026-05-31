@@ -1,604 +1,854 @@
 {
   "collections": [
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "00-Full-empirical-analysis-skill_StatsPAI",
+      "license": "MIT",
       "path": "skills/00-Full-empirical-analysis-skill_StatsPAI",
       "primary_skill": {
         "description": "Use when the user asks to run a full empirical / causal analysis in Python — by default in the style of an applied economics paper (AER / QJE / JPE / ReStud / AEJ) with DID / RD / IV / SCM / DML / matching, written-out estimating equation + identifying assumption, Table 1 / Table 2 / event-study figure / robustness gauntlet — OR in epidemiology / public health style (target-trial emulation, IPTW + g-formula + TMLE triplet, Mendelian randomization, KM/AFT survival, E-value sensitivity, STROBE/TRIPOD reporting) — OR in ML causal inference style (DML, S/T/X/R/DR meta-learners, causal forest, Dragonnet/TARNet/CEVAE, BCF, CATE distribution, policy learning, conformal causal, fairness audit, causal discovery). Also covers exporting multi-column regression tables to Word / Excel / LaTeX (Stata outreg2 / esttab / R modelsummary equivalent) and bundling an entire replication appendix into one .docx / .xlsx / .tex file. Triggers on keywords \"StatsPAI\", \"statspai\", \"AER empirical analysis\", \"applied micro pipeline\", \"Table 1 balance\", \"event study\", \"first-stage F\", \"Oster bound\", \"honest_did\", \"spec_curve\", \"callaway_santanna\", \"dragonnet\", \"text as treatment\", \"outreg2 in Python\", \"regression table to Word/Excel\", \"sp.regtable\", \"sp.collect\", \"sp.paper_tables\", \"sp.feols\", \"summary_col\", \"modelsummary\", \"AER style table\", \"QJE style table\", \"epidemiology pipeline\", \"target trial emulation\", \"g-formula\", \"IPTW\", \"TMLE\", \"Mendelian randomization\", \"STROBE\", \"TRIPOD\", \"公共健康\", \"流行病学\", \"DML\", \"double machine learning\", \"causal forest\", \"meta-learner\", \"CATE\", \"conformal causal\", \"policy learning\", \"因果机器学习\", \"ML causal\".",
         "name": "StatsPAI_skill",
         "path": "skills/00-Full-empirical-analysis-skill_StatsPAI/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "high",
+      "source_url": "https://github.com/brycewang-stanford/StatsPAI",
+      "sync": "weekly GitHub Actions sync"
     },
     {
+      "commercial_use": "share-alike",
       "has_license": false,
       "has_readme": true,
       "id": "00.1-Full-empirical-analysis-skill_Python",
+      "license": "CC-BY-SA-4.0 (repository default)",
       "path": "skills/00.1-Full-empirical-analysis-skill_Python",
       "primary_skill": {
         "description": "Classical end-to-end empirical analysis workflow in the traditional Python econometric stack — pandas + numpy + scipy + statsmodels + linearmodels + pyfixest + rdrobust + econml + causalml + matplotlib/seaborn. **Defaults to economics empirical-paper style** (AER / QJE / AEJ) — every run produces a publication-ready output set with a multi-column regression table (M1→M6 progressive controls/FE) as the centerpiece, plus Table 1 (descriptives), mechanism / heterogeneity / robustness tables, and event-study + coefficient + trend figures. Covers the full 8-step pipeline an applied economist or quantitative social scientist runs on every paper — (1) data cleaning, (2) variable construction & transformation, (3) descriptive statistics & Table 1, (4) statistical diagnostic tests, (5) baseline empirical modeling, (6) robustness battery, (7) further analysis (mechanism, heterogeneity, mediation, moderation), (8) publication-ready tables & figures. **Also covers two parallel domain modes that share the same 8-step scaffolding** — **Mode A — Epidemiology / public health** (target-trial emulation via `zepid` / hand-rolled `pandas`, IPTW + g-formula + TMLE doubly-robust triplet via `zepid` / `econml` / `lifelines`, Mendelian randomization via `pymr` / `mrtool` (or `rpy2` → `MendelianRandomization`/`TwoSampleMR`), KM / AFT / Cox survival via `lifelines`, E-value sensitivity, principal stratification — STROBE / TRIPOD reporting), and **Mode B — ML causal inference** (DML via `econml.dml` / `doubleml`, S/T/X/R/DR meta-learners via `econml.metalearners` / `causalml`, causal forest via `econml.grf` / `causalml`, Dragonnet / TARNet / CEVAE neural causal via `causalml`, BCF via `pymc-bart` / `bcf-py`, matrix completion, CATE distribution + policy tree via `econml.policy` / `policytree-py`, off-policy evaluation, conformal causal via `mapie`, fairness audit via `fairlearn`, DAG learning via `causal-learn` / `cdt` / LLM-assisted). Prescribes which library to reach for at each step, shows the canonical code, and links to deeper `references/` files for variant-specific patterns. Use when the user asks for a **complete empirical analysis** in Python, wants to replicate an applied-economics paper from scratch, needs a reproducible workflow that is NOT opinionated on any single vertical package (contrast with StatsPAI), wants explicit control over every estimator and diagnostic, or asks \"how do I write a full empirical pipeline in Python?\". Also triggers when the user names a specific classical step in isolation — \"winsorize at 1/99%\", \"run Breusch-Pagan\", \"build a Table 1 balance table\", \"do a placebo test\", \"event study plot\", \"mediation analysis\" — and wants it wired into the broader pipeline. Mode A triggers on \"target trial emulation\", \"IPTW\", \"TMLE\", \"Mendelian randomization\", \"STROBE\", \"公共健康\", \"流行病学\". Mode B triggers on \"DML\", \"double machine learning\", \"causal forest\", \"meta-learner\", \"Dragonnet\", \"BCF\", \"policy tree\", \"conformal causal\", \"fairness audit\", \"因果机器学习\".",
         "name": "Full-empirical-analysis-skill",
         "path": "skills/00.1-Full-empirical-analysis-skill_Python/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "high",
+      "source_url": "https://github.com/brycewang-stanford/Auto-Empirical-Research-Skills",
+      "sync": "manual"
     },
     {
+      "commercial_use": "share-alike",
       "has_license": false,
       "has_readme": true,
       "id": "00.2-Full-empirical-analysis-skill_Stata",
+      "license": "CC-BY-SA-4.0 (repository default)",
       "path": "skills/00.2-Full-empirical-analysis-skill_Stata",
       "primary_skill": {
         "description": "Classical end-to-end empirical analysis workflow in the traditional Stata ecosystem — native Stata + reghdfe + ivreg2 + csdid + did_imputation + eventstudyinteract + sdid + rdrobust + rddensity + synth + synth_runner + psmatch2 + teffects + ebalance + coefplot + esttab + asdoc + binscatter. **Defaults to economics empirical-paper style** (AER / QJE / AEJ) — every run produces a publication-ready output set with a multi-column regression table (M1→M6 progressive controls/FE) as the centerpiece, plus Table 1 (descriptives), mechanism / heterogeneity / robustness tables, and event-study + coefficient + trend figures. Covers the full 8-step Stata pipeline an applied economist runs on every paper — (1) data import & cleaning (use/import, destring, misstable, duplicates, merge assert), (2) variable construction (gen/egen/winsor2/xtile/xtset with L./F./D.), (3) descriptive statistics & Table 1 (tabstat/balancetable/asdoc), (4) classical diagnostic tests (sktest/swilk/hettest/imtest/xtserial/xttest3/vif/dfuller/kpss/hausman/estat overid), (5) baseline modeling (reg/xtreg/reghdfe/ivreg2/ivregress/csdid/did_imputation/eventstudyinteract/sdid/rdrobust/synth/psmatch2/teffects/heckman/qreg/ppmlhdfe), (6) robustness battery (bacondecomp/honestdid/rwolf/ritest/wildbootstrap/oster), (7) further analysis (subgroup/triple-diff/interactions/medsem/marginsplot/binscatter by group), (8) publication-ready tables & figures (esttab/outreg2/estout/coefplot/marginsplot/rdplot/twoway combined). **Also covers two parallel domain modes that share the same 8-step scaffolding** — **Mode A — Epidemiology / public health** (target-trial emulation, IPTW + g-formula + TMLE doubly-robust triplet via `teffects ipw` / `teffects ipwra` / `teffects aipw` / `eltmle`, Mendelian randomization via `mrrobust` (IVW / Egger / weighted median) and `mregger` / `mrpresso`, KM / Cox / AFT / RMST survival via `sts` / `stcox` / `streg` / `strmst2`, E-value sensitivity via `evalue` (Linden-Mathur), principal stratification — STROBE / TRIPOD reporting), and **Mode B — ML causal inference** (DML via `ddml` / `pdslasso`, S/T/X/R/DR meta-learners via `crforest` and `ddml interactive`, causal forest via `crforest` / `cforest`, BART/BCF via `bart` / `bartCause`-style externals, CATE distribution + policy tree via `crforest`, off-policy evaluation, conformal causal externals, fairness audit, DAG learning via `pcalg` / external Python callouts). Use when the user asks for a complete Stata empirical analysis, wants a reproducible .do-file pipeline, needs a Stata counterpart to the Python StatsPAI / Full-empirical-analysis-skill, or names a specific Stata step in isolation (\"run reghdfe with two-way clustering\", \"csdid event study\", \"winsor2 at 1%\", \"esttab to LaTeX\", \"coefplot with CI\", \"ivreg2 weak-IV test\", \"synth_runner placebos\", \"teffects psmatch balance check\"). Mode A triggers on \"target trial emulation Stata\", \"teffects ipw aipw\", \"eltmle\", \"mrrobust\", \"mregger weighted median\", \"stcox AFT survival\", \"strmst2\", \"evalue Stata\", \"STROBE Stata\", \"公共健康 Stata\", \"流行病学 Stata\". Mode B triggers on \"ddml Stata\", \"pdslasso\", \"crforest causal forest Stata\", \"policy tree Stata\", \"因果机器学习 Stata\".",
         "name": "Full-empirical-analysis-skill-Stata",
         "path": "skills/00.2-Full-empirical-analysis-skill_Stata/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "high",
+      "source_url": "https://github.com/brycewang-stanford/Auto-Empirical-Research-Skills",
+      "sync": "manual"
     },
     {
+      "commercial_use": "share-alike",
       "has_license": false,
       "has_readme": true,
       "id": "00.3-Full-empirical-analysis-skill_R",
+      "license": "CC-BY-SA-4.0 (repository default)",
       "path": "skills/00.3-Full-empirical-analysis-skill_R",
       "primary_skill": {
         "description": "Classical end-to-end empirical analysis workflow in the modern tidyverse + econometrics R ecosystem — dplyr + tidyr + haven + fixest + sandwich + lmtest + clubSandwich + AER + ivreg + did + bacondecomp + HonestDiD + eventstudyr + rdrobust + rddensity + Synth + gsynth + synthdid + MatchIt + WeightIt + cobalt + ebal + grf + DoubleML + mediation + marginaleffects + modelsummary + kableExtra + gt + ggplot2 + ggpubr + cowplot + binsreg. **Defaults to economics empirical-paper style** (AER / QJE / AEJ) — every run produces a publication-ready output set with a multi-column regression table (M1→M6 progressive controls/FE) as the centerpiece, plus Table 1 (descriptives), mechanism / heterogeneity / robustness tables, and event-study + coefficient + trend figures. Covers the full 8-step R pipeline an applied economist runs on every paper — (1) data import & cleaning (read_dta/read_csv, naniar, janitor, validate-merges), (2) variable construction (mutate/across/winsorize/group_by + lag/lead with dplyr), (3) descriptive statistics & Table 1 (gtsummary, modelsummary::datasummary, tableone), (4) classical diagnostic tests (shapiro/jarque.bera.test/bptest/dwtest/bgtest/vif/adf.test/kpss.test/Hausman), (5) baseline modeling (fixest::feols, ivreg, did::att_gt, eventstudyr, sun_ab, did_imputation, synthdid, rdrobust, MatchIt, WeightIt, grf::causal_forest, DoubleML, mediation), (6) robustness battery (modelsummary stack, clubSandwich CRSE, fwildclusterboot, ri2, robomit Oster, bacondecomp, HonestDiD), (7) further analysis (interactions + marginaleffects, mediation::mediate, gsem via lavaan, dose-response splines, grf CATE), (8) publication-ready tables & figures (modelsummary, kableExtra, gt, stargazer, texreg, flextable to LaTeX/Word/HTML; ggplot2 + ggpubr + cowplot + binsreg + iplot for figures). **Also covers two parallel domain modes that share the same 8-step scaffolding** — **Mode A — Epidemiology / public health** (target-trial emulation, IPTW + g-formula + TMLE doubly-robust triplet via `WeightIt` / `gfoRmula` / `tmle` / `ltmle`, Mendelian randomization via `MendelianRandomization` / `TwoSampleMR` / `MRPRESSO`, KM / Cox / AFT / RMST survival via `survival` / `survminer` / `flexsurv`, E-value sensitivity via `EValue`, principal stratification — STROBE / TRIPOD reporting), and **Mode B — ML causal inference** (DML via `DoubleML`, S/T/X/R/DR meta-learners via `causalweight` / `grf`, causal forest via `grf::causal_forest`, BART/BCF via `bartCause` / `bcf`, matrix completion via `MCPanel`, CATE distribution + policy tree via `policytree`, off-policy evaluation, conformal causal via `conformalInference` / `cfcausal`, fairness audit via `fairmodels`, DAG learning via `pcalg` / `bnlearn` / LLM-assisted). Use when the user asks for a complete R empirical analysis, wants a tidyverse-style reproducible R script / Quarto workflow, prefers fixest over reghdfe, needs the R counterpart to StatsPAI / 00.1 / 00.2, or names a specific R step in isolation (\"feols with cluster\", \"MatchIt nearest neighbor\", \"bacondecomp in R\", \"gtsummary table 1\", \"modelsummary to Word\"). Mode A triggers on \"target trial emulation R\", \"tmle ltmle\", \"MendelianRandomization\", \"TwoSampleMR\", \"MRPRESSO\", \"survival cox AFT\", \"STROBE R\", \"EValue R\", \"公共健康 R\", \"流行病学 R\". Mode B triggers on \"DoubleML R\", \"grf causal forest\", \"policytree\", \"bartCause bcf\", \"conformal causal R\", \"fairmodels\", \"pcalg NOTEARS\", \"因果机器学习 R\".",
         "name": "Full-empirical-analysis-skill-R",
         "path": "skills/00.3-Full-empirical-analysis-skill_R/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "high",
+      "source_url": "https://github.com/brycewang-stanford/Auto-Empirical-Research-Skills",
+      "sync": "manual"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "01-lishix520-academic-paper-skills",
+      "license": "MIT",
       "path": "skills/01-lishix520-academic-paper-skills",
       "primary_skill": {
         "description": "",
         "name": "composer",
         "path": "skills/01-lishix520-academic-paper-skills/composer/SKILL.md"
       },
-      "skill_count": 2
+      "skill_count": 2,
+      "source_confidence": "high",
+      "source_url": "https://github.com/lishix520/academic-paper-skills",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "02-luwill-research-skills",
+      "license": "MIT",
       "path": "skills/02-luwill-research-skills",
       "primary_skill": {
         "description": "",
         "name": "medical-imaging-review",
         "path": "skills/02-luwill-research-skills/medical-imaging-review/SKILL.md"
       },
-      "skill_count": 3
+      "skill_count": 3,
+      "source_confidence": "high",
+      "source_url": "https://github.com/luwill/research-skills",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "03-K-Dense-AI-claude-scientific-skills",
+      "license": "MIT",
       "path": "skills/03-K-Dense-AI-claude-scientific-skills",
       "primary_skill": {
         "description": "",
         "name": "hypothesis-generation",
         "path": "skills/03-K-Dense-AI-claude-scientific-skills/hypothesis-generation/SKILL.md"
       },
-      "skill_count": 4
+      "skill_count": 4,
+      "source_confidence": "high",
+      "source_url": "https://github.com/K-Dense-AI/claude-scientific-skills",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "04-K-Dense-AI-claude-scientific-writer",
+      "license": "MIT",
       "path": "skills/04-K-Dense-AI-claude-scientific-writer",
       "primary_skill": {
         "description": "",
         "name": "citation-management",
         "path": "skills/04-K-Dense-AI-claude-scientific-writer/citation-management/SKILL.md"
       },
-      "skill_count": 8
+      "skill_count": 8,
+      "source_confidence": "high",
+      "source_url": "https://github.com/K-Dense-AI/claude-scientific-writer",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "05-kthorn-research-superpower",
+      "license": "MIT",
       "path": "skills/05-kthorn-research-superpower",
       "primary_skill": {
         "description": "",
         "name": "getting-started",
         "path": "skills/05-kthorn-research-superpower/getting-started/SKILL.md"
       },
-      "skill_count": 10
+      "skill_count": 10,
+      "source_confidence": "high",
+      "source_url": "https://github.com/kthorn/research-superpower",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "06-fuhaoda-stats-paper-writing",
+      "license": "MIT",
       "path": "skills/06-fuhaoda-stats-paper-writing",
       "primary_skill": {
         "description": "",
         "name": "stat-writing",
         "path": "skills/06-fuhaoda-stats-paper-writing/stat-writing/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "high",
+      "source_url": "https://github.com/fuhaoda/stats-paper-writing-agent-skills",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "07-Orchestra-Research-AI-Research-SKILLs",
+      "license": "MIT",
       "path": "skills/07-Orchestra-Research-AI-Research-SKILLs",
       "primary_skill": {
         "description": "",
         "name": "academic-plotting",
         "path": "skills/07-Orchestra-Research-AI-Research-SKILLs/academic-plotting/SKILL.md"
       },
-      "skill_count": 3
+      "skill_count": 3,
+      "source_confidence": "high",
+      "source_url": "https://github.com/Orchestra-Research/AI-Research-SKILLs",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "08-ndpvt-web-latex-document-skill",
+      "license": "MIT",
       "path": "skills/08-ndpvt-web-latex-document-skill",
       "primary_skill": {
         "description": "Universal LaTeX document skill: create, compile, and convert any document to professional PDF with PNG previews. Supports resumes, reports, cover letters, invoices, academic papers, theses/dissertations, academic CVs, presentations (Beamer), scientific posters, formal letters, exams/quizzes, books, cheat sheets, reference cards, exam formula sheets, fillable PDF forms (hyperref form fields), conditional content (etoolbox toggles), mail merge from CSV/JSON (Jinja2 templates), version diffing (latexdiff), charts (pgfplots + matplotlib), tables (booktabs + CSV import), images (TikZ), Mermaid diagrams, AI-generated images, watermarks, landscape pages, bibliography/citations (BibTeX/biblatex), multi-language/CJK (auto XeLaTeX), algorithms/pseudocode, colored boxes (tcolorbox), SI units (siunitx), Pandoc format conversion (Markdown/DOCX/HTML ↔ LaTeX), and PDF-to-LaTeX conversion of handwritten or printed documents (math, business, legal, general). Compile script supports pdflatex, xelatex, lualatex with auto-detection, latexmk backend, texfot log filtering, PDF/A output, and verbosity control (--verbose/--quiet). Empirically optimized scaling: single agent 1-10 pages, split 11-20, batch-7 pipeline 21+. Use when user asks to: (1) create a resume/CV/cover letter, (2) write a LaTeX document, (3) create PDF with tables/charts/images, (4) compile a .tex file, (5) make a report/invoice/presentation, (6) anything involving LaTeX or pdflatex, (7) convert/OCR a PDF to LaTeX, (8) convert handwritten notes, (9) create charts/graphs/diagrams, (10) create slides, (11) write a thesis or dissertation, (12) create an academic CV, (13) create a poster, (14) create an exam/quiz, (15) create a book, (16) convert between document formats (Markdown, DOCX, HTML to/from LaTeX), (17) generate Mermaid diagrams for LaTeX, (18) create a formal business letter, (19) create a cheat sheet or reference card, (20) create an exam formula sheet or crib sheet, (21) condense lecture notes/PDFs into a cheat sheet, (22) create a fillable PDF form with text fields/checkboxes/dropdowns, (23) create a document with conditional content/toggles (show/hide sections), (24) generate batch/mail-merge documents from CSV/JSON data, (25) create a version diff PDF (latexdiff) highlighting changes between documents, (26) create a homework or assignment submission with problems and solutions, (27) create a lab report with data tables, graphs, and error analysis, (28) encrypt or password-protect a PDF, (29) merge multiple PDFs into one, (30) optimize/compress a PDF for web or email, (31) lint or check a LaTeX document for common issues, (32) count words in a LaTeX document, (33) analyze document statistics (figures, tables, citations), (34) fetch BibTeX from a DOI, (35) convert a Graphviz .dot file to PDF/PNG, (36) convert a PlantUML .puml file to PDF/PNG, (37) create a one-pager/fact sheet/executive summary, (38) create a datasheet or product specification sheet, (39) extract pages from a PDF (page ranges, odd/even), (40) check LaTeX package availability before compiling, (41) analyze citations and cross-reference with .bib files, (42) debug LaTeX compilation errors, (43) make a document accessible (PDF/A, tagged PDF), (44) create lecture notes or course handouts, (45) fill an existing PDF form (fillable fields or non-fillable with annotations), (46) extract text or tables from a PDF (pdfplumber, pypdf), (47) OCR a scanned PDF to text (pytesseract), (48) create a PDF programmatically with reportlab (Canvas, Platypus), (49) rotate or crop PDF pages (pypdf), (50) add a watermark to an existing PDF, (51) extract metadata from a PDF (title, author, subject).",
         "name": "latex-document",
         "path": "skills/08-ndpvt-web-latex-document-skill/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "high",
+      "source_url": "https://github.com/ndpvt-web/latex-document-skill",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "09-meleantonio-awesome-econ-ai-stuff",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/09-meleantonio-awesome-econ-ai-stuff",
       "primary_skill": {
         "description": "Panel data analysis with Python using linearmodels and pandas.",
         "name": "python-panel-data",
         "path": "skills/09-meleantonio-awesome-econ-ai-stuff/_skills/analysis/python-panel-data/SKILL.md"
       },
-      "skill_count": 17
+      "skill_count": 17,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/meleantonio/awesome-econ-ai-stuff",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "10-Jill0099-causal-inference-mixtape",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/10-Jill0099-causal-inference-mixtape",
       "primary_skill": {
         "description": "This skill should be used when the user asks to \"implement a DiD regression\", \"write a causal inference pipeline\", \"set up an event study\", \"implement instrumental variables\", \"run a regression discontinuity design\", \"build a synthetic control model\", \"implement propensity score matching\", \"write parallel trends test\", \"implement Bacon decomposition\", or needs code templates for causal inference methods in Python, R, or Stata. Based on Scott Cunningham''s Causal Inference: The Mixtape.",
         "name": "causal-inference-mixtape",
         "path": "skills/10-Jill0099-causal-inference-mixtape/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/Jill0099/causal-inference-mixtape",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "11-James-Traina-compound-science",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/11-James-Traina-compound-science",
       "primary_skill": {
         "description": "This skill covers Bayesian estimation and inference in quantitative social science. Use when the user is specifying priors, running MCMC, diagnosing chain convergence, or reporting posterior summaries — including hierarchical models, Bayesian structural models, and small-sample settings where priors regularize. Triggers on \"Bayesian estimation\", \"Bayesian inference\", \"MCMC\", \"Markov chain Monte Carlo\", \"Stan\", \"PyMC\", \"NumPyro\", \"prior\", \"posterior\", \"credible interval\", \"Bayesian structural\", \"Bayesian BLP\", \"Bayesian DSGE\", \"hierarchical model\", \"random effects Bayesian\", \"posterior predictive check\", \"Bayes factor\", \"prior predictive check\", \"NUTS\", \"HMC\", \"Hamiltonian Monte Carlo\", \"R-hat\", \"rhat\", \"effective sample size\", \"ESS\", \"Bayesian calibration\", \"posterior distribution\", \"prior elicitation\", \"weakly informative prior\", \"brms\", \"rstanarm\", \"cmdstanpy\", \"pymc\", \"arviz\".",
         "name": "bayesian-estimation",
         "path": "skills/11-James-Traina-compound-science/skills/bayesian-estimation/SKILL.md"
       },
-      "skill_count": 20
+      "skill_count": 20,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/James-Traina/compound-science",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "12-pedrohcgs-claude-code-my-workflow",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/12-pedrohcgs-claude-code-my-workflow",
       "primary_skill": {
         "description": "Stage, commit, create PR, and merge to main. Use for the standard commit-PR-merge cycle.",
         "name": "commit",
         "path": "skills/12-pedrohcgs-claude-code-my-workflow/dot-claude/skills/commit/SKILL.md"
       },
-      "skill_count": 22
+      "skill_count": 22,
+      "source_confidence": "high",
+      "source_url": "https://github.com/pedrohcgs/claude-code-my-workflow",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "13-scunning1975-MixtapeTools",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/13-scunning1975-MixtapeTools",
       "primary_skill": {
         "description": "Create and compile beautiful Beamer presentations following the Rhetoric of Decks philosophy. Use when making slides, creating decks, or compiling .tex presentation files.",
         "name": "compiledeck",
         "path": "skills/13-scunning1975-MixtapeTools/skills/compiledeck/SKILL.md"
       },
-      "skill_count": 5
+      "skill_count": 5,
+      "source_confidence": "high",
+      "source_url": "https://github.com/scunning1975/MixtapeTools",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "14-luischanci-claude-code-research-starter",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/14-luischanci-claude-code-research-starter",
       "primary_skill": {
         "description": "Run IV, DiD, and RDD analyses in R with proper diagnostics. Use when implementing causal inference methods, event studies, or treatment effect estimation.",
         "name": "causal-inference-r",
         "path": "skills/14-luischanci-claude-code-research-starter/dot-claude/skills/causal-inference-r/SKILL.md"
       },
-      "skill_count": 16
+      "skill_count": 16,
+      "source_confidence": "low",
+      "source_url": "https://github.com/luischanci/claude-code-research-starter",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "15-Felpix-Studios-social-science-research",
+      "license": "MIT",
       "path": "skills/15-Felpix-Studios-social-science-research",
       "primary_skill": {
         "description": "End-to-end data analysis workflow in R or Python — from exploration through regression to publication-ready tables and figures. Make sure to use this skill whenever the user wants to run any empirical analysis, write analysis code, or produce output from data. Triggers include: \"analyze this data\", \"run a regression\", \"write R code for this\", \"write Python code for this\", \"I have a dataset\", \"help me with this regression\", \"run a DiD\", \"run an RDD\", \"event study\", \"IV regression\", \"fit a model\", \"produce a table\", \"make a figure\", \"explore my data\", or any request involving a dataset path or empirical estimation.",
         "name": "data-analysis",
         "path": "skills/15-Felpix-Studios-social-science-research/skills/data-analysis/SKILL.md"
       },
-      "skill_count": 12
+      "skill_count": 12,
+      "source_confidence": "high",
+      "source_url": "https://github.com/Felpix-Studios/social-science-research",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "16-hsantanna88-clo-author",
+      "license": "MIT",
       "path": "skills/16-hsantanna88-clo-author",
       "primary_skill": {
         "description": "End-to-end data analysis dispatching Coder and Data-engineer for implementation, coder-critic for review. Supports R, Stata, Python, Julia. Replaces /data-analysis.",
         "name": "analyze",
         "path": "skills/16-hsantanna88-clo-author/dot-claude/skills/analyze/SKILL.md"
       },
-      "skill_count": 10
+      "skill_count": 10,
+      "source_confidence": "high",
+      "source_url": "https://github.com/hsantanna88/clo-author",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "17-DAAF-Contribution-Community-daaf",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/17-DAAF-Contribution-Community-daaf",
       "primary_skill": {
         "description": "Guide for creating DAAF agent definition files. Covers 12-section template, hook registration, skills-in-frontmatter, integration checklist. Use when adding or revising agents. For SKILL.md files, use skill-authoring instead.",
         "name": "agent-authoring",
         "path": "skills/17-DAAF-Contribution-Community-daaf/dot-claude/skills/agent-authoring/SKILL.md"
       },
-      "skill_count": 35
+      "skill_count": 35,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/DAAF-Contribution-Community/daaf",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "18-jusi-aalto-stata-accounting-research",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/18-jusi-aalto-stata-accounting-research",
       "primary_skill": {
         "description": "STATA code pattern library for empirical archival accounting research. Provides tested syntax from 126 peer-reviewed JAR (Journal of Accounting Research) replication files (2017-2025). Use when the user asks procedural questions like \"How do I implement [method]?\" or \"Show me code for [technique]\" — including: entropy balancing, propensity score matching (PSM), difference-in-differences (DiD), regression discontinuity (RDD), instrumental variables (IV), event studies (CAR/BHAR), survival analysis, Fama-MacBeth regressions, bootstrap, quantile regression, reghdfe/xtreg/areg, clustering standard errors, fixed effects, esttab/outreg2 table formatting, winsorization, leads/lags. Users can specify their variables (e.g., treatment, outcomes, controls) and receive adapted syntax. NOTE: This skill provides code patterns from published papers, not research design advice.",
         "name": "stata-accounting-research",
         "path": "skills/18-jusi-aalto-stata-accounting-research/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "low",
+      "source_url": "https://github.com/jusi/aalto-stata-accounting-research",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "20-wenddymacro-python-econ-skill",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/20-wenddymacro-python-econ-skill",
       "primary_skill": {
         "description": "Use when writing Python code for DSGE models, HANK models, numerical economic computation, causal inference, or quantitative economic data analysis",
         "name": "python-econ-computing",
         "path": "skills/20-wenddymacro-python-econ-skill/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "low",
+      "source_url": "https://github.com/wenddymacro/python-econ-skill",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "22-christopherkenny-skills",
+      "license": "MIT",
       "path": "skills/22-christopherkenny-skills",
       "primary_skill": {
         "description": "APSA style checker for Quarto (.qmd) files. Checks numbers, capitalization, abbreviations, italics, in-text citations, titles of works, neutral and unbiased language, and APSA-specific terminology against the APSA Style Manual for Political Science (2018, updated 2023). Produces a structured markdown report organized by document section — never modifies the source file. Use when asked to check APSA style, fix citations, review capitalization, check number formatting, or flag biased language in a .qmd document. For grammar, spelling, and punctuation, use the proofread skill instead. Supports an optional output-file argument and an optional @sec-label argument to restrict checking to one section.",
         "name": "apsa-style",
         "path": "skills/22-christopherkenny-skills/skills/apsa-style/SKILL.md"
       },
-      "skill_count": 11
+      "skill_count": 11,
+      "source_confidence": "low",
+      "source_url": "https://github.com/christopherkenny/skills",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "23-Learning-Bayesian-Statistics-baygent-skills",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/23-Learning-Bayesian-Statistics-baygent-skills",
       "primary_skill": {
         "description": "Opinionated Bayesian modeling workflow with PyMC and ArviZ. Contains critical guardrails (nutpie sampler, prior/posterior predictive checks, LOO-PIT calibration, prior sensitivity checks, 94% HDI, non-centered parameterizations, reproducible seeds) that agents won't apply unprompted — always consult before writing Bayesian model code. Trigger on: building probabilistic/Bayesian models, prior elicitation, MCMC inference, convergence diagnostics (divergences, R-hat, ESS), model comparison (LOO-CV, ELPD, stacking weights), hierarchical/multilevel models, count regressions, logistic regression with uncertainty, prior sensitivity analysis, reporting Bayesian results, or mentions of PyMC, ArviZ, InferenceData, credible intervals, posterior distributions, shrinkage, uncertainty quantification. Also trigger for model comparison, diagnosing sampling problems, choosing priors, or presenting stats to non-technical audiences.",
         "name": "bayesian-workflow",
         "path": "skills/23-Learning-Bayesian-Statistics-baygent-skills/bayesian-workflow/SKILL.md"
       },
-      "skill_count": 2
+      "skill_count": 2,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/Learning-Bayesian-Statistics/baygent-skills",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "24-Imbad0202-academic-research-skills",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/24-Imbad0202-academic-research-skills",
       "primary_skill": {
         "description": "Multi-perspective academic paper review with dynamic reviewer personas. Simulates 5 independent reviewers (EIC + 3 peer reviewers + Devil's Advocate) with field-specific expertise. Supports full review, re-review (verification), quick assessment, methodology focus, and Socratic guided modes. Triggers on: review paper, peer review, manuscript review, referee report, review my paper, critique paper, simulate review, editorial review.",
         "name": "academic-paper-reviewer",
         "path": "skills/24-Imbad0202-academic-research-skills/academic-paper-reviewer/SKILL.md"
       },
-      "skill_count": 4
+      "skill_count": 4,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/Imbad0202/academic-research-skills",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "25-HosungYou-Diverga",
+      "license": "MIT",
       "path": "skills/25-HosungYou-Diverga",
       "primary_skill": {
         "description": "VS-Enhanced Research Question Refiner - Prevents Mode Collapse and derives differentiated research questions Enhanced VS 3-Phase process: Modal question avoidance, alternatives presentation, differentiated RQ recommendation Use when: refining research ideas, formulating research questions, clarifying scope Triggers: research question, 연구 질문, PICO, SPIDER, research idea",
         "name": "a1",
         "path": "skills/25-HosungYou-Diverga/skills/a1/SKILL.md"
       },
-      "skill_count": 34
+      "skill_count": 34,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/HosungYou/Diverga",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "26-Data-Wise-scholar",
+      "license": "MIT",
       "path": "skills/26-Data-Wise-scholar",
       "primary_skill": {
         "description": "Design and document statistical algorithms with pseudocode and complexity analysis",
         "name": "algorithm-designer",
         "path": "skills/26-Data-Wise-scholar/skills/implementation/algorithm-designer/SKILL.md"
       },
-      "skill_count": 10
+      "skill_count": 17,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/Data-Wise/scholar",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "27-dariia-m-my_claude_skills",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/27-dariia-m-my_claude_skills",
       "primary_skill": {
         "description": "Guide for writing the abstract of an academic economics paper. Use this skill whenever the user asks for help writing, drafting, revising, or structuring an abstract for an economics paper - whether empirical micro, development economics, applied economics, or related fields. Also trigger when the user mentions \"abstract,\" \"paper summary,\" or asks how to compress their findings into a short description. This skill synthesizes best practices from David Evans (CGDev), Marc Bellemare, and patterns observed in top economics journals (AER, QJE, AEJ: Applied, etc.).",
         "name": "econ-abstract-writing",
         "path": "skills/27-dariia-m-my_claude_skills/abstract/SKILL.md"
       },
-      "skill_count": 5
+      "skill_count": 6,
+      "source_confidence": "high",
+      "source_url": "https://github.com/dariia-m/my_claude_skills",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "28-maxwell2732-paper-replicate-agent-demo",
+      "license": "MIT",
       "path": "skills/28-maxwell2732-paper-replicate-agent-demo",
       "primary_skill": {
         "description": "Stage, commit, create PR, and merge to main. Use for the standard commit-PR-merge cycle.",
         "name": "commit",
         "path": "skills/28-maxwell2732-paper-replicate-agent-demo/dot-claude/skills/commit/SKILL.md"
       },
-      "skill_count": 11
+      "skill_count": 11,
+      "source_confidence": "low",
+      "source_url": "https://github.com/maxwell2732/paper-replicate-agent-demo",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "29-quarcs-lab-project20XXy",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/29-quarcs-lab-project20XXy",
       "primary_skill": {
         "description": "Reads the manuscript and notebooks to generate a structured abstract. Use when writing or updating the abstract.",
         "name": "abstract",
         "path": "skills/29-quarcs-lab-project20XXy/dot-claude/skills/abstract/SKILL.md"
       },
-      "skill_count": 24
+      "skill_count": 24,
+      "source_confidence": "low",
+      "source_url": "https://github.com/quarcs/lab-project20XXy",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "31-thalysandratos-claude-code-skills",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/31-thalysandratos-claude-code-skills",
       "primary_skill": {
         "description": "Panel data analysis with Python using linearmodels and pandas.",
         "name": "python-panel-data",
         "path": "skills/31-thalysandratos-claude-code-skills/_skills/analysis/python-panel-data/SKILL.md"
       },
-      "skill_count": 13
+      "skill_count": 13,
+      "source_confidence": "high",
+      "source_url": "https://github.com/thalysandratos/claude-code-skills",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "32-dylantmoore-stata-skill",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/32-dylantmoore-stata-skill",
       "primary_skill": {
         "description": "Develop high-performance C/C++ plugins for Stata using the stplugin.h SDK. Use when the user asks to create a Stata plugin, write C/C++ code for Stata, accelerate a Stata command with C, build cross-platform Stata plugins, or translate/port a Python or R package into Stata. Covers the full lifecycle: SDK setup, data flow, memory safety, .ado wrappers with preserve/merge, cross-platform compilation, performance optimization (pthreads, pre-sorted indices, XorShift RNG), debugging, and distribution via net install. Also includes a translation workflow for porting Python/R packages to Stata — wrapping existing C++ backends when available, or writing C from scratch when not.",
         "name": "stata-c-plugins",
         "path": "skills/32-dylantmoore-stata-skill/plugins/stata-c-plugins/skills/stata-c-plugins/SKILL.md"
       },
-      "skill_count": 3
+      "skill_count": 3,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/dylantmoore/stata-skill",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "33-Galaxy-Dawn-claude-scholar",
+      "license": "MIT",
       "path": "skills/33-Galaxy-Dawn-claude-scholar",
       "primary_skill": {
         "description": "Use when creating or configuring Claude Code agents and their frontmatter.",
         "name": "agent-identifier",
         "path": "skills/33-Galaxy-Dawn-claude-scholar/skills/agent-identifier/SKILL.md"
       },
-      "skill_count": 47
+      "skill_count": 47,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/Galaxy-Dawn/claude-scholar",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "34-andrehuang-research-companion",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/34-andrehuang-research-companion",
       "primary_skill": {
         "description": "Strategic research companion — brainstorm, evaluate, and decide on research directions. TRIGGER when the user wants to brainstorm research, evaluate research ideas, do project triage, or explore a problem space. Orchestrates brainstormer, idea-critic, and research-strategist agents through a 6-phase pipeline: Seed → Diverge → Evaluate → Deepen → Frame → Decide. Includes Carlini's conclusion-first test.",
         "name": "research-companion",
         "path": "skills/34-andrehuang-research-companion/skills/research-companion/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/andrehuang/research-companion",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "35-bahayonghang-academic-writing-skills",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/35-bahayonghang-academic-writing-skills",
       "primary_skill": {
         "description": "Industrial AI literature research with mandatory intake questions, venue-aware source prioritization, structured report outputs, and survey draft generation. Use when the user needs up-to-date research on predictive maintenance, intelligent scheduling, industrial anomaly detection, smart manufacturing, cyber-physical systems, edge AI for automation, or crossover robotics-for-industry topics. Also trigger for adjacent terms: \"digital twin\", \"industrial IoT\", \"Industry 4.0\", \"manufacturing AI\", \"factory automation\", \"process optimization\", or \"survey draft\" in industrial contexts.",
         "name": "industrial-ai-research",
         "path": "skills/35-bahayonghang-academic-writing-skills/skills/industrial-ai-research/SKILL.md"
       },
-      "skill_count": 5
+      "skill_count": 5,
+      "source_confidence": "high",
+      "source_url": "https://github.com/bahayonghang/academic-writing-skills",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "36-taoyunudt-literature-review-skill",
+      "license": "MIT",
       "path": "skills/36-taoyunudt-literature-review-skill",
       "primary_skill": {
         "description": "帮助用户撰写高质量的文献综述类论文。提供从选题、文献检索、评估筛选、结构规划到最终写作的全流程指导。适用于需要撰写独立文献综述论文或学术论文中文献综述部分的用户。",
         "name": "literature-review",
         "path": "skills/36-taoyunudt-literature-review-skill/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "low",
+      "source_url": "https://github.com/taoyunudt/literature-review-skill",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "38-peternka-academic-proofreader",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/38-peternka-academic-proofreader",
       "primary_skill": {
         "description": "",
         "name": "38-peternka-academic-proofreader",
         "path": "skills/38-peternka-academic-proofreader/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "low",
+      "source_url": "https://github.com/peternka/academic-proofreader",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "39-vincentarelbundock-marginaleffects",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/39-vincentarelbundock-marginaleffects",
       "primary_skill": {
         "description": "Manual for the marginaleffects R and Python package, and guide to the book \"Model to Meaning\". Use when users ask about predictions, comparisons, slopes, marginal effects, average treatment effects (ATE/ATT/CATE), hypothesis testing, contrasts, counterfactuals, risk ratios, odds ratios, causal inference with G-computation, or need help with marginaleffects functions like predictions(), comparisons(), slopes(), hypotheses(), datagrid(), avg_predictions(), avg_comparisons(), avg_slopes(), or plot functions.",
         "name": "marginaleffects",
         "path": "skills/39-vincentarelbundock-marginaleffects/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "high",
+      "source_url": "https://github.com/vincentarelbundock/marginaleffects",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "40-py-econometrics-pyfixest",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/40-py-econometrics-pyfixest",
       "primary_skill": {
         "description": "",
         "name": "40-py-econometrics-pyfixest",
         "path": "skills/40-py-econometrics-pyfixest/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "high",
+      "source_url": "https://github.com/py-econometrics/pyfixest",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "41-sticerd-eee-sewage-econometrics-check",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/41-sticerd-eee-sewage-econometrics-check",
       "primary_skill": {
         "description": "Validate the replication package for the sewage-house-prices project. Runs 10 checks covering script execution, file integrity, output freshness, dependency verification, data provenance, and README completeness (AEA format). This skill should be used when asked to \"audit replication\", \"check the package\", or \"verify reproducibility\".",
         "name": "audit-replication",
         "path": "skills/41-sticerd-eee-sewage-econometrics-check/skills/audit-replication/SKILL.md"
       },
-      "skill_count": 22
+      "skill_count": 22,
+      "source_confidence": "high",
+      "source_url": "https://github.com/sticerd-eee/sewage",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "unknown",
       "has_license": false,
       "has_readme": true,
       "id": "42-wanshuiyin-ARIS",
+      "license": "UNKNOWN - check upstream",
       "path": "skills/42-wanshuiyin-ARIS",
       "primary_skill": {
         "description": "Use when main results pass result-to-claim (claim_supported=yes or partial) and ablation studies are needed for paper submission. Codex designs ablations from a reviewer's perspective, CC reviews feasibility and implements.",
         "name": "ablation-planner",
         "path": "skills/42-wanshuiyin-ARIS/skills/ablation-planner/SKILL.md"
       },
-      "skill_count": 104
+      "skill_count": 104,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": false,
       "has_readme": true,
       "id": "43-wentorai-research-plugins",
+      "license": "MIT",
       "path": "skills/43-wentorai-research-plugins",
       "primary_skill": {
         "description": "14 data visualization skills. Trigger: charts, plots, figures, publication-quality graphics. Design: one skill per tool with code templates and academic formatting conventions.",
         "name": "dataviz-skills",
         "path": "skills/43-wentorai-research-plugins/skills/analysis/dataviz/SKILL.md"
       },
-      "skill_count": 478
+      "skill_count": 478,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/wentorai/research-plugins",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": true,
       "has_readme": true,
       "id": "44-matsuikentaro1-humanizer_academic",
+      "license": "MIT",
       "path": "skills/44-matsuikentaro1-humanizer_academic",
       "primary_skill": {
         "description": "Remove signs of AI-generated writing from academic medical papers. Use when editing or reviewing manuscripts to make them sound more natural and professionally written. Based on Wikipedia's \"Signs of AI writing\" guide, adapted for medical literature. Detects and fixes patterns including: inflated significance claims, superficial -ing analyses, vague attributions, AI vocabulary words, copula avoidance, excessive hedging, generic conclusions, informal word choices (linked/beyond/via/where/yield), overly assertive causal claims, and artificially condensed expressions. Preserves legitimate academic transitions (Notably, Prior studies have shown, etc.).",
         "name": "humanizer_academic",
         "path": "skills/44-matsuikentaro1-humanizer_academic/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "high",
+      "source_url": "https://github.com/matsuikentaro1/humanizer_academic",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": true,
       "has_readme": true,
       "id": "45-stephenturner-skill-deslop",
+      "license": "MIT",
       "path": "skills/45-stephenturner-skill-deslop",
       "primary_skill": {
         "description": "Remove AI writing patterns from prose. Use this skill when writing, drafting, editing, reviewing, or revising any text to eliminate predictable AI tells, slop, and formulaic patterns. Trigger this skill whenever the user asks to \"deslop\", \"de-AI\", \"make it sound human,\" \"remove AI patterns,\" \"remove AI tropes,\" \"clean up AI writing,\" fix \"slop,\" \"deslop\" text, or review prose for authenticity. Also use when the user asks you to write or draft anything and wants it to sound natural rather than AI-generated. Common use cases include scientific writing (manuscripts, abstracts, cover letters, grant narratives, discussion sections, peer review responses), blog posts, newsletters, memos, reports, and any other substantial prose.",
         "name": "deslop",
         "path": "skills/45-stephenturner-skill-deslop/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/stephenturner/skill-deslop",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": true,
       "has_readme": true,
       "id": "46-hardikpandya-stop-slop",
+      "license": "MIT",
       "path": "skills/46-hardikpandya-stop-slop",
       "primary_skill": {
         "description": "Remove AI writing patterns from prose. Use when drafting, editing, or reviewing text to eliminate predictable AI tells.",
         "name": "stop-slop",
         "path": "skills/46-hardikpandya-stop-slop/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "low",
+      "source_url": "https://github.com/hardikpandya/stop-slop",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": true,
       "has_readme": true,
       "id": "47-conorbronsdon-avoid-ai-writing",
+      "license": "MIT",
       "path": "skills/47-conorbronsdon-avoid-ai-writing",
       "primary_skill": {
         "description": "Audit and rewrite content to remove AI writing patterns (\"AI-isms\"). Use this skill when asked to \"remove AI-isms,\" \"clean up AI writing,\" \"edit writing for AI patterns,\" \"audit writing for AI tells,\" or \"make this sound less like AI.\" Supports a detection-only mode that flags patterns without rewriting.",
         "name": "avoid-ai-writing",
         "path": "skills/47-conorbronsdon-avoid-ai-writing/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/conorbronsdon/avoid-ai-writing",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "share-alike",
       "has_license": false,
       "has_readme": true,
       "id": "48-copaper-ai-chinese-de-aigc",
+      "license": "CC-BY-SA-4.0 (repository default)",
       "path": "skills/48-copaper-ai-chinese-de-aigc",
       "primary_skill": {
         "description": "面向中文学术论文的降 AIGC 检测率 Skill。针对知网、万方、维普、Turnitin 中文版的检测机制，识别并消除中文大语言模型的 17 类结构化写作痕迹。采用\"定位 → 诊断 → 改写 → 自评 → 复查\"五步闭环工作流，分章节差异化策略（摘要/引言/文献综述/方法/结果/讨论/结论），保持学术严谨性前提下通过检测。",
         "name": "chinese-de-aigc",
         "path": "skills/48-copaper-ai-chinese-de-aigc/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "high",
+      "source_url": "https://github.com/brycewang-stanford/Auto-Empirical-Research-Skills",
+      "sync": "manual"
     },
     {
+      "commercial_use": "restricted",
       "has_license": true,
       "has_readme": true,
       "id": "49-voidborne-d-humanize-chinese",
+      "license": "MIT Non-Commercial",
       "path": "skills/49-voidborne-d-humanize-chinese",
       "primary_skill": {
         "description": "Detect and humanize AI-generated Chinese text. 20+ rule detection categories plus statistical features (sentence-length CV, short-sentence fraction, comma density, perplexity, GLTR, DivEye) plus scene-aware LR fusion (rule × 0.2 + LR × 0.8) trained on three scenes: general / academic / longform 长文本 (≥1500 字)。Unified CLI: ./humanize {detect,rewrite,academic,style,compare}. 8 style transforms (casual/zhihu/xiaohongshu/wechat/academic/literary/weibo/novel)。 Multi-paragraph rewriting (paragraph length CV、跨段 trigram 重复) plus best-of-N humanize (默认 N=10 取最低 LR)。165 replacement patterns + CiLin 同义词词林 38873 with collision blacklist。 Academic paper AIGC reduction for CNKI/VIP/Wanfang (知网/维普/万方 AIGC 检测降重)。 Pure Python, no dependencies, offline。v5.0.0 — HC3 fused 准确率 95%、学术 hero 100→35 (-65)、 工作汇报 96→13 (-83)、长篇博客 96→41 (-55)。 Use when user says: \"去AI味\", \"降AIGC\", \"人性化文本\", \"humanize chinese\", \"AI检测\", \"AIGC降重\", \"去除AI痕迹\", \"文本改写\", \"论文降重\", \"知网检测\", \"维普检测\", \"AI写作检测\", \"让文字更自然\", \"detect AI text\", \"humanize text\", \"reduce AIGC score\", \"make text human-like\", \"去ai化\", \"改成人话\", \"去机器味\", \"降低AI率\", \"过AIGC检测\", \"长文本改写\", \"小说改写\"",
         "name": "humanize-chinese",
         "path": "skills/49-voidborne-d-humanize-chinese/SKILL.md"
       },
-      "skill_count": 1
+      "skill_count": 1,
+      "source_confidence": "medium",
+      "source_url": "https://github.com/voidborne-d/humanize-chinese",
+      "sync": "manual vendor snapshot"
     },
     {
+      "commercial_use": "allowed",
       "has_license": true,
       "has_readme": true,
       "id": "50-brycewang-aer-skills",
+      "license": "MIT",
       "path": "skills/50-brycewang-aer-skills",
       "primary_skill": {
         "description": "Use when selecting, implementing, or stress-testing the causal identification strategy for an empirical economics manuscript — difference-in-differences (including staggered designs), instrumental variables (including weak-IV-robust inference), regression discontinuity, synthetic control, or shift-share / Bartik. Apply before writing the introduction or results.",
         "name": "aer-identification",
         "path": "skills/50-brycewang-aer-skills/skills/aer-identification/SKILL.md"
       },
-      "skill_count": 9
+      "skill_count": 9,
+      "source_confidence": "high",
+      "source_url": "https://github.com/brycewang-stanford/AER-skills",
+      "sync": "weekly GitHub Actions sync"
     }
   ],
   "generated_by": "scripts/build-catalog.py",
@@ -4069,6 +4319,20 @@
     },
     {
       "collection": "26-Data-Wise-scholar",
+      "description": "Computational methods for statistical inference and optimization",
+      "frontmatter_fields": [
+        "description",
+        "name"
+      ],
+      "has_description": true,
+      "has_frontmatter": true,
+      "has_name": true,
+      "line_count": 607,
+      "name": "computational-inference",
+      "path": "skills/26-Data-Wise-scholar/skills/implementation/computational-inference/SKILL.md"
+    },
+    {
+      "collection": "26-Data-Wise-scholar",
       "description": "Numerical algorithms and computational techniques for statistics",
       "frontmatter_fields": [
         "description",
@@ -4097,6 +4361,20 @@
     },
     {
       "collection": "26-Data-Wise-scholar",
+      "description": "Quality assurance and testing protocols for statistical software",
+      "frontmatter_fields": [
+        "description",
+        "name"
+      ],
+      "has_description": true,
+      "has_frontmatter": true,
+      "has_name": true,
+      "line_count": 600,
+      "name": "statistical-software-qa",
+      "path": "skills/26-Data-Wise-scholar/skills/implementation/statistical-software-qa/SKILL.md"
+    },
+    {
+      "collection": "26-Data-Wise-scholar",
       "description": "M-estimation, influence functions, and semiparametric efficiency theory for causal inference",
       "frontmatter_fields": [
         "description",
@@ -4122,6 +4400,20 @@
       "line_count": 575,
       "name": "identification-theory",
       "path": "skills/26-Data-Wise-scholar/skills/mathematical/identification-theory/SKILL.md"
+    },
+    {
+      "collection": "26-Data-Wise-scholar",
+      "description": "Core mathematical concepts and theoretical frameworks for statistics",
+      "frontmatter_fields": [
+        "description",
+        "name"
+      ],
+      "has_description": true,
+      "has_frontmatter": true,
+      "has_name": true,
+      "line_count": 538,
+      "name": "mathematical-foundations",
+      "path": "skills/26-Data-Wise-scholar/skills/mathematical/mathematical-foundations/SKILL.md"
     },
     {
       "collection": "26-Data-Wise-scholar",
@@ -4167,6 +4459,20 @@
     },
     {
       "collection": "26-Data-Wise-scholar",
+      "description": "Meta-analysis frameworks and methods for mediation studies",
+      "frontmatter_fields": [
+        "description",
+        "name"
+      ],
+      "has_description": true,
+      "has_frontmatter": true,
+      "has_name": true,
+      "line_count": 645,
+      "name": "mediation-meta-analyst",
+      "path": "skills/26-Data-Wise-scholar/skills/research/mediation-meta-analyst/SKILL.md"
+    },
+    {
+      "collection": "26-Data-Wise-scholar",
       "description": "Six-phase protocol for adapting methods across research domains",
       "frontmatter_fields": [
         "description",
@@ -4181,6 +4487,34 @@
     },
     {
       "collection": "26-Data-Wise-scholar",
+      "description": "Sensitivity analysis frameworks and assumption-testing methods",
+      "frontmatter_fields": [
+        "description",
+        "name"
+      ],
+      "has_description": true,
+      "has_frontmatter": true,
+      "has_name": true,
+      "line_count": 599,
+      "name": "sensitivity-analyst",
+      "path": "skills/26-Data-Wise-scholar/skills/research/sensitivity-analyst/SKILL.md"
+    },
+    {
+      "collection": "26-Data-Wise-scholar",
+      "description": "Effective communication strategies for statistical methods",
+      "frontmatter_fields": [
+        "description",
+        "name"
+      ],
+      "has_description": true,
+      "has_frontmatter": true,
+      "has_name": true,
+      "line_count": 598,
+      "name": "methods-communicator",
+      "path": "skills/26-Data-Wise-scholar/skills/writing/methods-communicator/SKILL.md"
+    },
+    {
+      "collection": "26-Data-Wise-scholar",
       "description": "JASA/Biometrika manuscript structure with VanderWeele notation standards",
       "frontmatter_fields": [
         "description",
@@ -4192,6 +4526,20 @@
       "line_count": 874,
       "name": "methods-paper-writer",
       "path": "skills/26-Data-Wise-scholar/skills/writing/methods-paper-writer/SKILL.md"
+    },
+    {
+      "collection": "26-Data-Wise-scholar",
+      "description": "Strategic publication planning and venue selection for research",
+      "frontmatter_fields": [
+        "description",
+        "name"
+      ],
+      "has_description": true,
+      "has_frontmatter": true,
+      "has_name": true,
+      "line_count": 676,
+      "name": "publication-strategist",
+      "path": "skills/26-Data-Wise-scholar/skills/writing/publication-strategist/SKILL.md"
     },
     {
       "collection": "27-dariia-m-my_claude_skills",
@@ -4248,6 +4596,20 @@
       "line_count": 200,
       "name": "econ-intro-writing",
       "path": "skills/27-dariia-m-my_claude_skills/econ_intro_writing/SKILL.md"
+    },
+    {
+      "collection": "27-dariia-m-my_claude_skills",
+      "description": "Use this skill whenever the user wants to conduct an event study, create event study plots, test for parallel trends, implement difference-in-differences designs, or work with any panel data estimation that involves pre/post treatment comparisons. Trigger on phrases like \"event study\", \"parallel trends\", \"pre-trends\", \"dynamic treatment effects\", \"leads and lags\", \"TWFE\", \"two-way fixed effects\", \"staggered adoption\", \"staggered treatment\", \"difference-in-differences\", \"DiD\", \"Sun and Abraham\", \"Callaway and Sant'Anna\", \"de Chaisemartin\", \"Borusyak\", \"did_multiplegt\", \"fixest\", \"did2s\", \"bacon decomposition\", or any reference to plotting coefficients around a treatment event. Also trigger when the user uploads panel data and wants to estimate treatment effects with variation in treatment timing. All code is in R.",
+      "frontmatter_fields": [
+        "description",
+        "name"
+      ],
+      "has_description": true,
+      "has_frontmatter": true,
+      "has_name": true,
+      "line_count": 132,
+      "name": "event-study",
+      "path": "skills/27-dariia-m-my_claude_skills/event-studies/SKILL.md"
     },
     {
       "collection": "27-dariia-m-my_claude_skills",
@@ -15269,8 +15631,8 @@
     "missing_description": 32,
     "missing_frontmatter": 32,
     "missing_name": 32,
-    "oversized_skill_files_over_500_lines": 68,
-    "skill_files": 969,
+    "oversized_skill_files_over_500_lines": 75,
+    "skill_files": 977,
     "top_level_collections": 50
   }
 }
