@@ -231,13 +231,26 @@ def validate_required_files() -> tuple[list[str], list[str]]:
     required = [
         "README.md",
         "README-zh.md",
+        "CHANGELOG.md",
         "CONTRIBUTING.md",
         "LICENSE",
         "SECURITY.md",
         "CODE_OF_CONDUCT.md",
         "CITATION.cff",
+        ".github/workflows/check-external-links.yml",
         "catalog/skills.json",
+        "catalog/provenance.json",
+        "catalog/skill-audit.json",
+        "docs/COMPETITIVE_LANDSCAPE.md",
+        "docs/LICENSE_AUDIT.md",
+        "docs/RELEASE.md",
+        "docs/SKILL_AUDIT.md",
         "docs/SKILL_CATALOG.md",
+        "docs/GOLDEN_WORKFLOWS.md",
+        "docs/INSTALL.md",
+        "docs/SKILL_SUBMISSION_GUIDE.md",
+        "docs/demos/README.md",
+        "docs/search.html",
     ]
     for item in required:
         if not (ROOT / item).exists():
@@ -250,6 +263,7 @@ def validate_required_files() -> tuple[list[str], list[str]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--strict", action="store_true", help="treat warnings as failures")
+    parser.add_argument("--audit", action="store_true", help="print non-blocking vendored-skill audit warnings")
     args = parser.parse_args()
 
     checks = [
@@ -265,15 +279,19 @@ def main() -> int:
         errors.extend(check_errors)
         warnings.extend(check_warnings)
 
-    for warning in warnings:
-        print(f"warning: {warning}", file=sys.stderr)
+    if args.audit or args.strict:
+        for warning in warnings:
+            print(f"warning: {warning}", file=sys.stderr)
     for error in errors:
         print(f"error: {error}", file=sys.stderr)
 
-    print(
-        f"Validation complete: {len(errors)} error(s), {len(warnings)} warning(s).",
-        file=sys.stderr,
-    )
+    if args.audit or args.strict:
+        print(
+            f"Validation complete: {len(errors)} error(s), {len(warnings)} warning(s).",
+            file=sys.stderr,
+        )
+    else:
+        print(f"Validation complete: {len(errors)} error(s).", file=sys.stderr)
     if errors or (args.strict and warnings):
         return 1
     return 0
